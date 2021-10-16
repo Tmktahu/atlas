@@ -16,7 +16,7 @@ async function createWindow() {
     autoHideMenuBar: true,
     titleBarStyle: 'hidden',
     titleBarOverlay: {
-      color: '#629bbd',
+      color: '#66a5cc',
       symbolColor: '#000000',
     },
     webPreferences: {

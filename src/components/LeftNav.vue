@@ -2,11 +2,11 @@
   <v-navigation-drawer v-model="leftNav" expand-on-hover permanent app class="left-nav">
     <v-layout column fill-height>
       <v-list class="pa-0" style="height: 100%">
-        <v-list-item class="flex-grow-0">
-          <div class="left-nav-icon">
-            <v-img :src="require('@/assets/logo.png')" contain />
+        <v-list-item class="pa-0 flex-grow-0">
+          <div class="left-nav-logo pa-2">
+            <v-img :src="require('@/assets/Atlas-Logo-Large-White-A.png')" contain />
           </div>
-          <span class="left-nav-label pl-5">Atlas</span>
+          <span class="left-nav-logo-label pl-8">Atlas</span>
         </v-list-item>
 
         <v-divider />
@@ -38,13 +38,6 @@
           </div>
           <span class="left-nav-label pl-5">Refresh</span>
         </v-list-item>
-
-        <v-list-item link @click="close">
-          <div class="left-nav-icon">
-            <v-icon>mdi-close</v-icon>
-          </div>
-          <span class="left-nav-label pl-5">Exit</span>
-        </v-list-item>
       </v-list>
 
       <v-spacer />
@@ -55,8 +48,20 @@
           <div class="left-nav-icon">
             <v-icon>mdi-github</v-icon>
           </div>
-          <span class="left-nav-label pl-5">Github Repo</span>
+          <span class="left-nav-label pl-5">Github</span>
         </v-list-item>
+
+        <v-tooltip right absolute content-class="about-tooltip">
+          <template v-slot:activator="{ on }">
+            <v-list-item style="margin-top: auto; margin-bottom: 0; cursor: pointer" v-on="on">
+              <div class="left-nav-icon">
+                <v-icon>mdi-progress-question</v-icon>
+              </div>
+              <span class="left-nav-label pl-5">About</span>
+            </v-list-item>
+          </template>
+          <div class="d-flex flex-column" v-html="aboutText" />
+        </v-tooltip>
       </v-list>
     </v-layout>
   </v-navigation-drawer>
@@ -80,22 +85,51 @@ export default {
     };
   },
 
-  methods: {
-    close() {
-      let window = electron.remote.getCurrentWindow();
-      if (window.isDevToolsOpened()) {
-        window.closeDevTools();
-      }
-      window.close();
+  computed: {
+    aboutText() {
+      return `
+        <div>Coded by <strong>Fryke#0746</strong> on Discord</div>
+        <div>Atlas Version: ${process.env.VUE_APP_VERSION}</div>
+        <div>Electron: ${process.versions.electron}</div>
+        <div>Chrome: ${process.versions.chrome}</div>
+        <div>Node.js: ${process.versions.node}</div>
+      `;
     },
   },
 };
 </script>
 
+<style lang="scss">
+@use 'sass:color';
+
+@import '@/design/variables/_colors';
+
+.about-tooltip {
+  top: unset !important;
+  bottom: 12px;
+  left: 212px !important;
+  background-color: color.change($primary-blue, $lightness: 80) !important;
+
+  div {
+    color: black;
+  }
+}
+</style>
+
 <style lang="scss" scoped>
+@use 'sass:color';
+
+@import '@/design/variables/_colors';
+
 .left-nav {
   max-width: 200px;
-  background-color: #629bbd !important;
+  background-color: color.change($primary-blue, $lightness: 60, $saturation: 50) !important;
+}
+
+.left-nav-logo {
+  display: flex;
+  justify-content: center;
+  width: 56px !important;
 }
 
 .left-nav-icon {
@@ -109,6 +143,13 @@ export default {
     font-weight: 800;
     color: black;
   }
+}
+
+.left-nav-logo-label {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .left-nav-label {
