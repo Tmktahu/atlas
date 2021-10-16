@@ -1,0 +1,10 @@
+{
+  "baseUrl": ".",
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "esnext",
+    "module": "esNext",
+  }
+}
