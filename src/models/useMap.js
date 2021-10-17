@@ -9,46 +9,46 @@ import pointFont from '@/assets/helvetiker_regular.typeface.json';
 
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
 
-export const ORIGIN_POINT = { name: 'Origin', color: 'red', position: { x: 0, y: 0, z: 0 } };
+export const ORIGIN_POINT = { name: 'Origin', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '0', hide: false };
 
 export const ORIGIN_STATIONS = [
-  { name: 'Origin Station 1', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 2', color: 'red', position: { x: 0, y: 1000, z: 0 } },
-  { name: 'Origin Station 3', color: 'red', position: { x: 0, y: -1000, z: 0 } },
-  { name: 'Origin Station 4', color: 'red', position: { x: 0, y: 0, z: 1000 } },
-  { name: 'Origin Station 5', color: 'red', position: { x: 0, y: 0, z: -1000 } },
-  { name: 'Origin Station 6', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 7', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 8', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 9', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 10', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 11', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 12', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 13', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 14', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 15', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 16', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 17', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 18', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 19', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 20', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 21', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 22', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 23', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 24', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 25', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 26', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 27', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 28', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 29', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'Origin Station 30', color: 'red', position: { x: 0, y: 0, z: 0 } },
+  { name: 'Origin Station 1', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '1', hide: false },
+  { name: 'Origin Station 2', color: 'red', position: { x: 0, y: 1000, z: 0 }, id: '2', hide: false },
+  { name: 'Origin Station 3', color: 'red', position: { x: 0, y: -1000, z: 0 }, id: '3', hide: false },
+  { name: 'Origin Station 4', color: 'red', position: { x: 0, y: 0, z: 1000 }, id: '4', hide: false },
+  { name: 'Origin Station 5', color: 'red', position: { x: 0, y: 0, z: -1000 }, id: '5', hide: false },
+  { name: 'Origin Station 6', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '6', hide: false },
+  { name: 'Origin Station 7', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '7', hide: false },
+  { name: 'Origin Station 8', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '8', hide: false },
+  { name: 'Origin Station 9', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '9', hide: false },
+  { name: 'Origin Station 10', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '10', hide: false },
+  { name: 'Origin Station 11', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '11', hide: false },
+  { name: 'Origin Station 12', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '12', hide: false },
+  { name: 'Origin Station 13', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '13', hide: false },
+  { name: 'Origin Station 14', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '14', hide: false },
+  { name: 'Origin Station 15', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '15', hide: false },
+  { name: 'Origin Station 16', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '16', hide: false },
+  { name: 'Origin Station 17', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '17', hide: false },
+  { name: 'Origin Station 18', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '18', hide: false },
+  { name: 'Origin Station 19', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '19', hide: false },
+  { name: 'Origin Station 20', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '20', hide: false },
+  { name: 'Origin Station 21', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '21', hide: false },
+  { name: 'Origin Station 22', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '22', hide: false },
+  { name: 'Origin Station 23', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '23', hide: false },
+  { name: 'Origin Station 24', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '24', hide: false },
+  { name: 'Origin Station 25', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '25', hide: false },
+  { name: 'Origin Station 26', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '26', hide: false },
+  { name: 'Origin Station 27', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '27', hide: false },
+  { name: 'Origin Station 28', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '28', hide: false },
+  { name: 'Origin Station 29', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '29', hide: false },
+  { name: 'Origin Station 30', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '30', hide: false },
 ];
 
 export const TRANSMITTER_STATIONS = [
-  { name: 'North', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'South', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'East', color: 'red', position: { x: 0, y: 0, z: 0 } },
-  { name: 'West', color: 'red', position: { x: 0, y: 0, z: 0 } },
+  { name: 'North', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '30', hide: false },
+  { name: 'South', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '31', hide: false },
+  { name: 'East', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '32', hide: false },
+  { name: 'West', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '33', hide: false },
 ];
 
 export const EOS_OFFSET = {
@@ -247,11 +247,18 @@ export function useMap(inMapData) {
   };
 
   const addPoints = async (points) => {
+    if (mapData.pointsMesh !== null) {
+      mapData.scene.remove(mapData.pointsMesh);
+    }
+
     const sprite = await new THREE.TextureLoader().load(pointSprite);
     const pointMaterial = new THREE.PointsMaterial({ color: 'red', size: 100, map: sprite, sizeAttenuation: true, alphaTest: 0.5, transparent: true });
 
     const geometry = new THREE.BufferGeometry();
     let formattedVertices = points
+      .filter((element) => {
+        return !element.hide;
+      })
       .map((element) => {
         return [element.position.x, element.position.y, element.position.z];
       })
@@ -323,10 +330,27 @@ export function useMap(inMapData) {
   };
 
   const viewPoint = (point) => {
-    console.log(point);
     mapData.controls.target.set(point.position.x + 1000, point.position.y + 1000, point.position.z + 1000);
     mapData.camera.position.set(point.position.x + 1000 + 1, point.position.y + 1000 + 1, point.position.z + 1000 + 1);
     mapData.controls.update();
+  };
+
+  const showHidePoint = (point) => {
+    let index = mapData.pointsArray.findIndex((obj) => obj.id === point.id);
+    mapData.pointsArray[index].hide = !mapData.pointsArray[index].hide;
+    addPoints(mapData.pointsArray);
+  };
+
+  const addPoint = (point) => {
+    mapData.pointsArray.push(point);
+    addPoints(mapData.pointsArray);
+  };
+
+  const deletePoint = (point) => {
+    mapData.pointsArray = mapData.pointsArray.filter((obj) => {
+      return obj.id !== point.id;
+    });
+    addPoints(mapData.pointsArray);
   };
 
   // ================= Utilities ========================
@@ -341,5 +365,8 @@ export function useMap(inMapData) {
     panForward,
     panBackward,
     viewPoint,
+    showHidePoint,
+    addPoint,
+    deletePoint,
   };
 }

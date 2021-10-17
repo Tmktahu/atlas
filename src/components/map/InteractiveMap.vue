@@ -35,15 +35,29 @@ export default {
     const mapData = inject('mapData');
     let stats = null;
 
-    const { init: initMap, resizeMap, panForward, panBackward, viewPoint } = useMap(mapData);
+    const { init: initMap, resizeMap, panForward, panBackward, viewPoint, showHidePoint, addPoint, deletePoint } = useMap(mapData);
 
     window.addEventListener(
       'message',
       (event) => {
         if (event.data.command) {
           if (event.data.command === 'view') {
-            console.log('they want us to view the point', event.data.point);
             viewPoint(event.data.point);
+          }
+
+          if (event.data.command === 'showHide') {
+            showHidePoint(event.data.point);
+            event.source.postMessage({ points: mapData.pointsArray });
+          }
+
+          if (event.data.command === 'add') {
+            addPoint(event.data.point);
+            event.source.postMessage({ points: mapData.pointsArray });
+          }
+
+          if (event.data.command === 'delete') {
+            deletePoint(event.data.point);
+            event.source.postMessage({ points: mapData.pointsArray });
           }
         }
       },

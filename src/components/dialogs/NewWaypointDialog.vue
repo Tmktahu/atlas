@@ -28,7 +28,16 @@
       <template v-slot:item.actions="{ item }">
         <div class="d-flex">
           <v-btn class="action-button view mr-2" dense outlined @click="onView(item)">View</v-btn>
+          <v-btn class="action-button mr-2" :class="{ show: item.hide, hide: !item.hide }" dense outlined @click="onShowHide(item)">{{
+            item.hide ? 'Show' : 'Hide'
+          }}</v-btn>
           <v-btn class="action-button delete" dense outlined @click="onDelete(item)">Delete</v-btn>
+        </div>
+      </template>
+      <template v-slot:no-data>
+        <div class="d-flex flex-column">
+          <div class="pt-2">There was a problem.</div>
+          <div class="pt-2 pb-4">Please try going back to the main Atlas window and <br />clicking the "Waypoints" navigation button again.</div>
         </div>
       </template>
     </v-data-table>
@@ -37,6 +46,7 @@
 
 <script>
 import { ref } from '@vue/composition-api';
+import { v4 as uuidv4 } from 'uuid';
 
 export default {
   setup() {
@@ -57,7 +67,7 @@ export default {
       {
         text: 'Coordinate',
         align: 'start',
-        sortable: true,
+        sortable: false,
         value: 'position',
       },
       {
@@ -93,12 +103,27 @@ export default {
 
   methods: {
     onAdd() {
-      console.log('trying to add point', this.name, this.xCoord, this.yCoord, this.zCoord);
+      console.log('trying to add point', this.newName, this.xCoord, this.yCoord, this.zCoord);
+      if (this.parentWindow !== null) {
+        this.parentWindow.postMessage({
+          command: 'add',
+          point: {
+            id: uuidv4(),
+            name: this.newName,
+            position: {
+              x: parseInt(this.xCoord),
+              y: parseInt(this.yCoord),
+              // eslint-disable-next-line id-length
+              z: parseInt(this.zCoord),
+            },
+            color: 'red',
+          },
+        });
+      }
     },
 
     onView(point) {
       if (this.parentWindow !== null) {
-        console.log('trying to view point', point);
         this.parentWindow.postMessage({
           command: 'view',
           point: point,
@@ -106,8 +131,22 @@ export default {
       }
     },
 
-    onDelete() {
-      console.log('trying to view point', point);
+    onShowHide(point) {
+      if (this.parentWindow !== null) {
+        this.parentWindow.postMessage({
+          command: 'showHide',
+          point: point,
+        });
+      }
+    },
+
+    onDelete(point) {
+      if (this.parentWindow !== null) {
+        this.parentWindow.postMessage({
+          command: 'delete',
+          point: point,
+        });
+      }
     },
   },
 };
@@ -182,6 +221,14 @@ export default {
 
   &.delete {
     color: red;
+  }
+
+  &.show {
+    color: green;
+  }
+
+  &.hide {
+    color: orange;
   }
 }
 
