@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <LeftNav />
+    <LeftNav v-if="showLeftNav" />
     <v-main>
       <div class="draggable-area-bar" />
       <router-view />
@@ -10,6 +10,9 @@
 
 <script>
 import { onMounted, ref, watch, provide, computed, inject } from '@vue/composition-api';
+import { LANDING_ROUTE } from '@/router/routes';
+
+import { useMap } from '@/models/useMap.js';
 
 import LeftNav from '@/components/LeftNav.vue';
 
@@ -24,6 +27,8 @@ export default {
   components: { LeftNav },
 
   setup() {
+    const showLeftNav = ref(true);
+
     onMounted(() => {
       console.log(
         '%cAtlas Started',
@@ -31,7 +36,22 @@ export default {
       );
     });
 
-    return {};
+    const { mapData } = useMap();
+
+    provide('mapData', mapData);
+
+    return {
+      showLeftNav,
+    };
+  },
+
+  watch: {
+    $route: {
+      handler() {
+        this.showLeftNav = this.$route.name === LANDING_ROUTE;
+      },
+      immediate: true,
+    },
   },
 };
 </script>
@@ -47,6 +67,7 @@ html {
 }
 
 .draggable-area-bar {
+  position: absolute;
   z-index: 20000;
   width: 100%;
   height: 30px;

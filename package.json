@@ -13,6 +13,7 @@
   },
   "main": "background.js",
   "dependencies": {
+    "@electron/remote": "^2.0.1",
     "@vue/composition-api": "^1.2.4",
     "axios": "^0.21.0",
     "core-js": "^3.6.5",
@@ -28,7 +29,8 @@
     "vue-router": "^3.2.0",
     "vue-toasted": "^1.1.28",
     "vuelidate": "^0.7.6",
-    "vuetify": "^2.4.0"
+    "vuetify": "^2.4.0",
+    "vuetify-multiple-draggable-dialogs": "^1.1.4"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

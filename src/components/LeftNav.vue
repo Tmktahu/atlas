@@ -11,11 +11,11 @@
 
         <v-divider />
 
-        <v-list-item link>
+        <v-list-item link @click="onNewWaypoint">
           <div class="left-nav-icon">
-            <v-icon>mdi-plus</v-icon>
+            <v-icon>mdi-map-marker</v-icon>
           </div>
-          <span class="left-nav-label pl-5">New Waypoint</span>
+          <span class="left-nav-label pl-5">Waypoints</span>
         </v-list-item>
 
         <v-list-item link>
@@ -37,6 +37,13 @@
             <v-icon>mdi-refresh</v-icon>
           </div>
           <span class="left-nav-label pl-5">Refresh</span>
+        </v-list-item>
+
+        <v-list-item link>
+          <div class="left-nav-icon">
+            <v-icon>mdi-cog-outline</v-icon>
+          </div>
+          <span class="left-nav-label pl-5">Settings</span>
         </v-list-item>
       </v-list>
 
@@ -68,9 +75,11 @@
 </template>
 
 <script>
-import { ref } from '@vue/composition-api';
+import { ref, watch, inject } from '@vue/composition-api';
+import { NEW_WAYPOINT_ROUTE } from '@/router/routes';
 
 import electron from 'electron';
+const { BrowserWindow } = require('@electron/remote');
 
 export default {
   name: 'LeftNav',
@@ -79,9 +88,15 @@ export default {
     const leftNav = ref(true);
     const mini = ref(false);
 
+    const mapData = inject('mapData');
+
+    let newWaypointsWindow = null;
+
     return {
       leftNav,
       mini,
+      mapData,
+      newWaypointsWindow,
     };
   },
 
@@ -94,6 +109,29 @@ export default {
         <div>Chrome: ${process.versions.chrome}</div>
         <div>Node.js: ${process.versions.node}</div>
       `;
+    },
+  },
+
+  methods: {
+    async onNewWaypoint() {
+      let routeData = this.$router.resolve({
+        name: NEW_WAYPOINT_ROUTE,
+      });
+
+      if (this.newWaypointsWindow === null || this.newWaypointsWindow?.closed) {
+        this.newWaypointsWindow = window.open(routeData.href, '_blank', 'width=600,height=800');
+        //
+        //
+        setTimeout(() => {
+          console.log('sending message', this.mapData.pointsArray, this.mapData.panSpeed);
+          this.newWaypointsWindow.postMessage({ points: this.mapData.pointsArray }, '*');
+          console.log(this.newWaypointsWindow);
+        }, 1000);
+      } else {
+        this.newWaypointsWindow.postMessage({ points: this.mapData.pointsArray }, '*');
+        this.newWaypointsWindow.focus();
+        //this.newWaypointsWindow.postMessage({ points: this.mapData.pointsArray });
+      }
     },
   },
 };

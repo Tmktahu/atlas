@@ -1,4 +1,5 @@
 export const LANDING_ROUTE = 'landing';
+export const NEW_WAYPOINT_ROUTE = 'new-waypoint';
 
 export default [
   {
@@ -6,6 +7,13 @@ export default [
     name: LANDING_ROUTE,
     components: {
       default: () => lazyLoadView(import('@/components/map/InteractiveMap.vue')),
+    },
+  },
+  {
+    path: '/newWaypoint',
+    name: NEW_WAYPOINT_ROUTE,
+    components: {
+      default: () => lazyLoadView(import('@/components/dialogs/NewWaypointDialog.vue')),
     },
   },
 ];
