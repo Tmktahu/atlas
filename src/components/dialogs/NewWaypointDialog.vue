@@ -228,7 +228,6 @@ export default {
 
   methods: {
     onAdd() {
-      console.log('trying to add point', this.newName, this.xCoord, this.yCoord, this.zCoord);
       if (this.parentWindow !== null) {
         this.parentWindow.postMessage({
           command: 'add',

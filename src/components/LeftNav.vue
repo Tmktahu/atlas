@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer v-model="leftNav" expand-on-hover permanent app class="left-nav">
+  <v-navigation-drawer v-model="leftNav" expand-on-hover permanent app class="left-nav" @transitionend="onTransitionEnd">
     <v-layout column fill-height>
       <v-list class="pa-0" style="height: 100%">
         <v-list-item class="pa-0 flex-grow-0">
@@ -39,11 +39,11 @@
           <span class="left-nav-label pl-5">Reload</span>
         </v-list-item>
 
-        <v-list-item link>
+        <v-list-item link :class="{ selected: showControls }" @click="onControls">
           <div class="left-nav-icon">
-            <v-icon>mdi-cog-outline</v-icon>
+            <v-icon>mdi-camera-control</v-icon>
           </div>
-          <span class="left-nav-label pl-5">Settings</span>
+          <span class="left-nav-label pl-5">Controls</span>
         </v-list-item>
       </v-list>
 
@@ -86,7 +86,9 @@ export default {
 
   setup() {
     const leftNav = ref(true);
-    const mini = ref(false);
+    const leftNavCondensed = inject('leftNavCondensed');
+
+    const showControls = inject('showControls');
 
     const mapData = inject('mapData');
 
@@ -94,9 +96,10 @@ export default {
 
     return {
       leftNav,
-      mini,
+      leftNavCondensed,
       mapData,
       newWaypointsWindow,
+      showControls,
     };
   },
 
@@ -113,6 +116,10 @@ export default {
   },
 
   methods: {
+    onTransitionEnd(event) {
+      this.leftNavCondensed = !event.srcElement.classList.contains('v-navigation-drawer--mini-variant');
+    },
+
     async onNewWaypoint() {
       let routeData = this.$router.resolve({
         name: NEW_WAYPOINT_ROUTE,
@@ -123,9 +130,7 @@ export default {
         //
         //
         setTimeout(() => {
-          console.log('sending message', this.mapData.pointsArray, this.mapData.panSpeed);
           this.newWaypointsWindow.postMessage({ points: this.mapData.pointsArray }, '*');
-          console.log(this.newWaypointsWindow);
         }, 1000);
       } else {
         this.newWaypointsWindow.postMessage({ points: this.mapData.pointsArray }, '*');
@@ -136,10 +141,13 @@ export default {
 
     onReload() {
       if (this.newWaypointsWindow) {
-        console.log(this.newWaypointsWindow);
         this.newWaypointsWindow.close();
       }
       window.location.reload(false);
+    },
+
+    onControls() {
+      this.showControls = !this.showControls;
     },
   },
 };
@@ -167,9 +175,13 @@ export default {
 
 @import '@/design/variables/_colors';
 
-.left-nav {
+.left-nav::v-deep {
   max-width: 200px;
   background-color: color.change($primary-blue, $lightness: 60, $saturation: 50) !important;
+
+  .selected {
+    background: color.change($primary-blue, $lightness: 50, $saturation: 50);
+  }
 }
 
 .left-nav-logo {

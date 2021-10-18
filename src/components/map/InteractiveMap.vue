@@ -15,6 +15,16 @@
       <div ref="pointName" class="name">Point Name</div>
       <div ref="pointCoord" class="coord">[Coordinate]</div>
     </div>
+    <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed }">
+      <div>W: Pan Forward</div>
+      <div>S: Pan Backward</div>
+      <div>A: Pan Left</div>
+      <div>D: Pan Right</div>
+      <div>Space: Pan Up</div>
+      <div>Left-Shift: Pan Down</div>
+      <div>Left-Click: Rotate Camera</div>
+      <div>Right-Click: Pan Camera</div>
+    </div>
   </div>
 </template>
 
@@ -37,6 +47,8 @@ export default {
   name: 'InteractiveMap',
   setup() {
     const mapData = inject('mapData');
+    const showControls = inject('showControls');
+    const leftNavCondensed = inject('leftNavCondensed');
     let stats = null;
 
     const { init: initMap, resizeMap, panForward, panBackward, viewPoint, showHidePoint, addPoint, deletePoint } = useMap(mapData);
@@ -69,6 +81,7 @@ export default {
     );
 
     const intersects = toRefs(mapData).intersects;
+    const isReady = toRefs(mapData).isReady;
 
     return {
       stats,
@@ -77,13 +90,22 @@ export default {
       panForward,
       panBackward,
       mapData,
+      showControls,
+      leftNavCondensed,
       MIN_PAN_SPEED,
       MAX_PAN_SPEED,
       intersects,
+      isReady,
     };
   },
 
   watch: {
+    isReady() {
+      if (this.isReady) {
+        this.initMap(this.$refs.mapContainer, this.stats);
+      }
+    },
+
     intersects() {
       if (this.mapData.intersects[0]?.object.type === 'Points') {
         this.$refs.pointName.innerHTML = this.mapData.intersects[0].object.name;
@@ -120,7 +142,6 @@ export default {
       });
 
       window.addEventListener('wheel', (event) => {
-        console.log(event.deltaY);
         if (event.deltaY > 0) {
           this.onSDown();
         } else {
@@ -129,7 +150,6 @@ export default {
       });
 
       this.createStats();
-      this.initMap(this.$refs.mapContainer, this.stats);
     });
   },
 
@@ -170,6 +190,10 @@ export default {
 .mapContainer::v-deep {
   width: calc(100vw - 56px);
   overflow: hidden;
+
+  .mapCanvas {
+    width: calc(100vw - 56px) !important;
+  }
 }
 
 .pan-speed-slider::v-deep {
@@ -194,6 +218,24 @@ export default {
 
   .coord {
     font-size: 12px;
+  }
+}
+
+.controls-info {
+  position: absolute;
+  top: 12px;
+  left: 15px;
+  width: 200px;
+  background: transparent;
+  transition: left 0.05s ease;
+
+  div {
+    font-size: 14px;
+    color: white;
+  }
+
+  &.out {
+    left: 160px !important;
   }
 }
 </style>

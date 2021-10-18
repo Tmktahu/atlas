@@ -12,7 +12,7 @@ import { ref, watch, reactive, toRefs } from '@vue/composition-api';
 import { ORIGIN_STATIONS } from '@/models/presetCoords/eos.js';
 import stargate from '@/assets/map_icons/stargate.png';
 
-export const ORIGIN_POINT = { name: 'Origin / WarpGate', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '0', hide: false, icon: stargate };
+export const ORIGIN_POINT = { name: 'Origin / WarpGate', color: 'aqua', position: { x: 0, y: 0, z: 0 }, id: '0', hide: false, icon: stargate };
 
 export const EOS_OFFSET = {
   x: -8450000,
@@ -57,6 +57,8 @@ export function useMap(inMapData) {
       intersects: null,
 
       pointSize: 7000,
+
+      isReady: ref(false),
     });
 
   const init = (inContainerElement, inStats) => {
@@ -74,6 +76,7 @@ export function useMap(inMapData) {
 
     mapData.renderer = new THREE.WebGLRenderer({ alpha: true });
     mapData.renderer.setSize(window.innerWidth - 56, window.innerHeight);
+    mapData.renderer.domElement.classList = 'mapCanvas';
     mapData.containerElement.appendChild(mapData.renderer.domElement);
 
     mapData.controls = new OrbitControls(mapData.camera, mapData.renderer.domElement);
@@ -105,7 +108,7 @@ export function useMap(inMapData) {
     addLight(4, 2, 4);
     addLight(-4, -1, -2);
 
-    mapData.pointsArray = [ORIGIN_POINT, ...ORIGIN_STATIONS];
+    //mapData.pointsArray = [ORIGIN_POINT, ...ORIGIN_STATIONS];
 
     addPoints(mapData.pointsArray);
 
@@ -151,7 +154,7 @@ export function useMap(inMapData) {
     mapData.raycaster.setFromCamera(mapData.mapMouse, mapData.camera);
 
     if (Date.now() - mapData.lastRaycast > mapData.raycastInterval) {
-      mapData.intersects = mapData.raycaster.intersectObjects(mapData.scene.children);
+      mapData.intersects = mapData.raycaster.intersectObjects(mapData.pointMeshes);
       mapData.lastRaycast = Date.now();
       mapData.qRaycast = false;
       handleIntersects();
@@ -168,7 +171,6 @@ export function useMap(inMapData) {
     if (mapData.intersects[0]?.object.type === 'Points') {
       mapData.intersects[0].object.material.size = mapData.pointSize * 1.25;
     }
-    //console.log(mapData.intersects[0]);
     //for (let i = 0; i < mapData.intersects.length; i++) {
     //mapData.intersects[i].object.material.color.set(0xffff00);
     //}
@@ -276,6 +278,7 @@ export function useMap(inMapData) {
       });
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.Float32BufferAttribute([point.position.x, point.position.z, -point.position.y], 3));
+      //geometry.setAttribute('offsets', new THREE.Float32BufferAttribute([1000, 1000], 2));
       const pointMesh = new THREE.Points(geometry, pointMaterial);
       pointMesh.name = point.name;
       mapData.pointMeshes.push(pointMesh);
@@ -362,8 +365,9 @@ export function useMap(inMapData) {
 
   const viewPoint = (point) => {
     let dist = 10000;
-    mapData.controls.target.set(point.position.x + dist, point.position.y + dist, point.position.z + dist);
-    mapData.camera.position.set(point.position.x + dist + 1, point.position.y + dist + 1, point.position.z + dist + 1);
+    mapData.camera.position.set(point.position.x + dist + 1, point.position.z + dist + 1, point.position.y + dist + 1);
+    mapData.controls.target.set(point.position.x + dist, point.position.z + dist, point.position.y + dist);
+
     mapData.controls.update();
   };
 

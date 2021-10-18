@@ -13,6 +13,7 @@ import { onMounted, ref, watch, provide, computed, inject } from '@vue/compositi
 import { LANDING_ROUTE } from '@/router/routes';
 
 import { useMap } from '@/models/useMap.js';
+import { useStorage } from '@/models/useStorage.js';
 
 import LeftNav from '@/components/LeftNav.vue';
 
@@ -28,6 +29,8 @@ export default {
 
   setup() {
     const showLeftNav = ref(true);
+    const showControls = ref(false);
+    const leftNavCondensed = ref(false);
 
     onMounted(() => {
       console.log(
@@ -38,7 +41,18 @@ export default {
 
     const { mapData } = useMap();
 
+    const { init: initStorage, pointStorage } = useStorage();
+
+    mapData.pointsArray = initStorage();
+
+    watch(pointStorage, () => {
+      mapData.pointsArray = pointStorage.value;
+      mapData.isReady = true;
+    });
+
     provide('mapData', mapData);
+    provide('showControls', showControls);
+    provide('leftNavCondensed', leftNavCondensed);
 
     return {
       showLeftNav,
