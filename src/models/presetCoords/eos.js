@@ -36,8 +36,8 @@ export const ORIGIN_STATIONS = [
 ];
 
 export const TRANSMITTER_STATIONS = [
-  { name: 'North', color: 'red', position: { x: 20000, y: 0, z: -65000 }, id: '30', hide: false, icon: satellite },
-  { name: 'South', color: 'white', position: { x: 35000, y: 0, z: 65000 }, id: '31', hide: false, icon: satellite },
-  { name: 'East', color: 'yellow', position: { x: -20000, y: 60000, z: 0 }, id: '32', hide: false, icon: satellite },
-  { name: 'West', color: 'purple', position: { x: -5000, y: -60000, z: 0 }, id: '33', hide: false, icon: satellite },
+  { name: 'North', color: 'red', position: { x: 20000, y: 0, z: -65000 }, id: '31', hide: false, icon: satellite },
+  { name: 'South', color: 'white', position: { x: 35000, y: 0, z: 65000 }, id: '32', hide: false, icon: satellite },
+  { name: 'East', color: 'yellow', position: { x: -20000, y: 60000, z: 0 }, id: '33', hide: false, icon: satellite },
+  { name: 'West', color: 'purple', position: { x: -5000, y: -60000, z: 0 }, id: '34', hide: false, icon: satellite },
 ];

@@ -229,6 +229,9 @@ export default {
   methods: {
     onAdd() {
       if (this.parentWindow !== null) {
+        let color = this.newColor.hexa.substring(0, this.newColor.hexa.length - 2);
+        console.log(color);
+
         this.parentWindow.postMessage({
           command: 'add',
           point: {
@@ -240,7 +243,7 @@ export default {
               // eslint-disable-next-line id-length
               z: parseInt(this.zCoord),
             },
-            color: this.newColor.hexa,
+            color: color,
             hide: false,
             icon: this.newIcon,
           },
@@ -361,7 +364,7 @@ export default {
   background-color: transparent !important;
 
   .v-data-table__wrapper {
-    height: calc(100vh - 195px);
+    height: calc(100vh - 253px);
   }
 
   th {

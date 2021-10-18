@@ -18,11 +18,11 @@
           <span class="left-nav-label pl-5">Waypoints</span>
         </v-list-item>
 
-        <v-list-item link>
+        <v-list-item link @click="onSave">
           <div class="left-nav-icon">
-            <v-icon>mdi-import</v-icon>
+            <v-icon>mdi-content-save-outline</v-icon>
           </div>
-          <span class="left-nav-label pl-5">Import Waypoints</span>
+          <span class="left-nav-label pl-5">Save Waypoints</span>
         </v-list-item>
 
         <v-list-item link>
@@ -71,6 +71,7 @@
         </v-tooltip>
       </v-list>
     </v-layout>
+    <SaveDialog />
   </v-navigation-drawer>
 </template>
 
@@ -81,8 +82,12 @@ import { NEW_WAYPOINT_ROUTE } from '@/router/routes';
 import electron from 'electron';
 const { BrowserWindow } = require('@electron/remote');
 
+import SaveDialog from '@/components/dialogs/SaveDialog.vue';
+
 export default {
   name: 'LeftNav',
+
+  components: { SaveDialog },
 
   setup() {
     const leftNav = ref(true);
@@ -137,6 +142,10 @@ export default {
         this.newWaypointsWindow.focus();
         //this.newWaypointsWindow.postMessage({ points: this.mapData.pointsArray });
       }
+    },
+
+    onSave() {
+      this.saveDialog = true;
     },
 
     onReload() {

@@ -259,11 +259,10 @@ export function useMap(inMapData) {
   };
 
   const addPoints = async (points) => {
-    if (mapData.pointMeshes !== null) {
-      for (const index in mapData.pointMeshes) {
-        mapData.scene.remove(mapData.pointMeshes[index]);
-      }
+    for (const index in mapData.pointMeshes) {
+      mapData.scene.remove(mapData.pointMeshes[index]);
     }
+    mapData.pointMeshes = [];
 
     for (const index in points) {
       let point = points[index];
@@ -365,8 +364,8 @@ export function useMap(inMapData) {
 
   const viewPoint = (point) => {
     let dist = 10000;
-    mapData.camera.position.set(point.position.x + dist + 1, point.position.z + dist + 1, point.position.y + dist + 1);
-    mapData.controls.target.set(point.position.x + dist, point.position.z + dist, point.position.y + dist);
+    mapData.camera.position.set(point.position.x + dist + 1, point.position.z + dist + 1, -(point.position.y + dist + 1));
+    mapData.controls.target.set(point.position.x + dist, point.position.z + dist, -(point.position.y + dist));
 
     mapData.controls.update();
   };
@@ -378,6 +377,7 @@ export function useMap(inMapData) {
   };
 
   const addPoint = (point) => {
+    console.log(point);
     mapData.pointsArray.push(point);
     addPoints(mapData.pointsArray);
   };
