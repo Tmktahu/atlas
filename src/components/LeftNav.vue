@@ -32,11 +32,11 @@
           <span class="left-nav-label pl-5">Export Waypoints</span>
         </v-list-item>
 
-        <v-list-item link>
+        <v-list-item link @click="onReload">
           <div class="left-nav-icon">
             <v-icon>mdi-refresh</v-icon>
           </div>
-          <span class="left-nav-label pl-5">Refresh</span>
+          <span class="left-nav-label pl-5">Reload</span>
         </v-list-item>
 
         <v-list-item link>
@@ -132,6 +132,14 @@ export default {
         this.newWaypointsWindow.focus();
         //this.newWaypointsWindow.postMessage({ points: this.mapData.pointsArray });
       }
+    },
+
+    onReload() {
+      if (this.newWaypointsWindow) {
+        console.log(this.newWaypointsWindow);
+        this.newWaypointsWindow.close();
+      }
+      window.location.reload(false);
     },
   },
 };

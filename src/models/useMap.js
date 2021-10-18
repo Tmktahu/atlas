@@ -9,47 +9,10 @@ import pointFont from '@/assets/helvetiker_regular.typeface.json';
 
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
 
-export const ORIGIN_POINT = { name: 'Origin', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '0', hide: false };
+import { ORIGIN_STATIONS } from '@/models/presetCoords/eos.js';
+import stargate from '@/assets/map_icons/stargate.png';
 
-export const ORIGIN_STATIONS = [
-  { name: 'Origin Station 1', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '1', hide: false },
-  { name: 'Origin Station 2', color: 'red', position: { x: 0, y: 1000, z: 0 }, id: '2', hide: false },
-  { name: 'Origin Station 3', color: 'red', position: { x: 0, y: -1000, z: 0 }, id: '3', hide: false },
-  { name: 'Origin Station 4', color: 'red', position: { x: 0, y: 0, z: 1000 }, id: '4', hide: false },
-  { name: 'Origin Station 5', color: 'red', position: { x: 0, y: 0, z: -1000 }, id: '5', hide: false },
-  { name: 'Origin Station 6', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '6', hide: false },
-  { name: 'Origin Station 7', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '7', hide: false },
-  { name: 'Origin Station 8', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '8', hide: false },
-  { name: 'Origin Station 9', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '9', hide: false },
-  { name: 'Origin Station 10', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '10', hide: false },
-  { name: 'Origin Station 11', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '11', hide: false },
-  { name: 'Origin Station 12', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '12', hide: false },
-  { name: 'Origin Station 13', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '13', hide: false },
-  { name: 'Origin Station 14', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '14', hide: false },
-  { name: 'Origin Station 15', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '15', hide: false },
-  { name: 'Origin Station 16', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '16', hide: false },
-  { name: 'Origin Station 17', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '17', hide: false },
-  { name: 'Origin Station 18', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '18', hide: false },
-  { name: 'Origin Station 19', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '19', hide: false },
-  { name: 'Origin Station 20', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '20', hide: false },
-  { name: 'Origin Station 21', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '21', hide: false },
-  { name: 'Origin Station 22', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '22', hide: false },
-  { name: 'Origin Station 23', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '23', hide: false },
-  { name: 'Origin Station 24', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '24', hide: false },
-  { name: 'Origin Station 25', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '25', hide: false },
-  { name: 'Origin Station 26', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '26', hide: false },
-  { name: 'Origin Station 27', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '27', hide: false },
-  { name: 'Origin Station 28', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '28', hide: false },
-  { name: 'Origin Station 29', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '29', hide: false },
-  { name: 'Origin Station 30', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '30', hide: false },
-];
-
-export const TRANSMITTER_STATIONS = [
-  { name: 'North', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '30', hide: false },
-  { name: 'South', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '31', hide: false },
-  { name: 'East', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '32', hide: false },
-  { name: 'West', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '33', hide: false },
-];
+export const ORIGIN_POINT = { name: 'Origin / WarpGate', color: 'red', position: { x: 0, y: 0, z: 0 }, id: '0', hide: false, icon: stargate };
 
 export const EOS_OFFSET = {
   x: -8450000,
@@ -73,7 +36,7 @@ export function useMap(inMapData) {
 
       sphereMesh: null,
       torusMesh: null,
-      pointsMesh: null,
+      pointMeshes: [],
       pointsArray: ref(null),
 
       torusFillFrontMesh: null,
@@ -83,7 +46,17 @@ export function useMap(inMapData) {
 
       lookAtVector: new THREE.Vector3(),
 
-      panSpeed: ref(1),
+      panSpeed: ref(40),
+
+      raycaster: new THREE.Raycaster(),
+      lastRaycast: null,
+      raycastInterval: 100,
+      qRaycast: true,
+
+      mapMouse: new THREE.Vector2(),
+      intersects: null,
+
+      pointSize: 7000,
     });
 
   const init = (inContainerElement, inStats) => {
@@ -92,7 +65,7 @@ export function useMap(inMapData) {
 
     mapData.scene = new THREE.Scene();
 
-    const startingCameraPosition = [ORIGIN_POINT.position.x + 1000, ORIGIN_POINT.position.y + 1000, ORIGIN_POINT.position.z + 1000];
+    const startingCameraPosition = [ORIGIN_POINT.position.x + 70000, ORIGIN_POINT.position.y + 70000, ORIGIN_POINT.position.z + 70000];
     const startingControlsPosition = [startingCameraPosition[0] - 1, startingCameraPosition[1] - 1, startingCameraPosition[2] - 1];
 
     // PerspectiveCamera(FOV, Aspect Ratio, Near Clipping Plane, Far Clipping Place)
@@ -100,7 +73,7 @@ export function useMap(inMapData) {
     mapData.camera.position.set(startingCameraPosition[0], startingCameraPosition[1], startingCameraPosition[2]);
 
     mapData.renderer = new THREE.WebGLRenderer({ alpha: true });
-    mapData.renderer.setSize(window.innerWidth, window.innerHeight);
+    mapData.renderer.setSize(window.innerWidth - 56, window.innerHeight);
     mapData.containerElement.appendChild(mapData.renderer.domElement);
 
     mapData.controls = new OrbitControls(mapData.camera, mapData.renderer.domElement);
@@ -165,9 +138,40 @@ export function useMap(inMapData) {
     mapData.torusFrameBackMesh.rotateX(Math.PI / 2);
     mapData.torusFrameBackMesh.rotateZ(Math.PI);
 
+    if (mapData.pointMeshes) {
+      for (let i = 0; i < mapData.pointMeshes.length; i++) {
+        if (mapData.intersects[0]?.object.id !== mapData.pointMeshes[i].id) {
+          mapData.pointMeshes[i].material.size = mapData.pointSize;
+        }
+      }
+    }
+
+    // update the picking ray with the camera and mouse position
+    mapData.raycaster.params.Points.threshold = 3000;
+    mapData.raycaster.setFromCamera(mapData.mapMouse, mapData.camera);
+
+    if (Date.now() - mapData.lastRaycast > mapData.raycastInterval) {
+      mapData.intersects = mapData.raycaster.intersectObjects(mapData.scene.children);
+      mapData.lastRaycast = Date.now();
+      mapData.qRaycast = false;
+      handleIntersects();
+    }
+
+    // calculate objects intersecting the picking ray
+
     mapData.controls.update();
     mapData.renderer.render(mapData.scene, mapData.camera);
     mapData.stats.end();
+  };
+
+  const handleIntersects = () => {
+    if (mapData.intersects[0]?.object.type === 'Points') {
+      mapData.intersects[0].object.material.size = mapData.pointSize * 1.25;
+    }
+    //console.log(mapData.intersects[0]);
+    //for (let i = 0; i < mapData.intersects.length; i++) {
+    //mapData.intersects[i].object.material.color.set(0xffff00);
+    //}
   };
 
   const resizeMap = () => {
@@ -206,8 +210,14 @@ export function useMap(inMapData) {
     let tubularSegments = 100;
 
     const geometry = new THREE.TorusGeometry(overalRadius, innerRadius, radialSegments, tubularSegments, Math.PI);
-    const materialFillFront = new THREE.MeshLambertMaterial({ color: '#2c809b', opacity: 0.5, transparent: true, blending: THREE.AdditiveBlending });
-    const materialFillBack = new THREE.MeshLambertMaterial({ color: '#2c809b', opacity: 0.5, blending: THREE.AdditiveBlending });
+    const materialFillFront = new THREE.MeshLambertMaterial({
+      color: '#2c809b',
+      opacity: 0.5,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+    });
+    const materialFillBack = new THREE.MeshLambertMaterial({ color: '#2c809b', opacity: 0.5, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
     const materialFrameFront = new THREE.MeshLambertMaterial({
       color: '#2c809b',
       wireframe: true,
@@ -247,30 +257,51 @@ export function useMap(inMapData) {
   };
 
   const addPoints = async (points) => {
-    if (mapData.pointsMesh !== null) {
-      mapData.scene.remove(mapData.pointsMesh);
+    if (mapData.pointMeshes !== null) {
+      for (const index in mapData.pointMeshes) {
+        mapData.scene.remove(mapData.pointMeshes[index]);
+      }
     }
 
-    const sprite = await new THREE.TextureLoader().load(pointSprite);
-    const pointMaterial = new THREE.PointsMaterial({ color: 'red', size: 100, map: sprite, sizeAttenuation: true, alphaTest: 0.5, transparent: true });
+    for (const index in points) {
+      let point = points[index];
+      const sprite = await new THREE.TextureLoader().load(point.icon);
+      let color = new THREE.Color(point.color);
+      const pointMaterial = new THREE.PointsMaterial({
+        color: color,
+        size: mapData.pointSize,
+        map: sprite,
+        sizeAttenuation: true,
+        alphaTest: 0.5,
+      });
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute([point.position.x, point.position.z, -point.position.y], 3));
+      const pointMesh = new THREE.Points(geometry, pointMaterial);
+      pointMesh.name = point.name;
+      mapData.pointMeshes.push(pointMesh);
+      mapData.scene.add(pointMesh);
+    }
 
-    const geometry = new THREE.BufferGeometry();
-    let formattedVertices = points
-      .filter((element) => {
-        return !element.hide;
-      })
-      .map((element) => {
-        return [element.position.x, element.position.y, element.position.z];
-      })
-      .flat();
+    // const sprite = await new THREE.TextureLoader().load(pointSprite);
+    // const pointMaterial = new THREE.PointsMaterial({ color: 'red', size: 100, map: sprite, sizeAttenuation: true, alphaTest: 0.5, transparent: true });
 
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(formattedVertices, 3));
+    // const geometry = new THREE.BufferGeometry();
+    // let formattedVertices = points
+    //   .filter((element) => {
+    //     return !element.hide;
+    //   })
+    //   .map((element) => {
+    //     return [element.position.x, element.position.y, element.position.z];
+    //   })
+    //   .flat();
 
-    mapData.pointsMesh = new THREE.Points(geometry, pointMaterial);
-    mapData.scene.add(mapData.pointsMesh);
+    // geometry.setAttribute('position', new THREE.Float32BufferAttribute(formattedVertices, 3));
 
-    const loader = new FontLoader();
-    const font = loader.parse(pointFont);
+    // mapData.pointsMesh = new THREE.Points(geometry, pointMaterial);
+    // mapData.scene.add(mapData.pointsMesh);
+
+    // const loader = new FontLoader();
+    // const font = loader.parse(pointFont);
 
     // for (const index in vertices) {
     //   const textGeometry = new TextGeometry('test', { font: font, size: 100, height: 0 });
@@ -330,8 +361,9 @@ export function useMap(inMapData) {
   };
 
   const viewPoint = (point) => {
-    mapData.controls.target.set(point.position.x + 1000, point.position.y + 1000, point.position.z + 1000);
-    mapData.camera.position.set(point.position.x + 1000 + 1, point.position.y + 1000 + 1, point.position.z + 1000 + 1);
+    let dist = 10000;
+    mapData.controls.target.set(point.position.x + dist, point.position.y + dist, point.position.z + dist);
+    mapData.camera.position.set(point.position.x + dist + 1, point.position.y + dist + 1, point.position.z + dist + 1);
     mapData.controls.update();
   };
 

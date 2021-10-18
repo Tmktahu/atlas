@@ -4,12 +4,79 @@
     <div class="page-title px-6 pt-5">Waypoint Management</div>
     <div class="page-title--sub px-6">Add a new waypoint with the form below. Manage waypoints with the list.</div>
     <v-divider color="primary-blue" class="mt-4" />
-    <div class="d-flex align-center new-coord-form px-6 my-6">
-      <v-text-field v-model="newName" label="Name" class="name-input mr-5" hide-details solo />
-      <v-text-field v-model="xCoord" type="number" label="X" class="coord-input mr-5" hide-details solo />
-      <v-text-field v-model="yCoord" type="number" label="Y" class="coord-input mr-5" hide-details solo />
-      <v-text-field v-model="zCoord" type="number" label="Z" class="coord-input mr-5" hide-details solo />
-      <v-btn class="add-new-button" dense outlined @click="onAdd"><v-icon>mdi-plus</v-icon>Add</v-btn>
+    <div class="d-flex flex-column px-6 my-6">
+      <div class="d-flex align-center">
+        <v-select
+          v-model="newIcon"
+          :menu-props="{ bottom: true, offsetY: true }"
+          class="icon-select"
+          dense
+          hide-details
+          :items="icons"
+          :item-color="newColor && newColor.hexa"
+          background-color="transparent"
+          flat
+          solo
+        >
+          <template v-slot:item="{ item }">
+            <img :src="item.text" contain width="24px" style="margin-right: auto; margin-left: auto" />
+          </template>
+          <template v-slot:selection="{ item }">
+            <img :src="item.text" contain width="34px" />
+          </template>
+        </v-select>
+        <v-color-picker v-model="newColor" class="color-picker mr-3" flat hide-canvas mode="hexa" hide-inputs />
+        <v-text-field
+          v-model="newName"
+          outlined
+          label="Name"
+          class="name-input"
+          hide-details
+          flat
+          solo
+          :error="$v.newName.$invalid"
+          @input="$v.newName.$touch"
+        />
+      </div>
+      <div class="d-flex mt-3 new-coord-form align-center">
+        <v-text-field
+          v-model="xCoord"
+          type="number"
+          label="X"
+          class="coord-input mr-5"
+          outlined
+          hide-details
+          flat
+          solo
+          :error="$v.xCoord.$invalid"
+          @input="$v.xCoord.$touch"
+        />
+        <v-text-field
+          v-model="yCoord"
+          type="number"
+          outlined
+          label="Y"
+          class="coord-input mr-5"
+          hide-details
+          solo
+          flat
+          :error="$v.yCoord.$invalid"
+          @input="$v.yCoord.$touch"
+        />
+        <v-text-field
+          v-model="zCoord"
+          outlined
+          type="number"
+          label="Z"
+          class="coord-input mr-5"
+          hide-details
+          flat
+          solo
+          :error="$v.zCoord.$invalid"
+          @input="$v.zCoord.$touch"
+        />
+        <v-btn class="add-new-button" dense outlined :class="{ disabled: $v.$invalid }" @click="onAdd"><v-icon>mdi-plus</v-icon>Add</v-btn>
+      </div>
     </div>
     <v-divider color="primary-blue" />
 
@@ -45,15 +112,46 @@
 </template>
 
 <script>
-import { ref } from '@vue/composition-api';
+import { ref, watch } from '@vue/composition-api';
 import { v4 as uuidv4 } from 'uuid';
 
+import { required } from 'vuelidate/lib/validators';
+
+import diamond1 from '@/assets/map_icons/diamond1.png';
+import diamond2 from '@/assets/map_icons/diamond2.png';
+import dot from '@/assets/map_icons/dot.png';
+import pin1 from '@/assets/map_icons/pin1.png';
+import pin2 from '@/assets/map_icons/pin2.png';
+import pin3 from '@/assets/map_icons/pin3.png';
+import satellite from '@/assets/map_icons/satellite.png';
+import shield from '@/assets/map_icons/shield.png';
+import ship1 from '@/assets/map_icons/ship1.png';
+import ship2 from '@/assets/map_icons/ship2.png';
+import ship3 from '@/assets/map_icons/ship3.png';
+import ship4 from '@/assets/map_icons/ship4.png';
+import stargate from '@/assets/map_icons/stargate.png';
+import station1 from '@/assets/map_icons/station1.png';
+import station2 from '@/assets/map_icons/station2.png';
+import station3 from '@/assets/map_icons/station3.png';
+import target from '@/assets/map_icons/target.png';
+
 export default {
+  name: 'NewWaypointDialog',
+
+  validations: {
+    newName: { required },
+    xCoord: { required },
+    yCoord: { required },
+    zCoord: { required },
+  },
+
   setup() {
+    const newIcon = ref(pin1);
+    const newColor = ref(null);
     const newName = ref('');
-    const xCoord = ref(0);
-    const yCoord = ref(0);
-    const zCoord = ref(0);
+    const xCoord = ref(null);
+    const yCoord = ref(null);
+    const zCoord = ref(null);
 
     const allWaypoints = ref();
 
@@ -78,6 +176,30 @@ export default {
       },
     ];
 
+    const icons = [
+      { text: diamond1, value: diamond1 },
+      { text: diamond2, value: diamond2 },
+      { text: dot, value: dot },
+      { text: pin1, value: pin1 },
+      { text: pin2, value: pin2 },
+      { text: pin3, value: pin3 },
+      { text: target, value: target },
+      { text: shield, value: shield },
+      { text: satellite, value: satellite },
+      { text: ship1, value: ship1 },
+      { text: ship2, value: ship2 },
+      { text: ship3, value: ship3 },
+      { text: ship4, value: ship4 },
+      { text: stargate, value: stargate },
+      { text: station1, value: station1 },
+      { text: station2, value: station2 },
+      { text: station3, value: station3 },
+    ];
+
+    watch(newColor, () => {
+      console.log(newColor.value);
+    });
+
     const parentWindow = ref(null);
     window.addEventListener(
       'message',
@@ -91,6 +213,8 @@ export default {
     );
 
     return {
+      newIcon,
+      newColor,
       newName,
       xCoord,
       yCoord,
@@ -98,6 +222,7 @@ export default {
       tableHeaders,
       allWaypoints,
       parentWindow,
+      icons,
     };
   },
 
@@ -116,7 +241,9 @@ export default {
               // eslint-disable-next-line id-length
               z: parseInt(this.zCoord),
             },
-            color: 'red',
+            color: this.newColor.hexa,
+            hide: false,
+            icon: this.newIcon,
           },
         });
       }
@@ -152,6 +279,19 @@ export default {
 };
 </script>
 
+<style lang="scss">
+.v-select-list {
+  display: flex;
+  flex-wrap: wrap;
+  background: #444 !important;
+
+  .v-list-item {
+    max-width: 40px;
+    padding: 0;
+  }
+}
+</style>
+
 <style lang="scss" scoped>
 @import '@/design/variables/_colors';
 
@@ -172,12 +312,48 @@ export default {
     min-height: 0 !important;
   }
 
+  .v-label {
+    color: #aaa !important;
+  }
+
+  input {
+    color: #ddd !important;
+  }
+
   .v-input__slot {
-    background-color: #ccc !important;
+    min-height: 0 !important;
+    background-color: #333 !important;
   }
 
   .add-new-button {
+    height: 32px !important;
+    min-height: 0 !important;
     color: $primary-blue;
+
+    &.disabled {
+      color: red;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+  }
+}
+
+.name-input::v-deep {
+  .v-input__control {
+    min-height: 0 !important;
+  }
+
+  input {
+    color: #ddd !important;
+  }
+
+  .v-label {
+    color: #aaa !important;
+  }
+
+  .v-input__slot {
+    min-height: 0 !important;
+    background-color: #333 !important;
   }
 }
 
@@ -238,5 +414,49 @@ export default {
   &:hover {
     overflow-y: overlay !important;
   }
+}
+
+.color-picker::v-deep {
+  width: 200px;
+  background: transparent;
+
+  .v-color-picker__controls {
+    padding: 10px 10px 10px 0 !important;
+  }
+
+  .v-slider__thumb {
+    cursor: pointer;
+  }
+
+  .v-color-picker__hue {
+    margin-top: 2px;
+    margin-bottom: 0 !important;
+  }
+
+  .v-slider__thumb::after {
+    width: 12px;
+    height: 12px;
+  }
+
+  .v-color-picker__alpha {
+    display: none;
+  }
+
+  .v-slider__thumb::before {
+    top: -6px;
+    left: -6px;
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .v-slider__thumb-container--active {
+    .v-slider__thumb::before {
+      transform: scale(1) !important;
+    }
+  }
+}
+
+.icon-select {
+  width: 30px;
 }
 </style>

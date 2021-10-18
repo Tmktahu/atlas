@@ -11,13 +11,17 @@
       thumb-label="always"
       label="Pan Speed:"
     />
+    <div ref="pointInfoContainer" class="point-info">
+      <div ref="pointName" class="name">Point Name</div>
+      <div ref="pointCoord" class="coord">[Coordinate]</div>
+    </div>
   </div>
 </template>
 
 <script>
 import Stats from 'stats.js';
 
-import { ref, inject } from '@vue/composition-api';
+import { ref, inject, watch, toRefs } from '@vue/composition-api';
 
 import { useMap, MIN_PAN_SPEED, MAX_PAN_SPEED } from '@/models/useMap.js';
 
@@ -64,6 +68,8 @@ export default {
       false
     );
 
+    const intersects = toRefs(mapData).intersects;
+
     return {
       stats,
       initMap,
@@ -73,7 +79,21 @@ export default {
       mapData,
       MIN_PAN_SPEED,
       MAX_PAN_SPEED,
+      intersects,
     };
+  },
+
+  watch: {
+    intersects() {
+      if (this.mapData.intersects[0]?.object.type === 'Points') {
+        this.$refs.pointName.innerHTML = this.mapData.intersects[0].object.name;
+        this.$refs.pointCoord.innerHTML = `[${this.mapData.intersects[0].object.geometry.attributes.position.array[0]}, ${-this.mapData.intersects[0].object
+          .geometry.attributes.position.array[2]}, ${this.mapData.intersects[0].object.geometry.attributes.position.array[1]}]`;
+        this.$refs.pointInfoContainer.style.display = 'block';
+      } else {
+        this.$refs.pointInfoContainer.style.display = 'none';
+      }
+    },
   },
 
   mounted() {
@@ -85,6 +105,26 @@ export default {
 
         if (event.keyCode === 83) {
           this.onSDown();
+        }
+      });
+
+      window.addEventListener('mousemove', (event) => {
+        if (this.$refs.pointInfoContainer) {
+          this.$refs.pointInfoContainer.style.left = `${event.pageX - 30}px`;
+          this.$refs.pointInfoContainer.style.top = `${event.pageY - 10}px`;
+        }
+
+        // eslint-disable-next-line prettier/prettier
+        this.mapData.mapMouse.x = ((event.clientX - 56) / (window.innerWidth - 56))* 2 - 1;
+        this.mapData.mapMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      });
+
+      window.addEventListener('wheel', (event) => {
+        console.log(event.deltaY);
+        if (event.deltaY > 0) {
+          this.onSDown();
+        } else {
+          this.onWDown();
         }
       });
 
@@ -127,7 +167,8 @@ export default {
 </style>
 
 <style lang="scss" scoped>
-.mapContainer {
+.mapContainer::v-deep {
+  width: calc(100vw - 56px);
   overflow: hidden;
 }
 
@@ -141,6 +182,18 @@ export default {
     font-weight: 400;
     color: white;
     letter-spacing: 0.03em;
+  }
+}
+
+.point-info {
+  position: absolute;
+
+  .name {
+    font-size: 16px;
+  }
+
+  .coord {
+    font-size: 12px;
   }
 }
 </style>
