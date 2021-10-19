@@ -14,6 +14,7 @@ import { LANDING_ROUTE } from '@/router/routes';
 
 import { useMap } from '@/models/useMap.js';
 import { useStorage } from '@/models/useStorage.js';
+import { useToasts } from '@/models/useToasts.js';
 
 import LeftNav from '@/components/LeftNav.vue';
 
@@ -38,6 +39,8 @@ export default {
         'border: 2px solid white; background-color: #527cbf; border-radius: 5px; color: #cbdaf2; font-size: 2rem; font-weight: 800; padding: 4px; margin: 5px 0;'
       );
     });
+
+    useToasts();
 
     const { mapData } = useMap();
 

@@ -8,8 +8,24 @@ import { ICON_MAP } from '@/models/useIcons.js';
 import stargate from '@/assets/map_icons/stargate.png';
 import isan from '@/assets/map_icons/isan.png';
 
-export const ORIGIN_POINT = { name: 'Origin / WarpGate', color: 'aqua', position: { x: 0, y: 0, z: 0 }, id: '0', hide: false, icon: 'stargate' };
-export const ISAN_ORIGIN_POINT = { name: 'ISAN Origin', color: 'orange', position: { x: 15046, y: -3474, z: -1416 }, id: '1234', hide: false, icon: 'isan' };
+export const ORIGIN_POINT = {
+  name: 'Origin / WarpGate',
+  color: 'aqua',
+  position: { x: 0, y: 0, z: 0 },
+  id: '0',
+  hide: false,
+  icon: 'stargate',
+  group: 'Origins',
+};
+export const ISAN_ORIGIN_POINT = {
+  name: 'ISAN Origin',
+  color: 'orange',
+  position: { x: 15046, y: -3474, z: -1416 },
+  id: '1234',
+  hide: false,
+  icon: 'isan',
+  group: 'Origins',
+};
 
 export const EOS_OFFSET = {
   x: -8450000,

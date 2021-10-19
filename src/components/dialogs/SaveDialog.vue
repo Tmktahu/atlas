@@ -1,8 +1,10 @@
 <template>
   <v-dialog v-model="showDialog" content-class="save-dialog">
     <div class="pa-6">
-      <div>Save Waypoints</div>
-      <div>Select whether you want to save your current set of waypoints to the standard storage JSON or to a specific JSON of your choice.</div>
+      <div class="dialog-title">Save Waypoints</div>
+      <div class="dialog-title--sub mb-6">
+        Select whether you want to save your current set of waypoints to the standard storage JSON or to a specific JSON of your choice.
+      </div>
       <v-radio-group v-model="storageOption">
         <v-radio class="radio-option" value="storage" label="Standard Storage (waypoint_data.json)" />
         <v-radio class="radio-option" value="custom" label="">
@@ -12,7 +14,7 @@
           </template>
         </v-radio>
       </v-radio-group>
-      <v-btn class="save-button px-8" large @click="onSave"><v-icon class="pr-2">mdi-content-save-outline</v-icon>Save</v-btn>
+      <v-btn class="save-button px-8 mt-4" large @click="onSave"><v-icon class="pr-2">mdi-content-save-outline</v-icon>Save</v-btn>
     </div>
   </v-dialog>
 </template>
@@ -74,6 +76,7 @@ export default {
         const errors = await this.saveToJSON(this.mapData.pointsArray, this.dataStoragePath);
         if (errors) {
           console.log('File Save Error: ', errors);
+          this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });
         } else {
           this.close();
         }
@@ -81,6 +84,7 @@ export default {
         const errors = await this.saveToJSON(this.mapData.pointsArray, this.filePath);
         if (errors) {
           console.log('File Save Error: ', errors);
+          this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });
         } else {
           this.close();
         }
@@ -111,6 +115,15 @@ export default {
 
 <style lang="scss" scoped>
 @import '@/design/variables/_colors';
+
+.dialog-title {
+  font-size: 24px;
+  letter-spacing: 0.04em;
+
+  &--sub {
+    font-size: 14px;
+  }
+}
 
 .select-path-button {
   color: $primary-blue !important;

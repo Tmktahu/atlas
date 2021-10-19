@@ -1,12 +1,13 @@
+import Vue from 'vue';
 import { ref, watch } from '@vue/composition-api';
 const fs = require('fs');
 
-import { ORIGIN_POINT } from './useMap';
+import { ISAN_ORIGIN_POINT, ORIGIN_POINT } from './useMap';
 import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetCoords/eos';
 
 const remote = require('electron').remote;
 
-export const DEFAULT_DATA = [ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
+export const DEFAULT_DATA = [ORIGIN_POINT, ISAN_ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
 
 export function useStorage() {
   let dataStoragePath = ref('');
@@ -31,6 +32,7 @@ export function useStorage() {
     fs.readFile(filePath, 'utf-8', (error, data) => {
       if (error) {
         console.log('Error reading file: ', error);
+        Vue.toasted.global.alertError({ message: 'Error reading JSON file', description: error });
         return;
       }
 
@@ -44,6 +46,10 @@ export function useStorage() {
       fs.writeFile(filePath, stringifiedData, 'utf-8', () => {
         if (container) {
           container.value = inData;
+          Vue.toasted.global.alertInfo({
+            message: 'Initialized default JSON storage',
+            description: `No standard JSON file was found, so one was created at ${dataStoragePath.value}`,
+          });
         }
       });
       return null;

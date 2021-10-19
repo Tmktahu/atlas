@@ -131,7 +131,7 @@ export default {
       });
 
       if (this.manageWaypointsWindow === null || this.manageWaypointsWindow?.closed) {
-        this.manageWaypointsWindow = window.open(routeData.href, '_blank', 'width=600,height=800');
+        this.manageWaypointsWindow = window.open(routeData.href, '_blank', 'width=700,height=800');
 
         setTimeout(() => {
           this.manageWaypointsWindow.postMessage({ points: this.mapData.pointsArray }, '*');
@@ -148,6 +148,9 @@ export default {
 
     onImportWaypoints() {
       console.log('Coming soon');
+      this.$toasted.global.alertError({ message: 'Testing toast error with a longer title that wraps.' });
+      this.$toasted.global.alertWarning({ message: 'Testing warning error.' });
+      this.$toasted.global.alertInfo({ message: 'Testing info error.', description: 'with a message that has some length to it' });
     },
 
     onReload() {

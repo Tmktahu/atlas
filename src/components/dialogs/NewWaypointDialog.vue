@@ -6,7 +6,7 @@
     <v-divider color="primary-blue" class="mt-4" />
     <div class="d-flex flex-column px-6 my-6">
       <div class="d-flex align-center">
-        <v-select v-model="newIcon" menu-props="auto" class="icon-select" dense hide-details :items="icons" background-color="transparent" flat solo>
+        <v-select v-model="newIcon" menu-props="auto" class="icon-select mr-2" dense hide-details :items="icons" background-color="transparent" flat solo>
           <template v-slot:item="{ item }">
             <img :src="item.text" contain width="24px" style="margin-right: auto; margin-left: auto" />
           </template>
@@ -19,12 +19,23 @@
           v-model="newName"
           outlined
           label="Name"
-          class="name-input"
+          class="name-input mr-5"
           hide-details
           flat
           solo
           :error="$v.newName.$invalid"
           @input="$v.newName.$touch"
+        />
+        <v-text-field
+          v-model="newGroup"
+          outlined
+          label="Group"
+          class="name-input"
+          hide-details
+          flat
+          solo
+          :error="$v.newGroup.$invalid"
+          @input="$v.newGroup.$touch"
         />
       </div>
       <div class="d-flex mt-3 new-coord-form align-center">
@@ -69,10 +80,21 @@
     </div>
     <v-divider color="primary-blue" />
 
-    <v-data-table class="waypoint-list" :items="allWaypoints" :items-per-page="-1" fixed-header hide-default-footer disable-pagination :headers="tableHeaders">
+    <v-data-table
+      class="waypoint-list"
+      :items="allWaypoints"
+      :items-per-page="-1"
+      fixed-header
+      hide-default-footer
+      disable-pagination
+      :headers="tableHeaders"
+      group-by="group"
+    >
       <template v-slot:item.name="{ item }">
-        <div class="d-flex">
-          <v-icon :color="item.color">mdi-circle</v-icon>
+        <div class="d-flex align-center">
+          <div class="image-wrapper" :style="{ 'background-color': item.color }">
+            <img :src="ICON_MAP[item.icon].workingFilePath" contain width="32px" height="32px" style="filter: invert(1)" />
+          </div>
           <span class="pl-3"> {{ item.name }}</span>
         </div>
       </template>
@@ -96,6 +118,15 @@
           <div class="pt-2 pb-4">Please try going back to the main Atlas window and <br />clicking the "Waypoints" navigation button again.</div>
         </div>
       </template>
+      <template v-slot:group.header="{ group, toggle, isOpen }">
+        <td colspan="3" class="group-header-row" @click="toggle">
+          <div class="d-flex justify-center align-center group-header-text">
+            <v-icon size="32" class="mr-3">{{ isOpen ? 'mdi-minus' : 'mdi-plus' }}</v-icon>
+            <div class="group-header"> "{{ group }}" Waypoints </div>
+            <v-icon size="32" class="ml-3">{{ isOpen ? 'mdi-minus' : 'mdi-plus' }}</v-icon>
+          </div>
+        </td>
+      </template>
     </v-data-table>
   </div>
 </template>
@@ -113,6 +144,7 @@ export default {
 
   validations: {
     newName: { required },
+    newGroup: { required },
     xCoord: { required },
     yCoord: { required },
     zCoord: { required },
@@ -125,6 +157,7 @@ export default {
     const xCoord = ref(null);
     const yCoord = ref(null);
     const zCoord = ref(null);
+    const newGroup = ref('');
 
     const allWaypoints = ref();
 
@@ -176,6 +209,8 @@ export default {
       allWaypoints,
       parentWindow,
       icons,
+      newGroup,
+      ICON_MAP,
     };
   },
 
@@ -198,6 +233,7 @@ export default {
             color: color,
             hide: false,
             icon: this.newIcon,
+            group: this.newGroup,
           },
         });
       }
@@ -252,6 +288,8 @@ export default {
 </style>
 
 <style lang="scss" scoped>
+@use 'sass:color';
+
 @import '@/design/variables/_colors';
 
 .page-title {
@@ -324,6 +362,15 @@ export default {
     height: calc(100vh - 253px);
   }
 
+  .image-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 16px;
+  }
+
   th {
     color: white !important;
     background: #222 !important;
@@ -344,6 +391,28 @@ export default {
   td {
     color: white;
     border-bottom: 1px solid #666 !important;
+  }
+
+  .v-row-group__header {
+    background: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+  }
+
+  .group-header-text {
+    height: 24px;
+    font-size: 18px;
+    font-weight: 600;
+    color: black;
+    letter-spacing: 0.03em;
+  }
+
+  .group-header-row {
+    height: 26px;
+    padding: 0 !important;
+
+    &:hover {
+      cursor: pointer;
+      background: color.change($primary-blue, $lightness: 40%, $saturation: 50%) !important;
+    }
   }
 }
 
@@ -415,7 +484,16 @@ export default {
   }
 }
 
-.icon-select {
-  width: 30px;
+.icon-select::v-deep {
+  width: 50px;
+  min-width: 50px;
+
+  .v-input__slot {
+    padding: 0 !important;
+  }
+
+  i {
+    color: white !important;
+  }
 }
 </style>
