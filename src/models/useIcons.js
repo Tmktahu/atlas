@@ -19,6 +19,7 @@ import collective from '@/assets/map_icons/collective.png';
 import nomads from '@/assets/map_icons/nomads.png';
 import tactical from '@/assets/map_icons/tactical.png';
 import isan from '@/assets/map_icons/isan.png';
+import federation from '@/assets/map_icons/federation.png';
 
 export const ICON_FOLDER_PATH = '@/assets/map_icons/';
 
@@ -44,4 +45,5 @@ export const ICON_MAP = {
   nomads: { name: 'nomads', fileName: 'nomads.png', baseFilePath: `${ICON_FOLDER_PATH}nomads.png`, workingFilePath: nomads },
   tactical: { name: 'tactical', fileName: 'tactical.png', baseFilePath: `${ICON_FOLDER_PATH}tactical.png`, workingFilePath: tactical },
   isan: { name: 'isan', fileName: 'isan.png', baseFilePath: `${ICON_FOLDER_PATH}isan.png`, workingFilePath: isan },
+  federation: { name: 'federation', fileName: 'federation.png', baseFilePath: `${ICON_FOLDER_PATH}federation.png`, workingFilePath: federation },
 };

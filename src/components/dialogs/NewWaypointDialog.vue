@@ -6,18 +6,7 @@
     <v-divider color="primary-blue" class="mt-4" />
     <div class="d-flex flex-column px-6 my-6">
       <div class="d-flex align-center">
-        <v-select
-          v-model="newIcon"
-          :menu-props="{ bottom: true, offsetY: true }"
-          class="icon-select"
-          dense
-          hide-details
-          :items="icons"
-          :item-color="newColor && newColor.hexa"
-          background-color="transparent"
-          flat
-          solo
-        >
+        <v-select v-model="newIcon" menu-props="auto" class="icon-select" dense hide-details :items="icons" background-color="transparent" flat solo>
           <template v-slot:item="{ item }">
             <img :src="item.text" contain width="24px" style="margin-right: auto; margin-left: auto" />
           </template>
@@ -245,6 +234,11 @@ export default {
 </script>
 
 <style lang="scss">
+.v-menu__content--auto {
+  top: 180px !important;
+  left: 25px !important;
+}
+
 .v-select-list {
   display: flex;
   flex-wrap: wrap;

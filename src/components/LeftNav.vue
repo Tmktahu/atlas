@@ -11,7 +11,7 @@
 
         <v-divider />
 
-        <v-list-item link @click="onNewWaypoint">
+        <v-list-item link @click="onManageWaypoint">
           <div class="left-nav-icon">
             <v-icon>mdi-map-marker</v-icon>
           </div>
@@ -25,11 +25,11 @@
           <span class="left-nav-label pl-5">Save Waypoints</span>
         </v-list-item>
 
-        <v-list-item link>
+        <v-list-item link @click="onImportWaypoints">
           <div class="left-nav-icon">
             <v-icon>mdi-export</v-icon>
           </div>
-          <span class="left-nav-label pl-5">Export Waypoints</span>
+          <span class="left-nav-label pl-5">Import Waypoints</span>
         </v-list-item>
 
         <v-list-item link @click="onReload">
@@ -97,13 +97,13 @@ export default {
 
     const mapData = inject('mapData');
 
-    let newWaypointsWindow = null;
+    let manageWaypointsWindow = null;
 
     return {
       leftNav,
       leftNavCondensed,
       mapData,
-      newWaypointsWindow,
+      manageWaypointsWindow,
       showControls,
     };
   },
@@ -125,22 +125,20 @@ export default {
       this.leftNavCondensed = !event.srcElement.classList.contains('v-navigation-drawer--mini-variant');
     },
 
-    async onNewWaypoint() {
+    async onManageWaypoint() {
       let routeData = this.$router.resolve({
         name: NEW_WAYPOINT_ROUTE,
       });
 
-      if (this.newWaypointsWindow === null || this.newWaypointsWindow?.closed) {
-        this.newWaypointsWindow = window.open(routeData.href, '_blank', 'width=600,height=800');
-        //
-        //
+      if (this.manageWaypointsWindow === null || this.manageWaypointsWindow?.closed) {
+        this.manageWaypointsWindow = window.open(routeData.href, '_blank', 'width=600,height=800');
+
         setTimeout(() => {
-          this.newWaypointsWindow.postMessage({ points: this.mapData.pointsArray }, '*');
+          this.manageWaypointsWindow.postMessage({ points: this.mapData.pointsArray }, '*');
         }, 1000);
       } else {
-        this.newWaypointsWindow.postMessage({ points: this.mapData.pointsArray }, '*');
-        this.newWaypointsWindow.focus();
-        //this.newWaypointsWindow.postMessage({ points: this.mapData.pointsArray });
+        this.manageWaypointsWindow.postMessage({ points: this.mapData.pointsArray }, '*');
+        this.manageWaypointsWindow.focus();
       }
     },
 
@@ -148,9 +146,13 @@ export default {
       this.$refs.saveDialog.open();
     },
 
+    onImportWaypoints() {
+      console.log('Coming soon');
+    },
+
     onReload() {
-      if (this.newWaypointsWindow) {
-        this.newWaypointsWindow.close();
+      if (this.manageWaypointsWindow) {
+        this.manageWaypointsWindow.close();
       }
       window.location.reload(false);
     },

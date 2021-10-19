@@ -112,7 +112,7 @@ export default {
     localStorageText() {
       let path = require('path');
       let absolutePath = path.resolve(this.dataStoragePath);
-      return `${absolutePath} | ${process.env.PORTABLE_EXECUTABLE_DIR}`;
+      return absolutePath;
     },
   },
 
