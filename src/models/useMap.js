@@ -1,18 +1,14 @@
 /* eslint-disable id-length */
 import * as THREE from 'three';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-
-import pointSprite from '@/assets/disc.png';
-import pointFont from '@/assets/helvetiker_regular.typeface.json';
 
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
 
-import { ORIGIN_STATIONS } from '@/models/presetCoords/eos.js';
 import stargate from '@/assets/map_icons/stargate.png';
+import isan from '@/assets/map_icons/isan.png';
 
 export const ORIGIN_POINT = { name: 'Origin / WarpGate', color: 'aqua', position: { x: 0, y: 0, z: 0 }, id: '0', hide: false, icon: stargate };
+export const ISAN_ORIGIN_POINT = { name: 'ISAN Origin', color: 'orange', position: { x: 15046, y: -3474, z: -1416 }, id: '1234', hide: false, icon: isan };
 
 export const EOS_OFFSET = {
   x: -8450000,
@@ -266,6 +262,9 @@ export function useMap(inMapData) {
 
     for (const index in points) {
       let point = points[index];
+      if (point.hide) {
+        continue;
+      }
       const sprite = await new THREE.TextureLoader().load(point.icon);
       let color = new THREE.Color(point.color);
       const pointMaterial = new THREE.PointsMaterial({
@@ -377,7 +376,6 @@ export function useMap(inMapData) {
   };
 
   const addPoint = (point) => {
-    console.log(point);
     mapData.pointsArray.push(point);
     addPoints(mapData.pointsArray);
   };

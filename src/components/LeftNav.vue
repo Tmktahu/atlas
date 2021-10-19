@@ -4,9 +4,9 @@
       <v-list class="pa-0" style="height: 100%">
         <v-list-item class="pa-0 flex-grow-0">
           <div class="left-nav-logo pa-2">
-            <v-img :src="require('@/assets/Atlas-Logo-Large-White-A.png')" contain />
+            <v-img :src="require('@/assets/Atlas-Logo-Transparent.png')" contain />
           </div>
-          <span class="left-nav-logo-label pl-8">Atlas</span>
+          <span class="left-nav-logo-label pl-3">Atlas Map</span>
         </v-list-item>
 
         <v-divider />
@@ -71,7 +71,7 @@
         </v-tooltip>
       </v-list>
     </v-layout>
-    <SaveDialog />
+    <SaveDialog ref="saveDialog" />
   </v-navigation-drawer>
 </template>
 
@@ -145,7 +145,7 @@ export default {
     },
 
     onSave() {
-      this.saveDialog = true;
+      this.$refs.saveDialog.open();
     },
 
     onReload() {
@@ -171,7 +171,7 @@ export default {
   top: unset !important;
   bottom: 12px;
   left: 212px !important;
-  background-color: color.change($primary-blue, $lightness: 80) !important;
+  background-color: color.change($primary-blue, $lightness: 80%) !important;
 
   div {
     color: black;
@@ -186,10 +186,10 @@ export default {
 
 .left-nav::v-deep {
   max-width: 200px;
-  background-color: color.change($primary-blue, $lightness: 60, $saturation: 50) !important;
+  background-color: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
 
   .selected {
-    background: color.change($primary-blue, $lightness: 50, $saturation: 50);
+    background: color.change($primary-blue, $lightness: 50%, $saturation: 50%);
   }
 }
 

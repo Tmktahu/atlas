@@ -82,10 +82,10 @@ html {
 
 .draggable-area-bar {
   position: absolute;
-  z-index: 20000;
   width: 100%;
   height: 30px;
   -webkit-user-select: none;
   -webkit-app-region: drag;
+  background: #333;
 }
 </style>

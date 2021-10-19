@@ -1,6 +1,6 @@
 'use strict';
 
-import { app, protocol, BrowserWindow } from 'electron';
+import { app, protocol, BrowserWindow, nativeImage } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -11,6 +11,10 @@ require('@electron/remote/main').initialize();
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true } }]);
 
 async function createWindow() {
+  let imagePath = `${__static}/Atlas-Logo.ico`;
+  let image = nativeImage.createFromPath(imagePath);
+  image.setTemplateImage(true);
+
   // Create the browser window.
   const win = new BrowserWindow({
     width: 800,
@@ -28,6 +32,7 @@ async function createWindow() {
       contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
       enableRemoteModule: true,
     },
+    icon: image,
   });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {

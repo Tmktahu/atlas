@@ -16,14 +16,18 @@
       <div ref="pointCoord" class="coord">[Coordinate]</div>
     </div>
     <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed }">
-      <div>W: Pan Forward</div>
-      <div>S: Pan Backward</div>
-      <div>A: Pan Left</div>
-      <div>D: Pan Right</div>
-      <div>Space: Pan Up</div>
-      <div>Left-Shift: Pan Down</div>
-      <div>Left-Click: Rotate Camera</div>
-      <div>Right-Click: Pan Camera</div>
+      <div>
+        Local Storage File:
+        <span>{{ localStorageText }}</span>
+      </div>
+      <div>W: <span>Pan Forward</span></div>
+      <div>S: <span>Pan Backward</span></div>
+      <div>A: <span>Pan Left</span></div>
+      <div>D: <span>Pan Right</span></div>
+      <div>Space: <span>Pan Up</span></div>
+      <div>Left-Shift: <span>Pan Down</span></div>
+      <div>Left-Click: <span>Rotate Camera</span></div>
+      <div>Right-Click: <span>Pan Camera</span></div>
     </div>
   </div>
 </template>
@@ -34,6 +38,8 @@ import Stats from 'stats.js';
 import { ref, inject, watch, toRefs } from '@vue/composition-api';
 
 import { useMap, MIN_PAN_SPEED, MAX_PAN_SPEED } from '@/models/useMap.js';
+
+import { useStorage } from '@/models/useStorage.js';
 
 export default {
   metaInfo() {
@@ -52,6 +58,8 @@ export default {
     let stats = null;
 
     const { init: initMap, resizeMap, panForward, panBackward, viewPoint, showHidePoint, addPoint, deletePoint } = useMap(mapData);
+
+    const { dataStoragePath } = useStorage();
 
     window.addEventListener(
       'message',
@@ -96,7 +104,16 @@ export default {
       MAX_PAN_SPEED,
       intersects,
       isReady,
+      dataStoragePath,
     };
+  },
+
+  computed: {
+    localStorageText() {
+      let path = require('path');
+      let absolutePath = path.resolve(this.dataStoragePath);
+      return `${absolutePath} | ${process.env.PORTABLE_EXECUTABLE_DIR}`;
+    },
   },
 
   watch: {
@@ -187,6 +204,10 @@ export default {
 </style>
 
 <style lang="scss" scoped>
+@use 'sass:color';
+
+@import '@/design/variables/_colors';
+
 .mapContainer::v-deep {
   width: calc(100vw - 56px);
   overflow: hidden;
@@ -211,6 +232,7 @@ export default {
 
 .point-info {
   position: absolute;
+  display: none;
 
   .name {
     font-size: 16px;
@@ -223,15 +245,22 @@ export default {
 
 .controls-info {
   position: absolute;
-  top: 12px;
+  top: 36px;
   left: 15px;
-  width: 200px;
+  width: 100%;
+  pointer-events: none;
   background: transparent;
   transition: left 0.05s ease;
 
   div {
+    width: fit-content;
     font-size: 14px;
     color: white;
+    pointer-events: all;
+
+    span {
+      color: color.change($primary-blue, $lightness: 60%, $saturation: 80%);
+    }
   }
 
   &.out {

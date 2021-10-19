@@ -1,7 +1,13 @@
+export const INDEX_ROUTE = 'index';
 export const LANDING_ROUTE = 'landing';
 export const NEW_WAYPOINT_ROUTE = 'new-waypoint';
 
 export default [
+  {
+    path: '/index.html',
+    name: INDEX_ROUTE,
+    redirect: '/',
+  },
   {
     path: '/',
     name: LANDING_ROUTE,

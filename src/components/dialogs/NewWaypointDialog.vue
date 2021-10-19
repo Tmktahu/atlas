@@ -117,23 +117,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { required } from 'vuelidate/lib/validators';
 
-import diamond1 from '@/assets/map_icons/diamond1.png';
-import diamond2 from '@/assets/map_icons/diamond2.png';
-import dot from '@/assets/map_icons/dot.png';
-import pin1 from '@/assets/map_icons/pin1.png';
-import pin2 from '@/assets/map_icons/pin2.png';
-import pin3 from '@/assets/map_icons/pin3.png';
-import satellite from '@/assets/map_icons/satellite.png';
-import shield from '@/assets/map_icons/shield.png';
-import ship1 from '@/assets/map_icons/ship1.png';
-import ship2 from '@/assets/map_icons/ship2.png';
-import ship3 from '@/assets/map_icons/ship3.png';
-import ship4 from '@/assets/map_icons/ship4.png';
-import stargate from '@/assets/map_icons/stargate.png';
-import station1 from '@/assets/map_icons/station1.png';
-import station2 from '@/assets/map_icons/station2.png';
-import station3 from '@/assets/map_icons/station3.png';
-import target from '@/assets/map_icons/target.png';
+import { ICON_MAP } from '@/models/useIcons.js';
 
 export default {
   name: 'NewWaypointDialog',
@@ -146,7 +130,7 @@ export default {
   },
 
   setup() {
-    const newIcon = ref(pin1);
+    const newIcon = ref(ICON_MAP.pin1.name);
     const newColor = ref(null);
     const newName = ref('');
     const xCoord = ref(null);
@@ -176,28 +160,8 @@ export default {
       },
     ];
 
-    const icons = [
-      { text: diamond1, value: diamond1 },
-      { text: diamond2, value: diamond2 },
-      { text: dot, value: dot },
-      { text: pin1, value: pin1 },
-      { text: pin2, value: pin2 },
-      { text: pin3, value: pin3 },
-      { text: target, value: target },
-      { text: shield, value: shield },
-      { text: satellite, value: satellite },
-      { text: ship1, value: ship1 },
-      { text: ship2, value: ship2 },
-      { text: ship3, value: ship3 },
-      { text: ship4, value: ship4 },
-      { text: stargate, value: stargate },
-      { text: station1, value: station1 },
-      { text: station2, value: station2 },
-      { text: station3, value: station3 },
-    ];
-
-    watch(newColor, () => {
-      console.log(newColor.value);
+    let icons = Object.values(ICON_MAP).map((value) => {
+      return { text: value.workingFilePath, value: value.name };
     });
 
     const parentWindow = ref(null);
@@ -230,7 +194,6 @@ export default {
     onAdd() {
       if (this.parentWindow !== null) {
         let color = this.newColor.hexa.substring(0, this.newColor.hexa.length - 2);
-        console.log(color);
 
         this.parentWindow.postMessage({
           command: 'add',
