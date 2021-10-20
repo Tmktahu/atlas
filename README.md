@@ -41,3 +41,8 @@ I've also taken the liberty to upload the current Atlas version executable to se
 ## Want to help?
 
 If you are interested in contributing to this project, feel free to look through the [Issues](https://github.com/Tmktahu/atlas/issues) to see what is currently being worked on. Any thoughts, comments, or PRs are much appreciated. If you have any questions or ideas, also feel free to reach out to Fryke#0746 on Discord. You can find me in the official [Starbase Discord](https://discord.com/invite/starbase).
+
+## Special Thanks
+
+- Cycle_Of_Insanity#3074 for helping to collect company logos
+- Strikeeaglechase#0001 and [Starmap](https://github.com/Collective-SB/Starmap) for inspiration
