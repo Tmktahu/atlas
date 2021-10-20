@@ -24,9 +24,9 @@ https://www.youtube.com/watch?v=aGvQCEddP10
 <br>
 <a href="https://www.youtube.com/watch?v=aGvQCEddP10" target="_blank"><img src="https://i.imgur.com/iKY6ibM.png" width="50%"></a>
 
-## A Note to Companies
+## Submitting Custom Icons
 
-Atlas allows users to select icons for their custom waypoints. If you are interested, I would love to add your company logo to the options. Reach out to me on Discord at Fryke#0746.
+Atlas allows users to select icons for their custom waypoints. If you are interested, I would love to add your company logo to the options. Check out the wiki page [Submitting an Icon](https://github.com/Tmktahu/atlas/wiki/Submitting-an-Icon) for more information.
 
 ## Is this a virus?
 
