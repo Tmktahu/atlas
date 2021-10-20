@@ -20,4 +20,4 @@ All waypoint information is stored locally on your computer in the form of JSON 
 
 https://www.youtube.com/watch?v=aGvQCEddP10
 <br>
-[![Altas Project - Demo](https://i9.ytimg.com/vi/aGvQCEddP10/mqdefault.jpg?v=616f790f&amp;sqp=CICDvosG&amp;rs=AOn4CLCvkAVs56u7j5skgIzO7oSI-K-DFg)](https://www.youtube.com/watch?v=aGvQCEddP10)
+<a href="https://www.youtube.com/watch?v=aGvQCEddP10" target="_blank"><img src="https://i.imgur.com/iKY6ibM.png" width="50%"></a>
