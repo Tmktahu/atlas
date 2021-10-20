@@ -2,8 +2,11 @@
 <template>
   <div class="d-flex flex-column" style="height: 100vh">
     <div class="page-title px-6 pt-5">Waypoint Management</div>
-    <div class="page-title--sub px-6">Add a new waypoint with the form below. Manage waypoints with the list.</div>
+    <div class="page-title--sub px-6">{{ subText }}</div>
     <v-divider color="primary-blue" class="mt-4" />
+
+    <div v-if="parentWindow === null" class="error-state-mask" />
+
     <div class="d-flex flex-column px-6 my-6">
       <div class="d-flex align-center">
         <v-select v-model="newIcon" menu-props="auto" class="icon-select mr-2" dense hide-details :items="icons" background-color="transparent" flat solo>
@@ -81,8 +84,9 @@
     <v-divider color="primary-blue" />
 
     <v-data-table
+      v-if="listReady"
       class="waypoint-list"
-      :items="allWaypoints"
+      :items="pointsArray"
       :items-per-page="-1"
       fixed-header
       hide-default-footer
@@ -132,7 +136,7 @@
 </template>
 
 <script>
-import { ref, watch } from '@vue/composition-api';
+import { ref, watch, inject, toRefs } from '@vue/composition-api';
 import { v4 as uuidv4 } from 'uuid';
 
 import { required } from 'vuelidate/lib/validators';
@@ -159,8 +163,6 @@ export default {
     const zCoord = ref(null);
     const newGroup = ref('');
 
-    const allWaypoints = ref();
-
     const tableHeaders = [
       {
         text: 'Name',
@@ -186,13 +188,16 @@ export default {
       return { text: value.workingFilePath, value: value.name };
     });
 
+    const pointsArray = ref([]);
+    const listReady = ref(false);
+
     const parentWindow = ref(null);
     window.addEventListener(
       'message',
       (event) => {
         if (event.data.points) {
           parentWindow.value = event.source;
-          allWaypoints.value = event.data.points;
+          pointsArray.value = event.data.points;
         }
       },
       false
@@ -206,12 +211,29 @@ export default {
       yCoord,
       zCoord,
       tableHeaders,
-      allWaypoints,
       parentWindow,
       icons,
       newGroup,
       ICON_MAP,
+      pointsArray,
+      listReady,
     };
+  },
+
+  computed: {
+    subText() {
+      if (this.parentWindow === null) {
+        return '!!! ERROR: Go back to the main window and press the Waypoints nav option again !!!';
+      } else {
+        return 'Add a new waypoint with the form below. Manage waypoints with the list.';
+      }
+    },
+  },
+
+  watch: {
+    pointsArray() {
+      this.listReady = this.pointsArray;
+    },
   },
 
   methods: {
@@ -241,6 +263,7 @@ export default {
 
     onView(point) {
       if (this.parentWindow !== null) {
+        console.log('sending view command');
         this.parentWindow.postMessage({
           command: 'view',
           point: point,
@@ -302,6 +325,17 @@ export default {
     color: white;
     letter-spacing: 0.02em;
   }
+}
+
+.error-state-mask {
+  position: fixed;
+  top: 110px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100000;
+  pointer-events: all;
+  background: rgba(100, 0, 0, 0.5);
 }
 
 .new-coord-form::v-deep {

@@ -1,4 +1,5 @@
 /* eslint-disable id-length */
+import Vue from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
@@ -20,7 +21,7 @@ export const ORIGIN_POINT = {
 export const ISAN_ORIGIN_POINT = {
   name: 'ISAN Origin',
   color: 'orange',
-  position: { x: 15046, y: -3474, z: -1416 },
+  position: { x: 15046, y: 3474, z: 1416 },
   id: '1234',
   hide: false,
   icon: 'isan',
@@ -36,47 +37,45 @@ export const EOS_OFFSET = {
 export const MIN_PAN_SPEED = 1;
 export const MAX_PAN_SPEED = 10000;
 
-export function useMap(inMapData) {
-  const mapData =
-    inMapData ||
-    reactive({
-      containerElement: null,
-      stats: null,
-      scene: null,
-      camera: null,
-      renderer: null,
-      controls: null,
+export const masterMapData = reactive({
+  containerElement: null,
+  stats: null,
+  scene: null,
+  camera: ref(null),
+  renderer: null,
+  controls: null,
 
-      sphereMesh: null,
-      torusMesh: null,
-      pointMeshes: [],
-      pointsArray: ref(null),
+  sphereMesh: null,
+  torusMesh: null,
+  pointMeshes: [],
+  pointsArray: ref([]),
 
-      torusFillFrontMesh: null,
-      torusFillBackMesh: null,
-      torusFrameFrontMesh: null,
-      torusFrameBackMesh: null,
+  torusFillFrontMesh: null,
+  torusFillBackMesh: null,
+  torusFrameFrontMesh: null,
+  torusFrameBackMesh: null,
 
-      lookAtVector: new THREE.Vector3(),
+  lookAtVector: new THREE.Vector3(),
 
-      panSpeed: ref(40),
+  panSpeed: ref(40),
 
-      raycaster: new THREE.Raycaster(),
-      lastRaycast: null,
-      raycastInterval: 100,
-      qRaycast: true,
+  raycaster: new THREE.Raycaster(),
+  lastRaycast: null,
+  raycastInterval: 100,
+  qRaycast: true,
 
-      mapMouse: new THREE.Vector2(),
-      intersects: null,
+  mapMouse: new THREE.Vector2(),
+  intersects: null,
 
-      pointSize: 7000,
+  pointSize: 7000,
 
-      isReady: ref(false),
-    });
+  isReady: ref(false),
+});
 
-  const init = (inContainerElement, inStats) => {
+export function useMap(mapData) {
+  const init = (inContainerElement) => {
+    console.log(mapData);
     mapData.containerElement = inContainerElement;
-    mapData.stats = inStats;
 
     mapData.scene = new THREE.Scene();
 
@@ -115,18 +114,18 @@ export function useMap(inMapData) {
     grid.material = gridMaterial;
     mapData.scene.add(grid);
 
-    addTorus();
-    addSphere();
+    addTorus(mapData);
+    addSphere(mapData);
 
-    addLight(4, 2, 4);
-    addLight(-4, -1, -2);
+    addLight(4, 2, 4, mapData);
+    addLight(-4, -1, -2, mapData);
 
     //mapData.pointsArray = [ORIGIN_POINT, ...ORIGIN_STATIONS];
 
-    addPoints(mapData.pointsArray);
+    addPoints(mapData.pointsArray, mapData);
 
     mapData.controls.update();
-    animate();
+    animate(mapData);
 
     const refs = toRefs(mapData);
 
@@ -170,7 +169,7 @@ export function useMap(inMapData) {
       mapData.intersects = mapData.raycaster.intersectObjects(mapData.pointMeshes);
       mapData.lastRaycast = Date.now();
       mapData.qRaycast = false;
-      handleIntersects();
+      handleIntersects(mapData);
     }
 
     // calculate objects intersecting the picking ray
@@ -180,7 +179,7 @@ export function useMap(inMapData) {
     mapData.stats.end();
   };
 
-  const handleIntersects = () => {
+  const handleIntersects = (mapData) => {
     if (mapData.intersects[0]?.object.type === 'Points') {
       mapData.intersects[0].object.material.size = mapData.pointSize * 1.25;
     }
@@ -189,7 +188,7 @@ export function useMap(inMapData) {
     //}
   };
 
-  const resizeMap = () => {
+  const resizeMap = (mapData) => {
     if (mapData.camera) {
       mapData.camera.aspect = window.innerWidth / window.innerHeight;
       mapData.camera.updateProjectionMatrix();
@@ -199,7 +198,7 @@ export function useMap(inMapData) {
   };
 
   // ============ Object Adding Methods ===============
-  const addSphere = () => {
+  const addSphere = (mapData) => {
     let radius = 5500000;
     let widthSegments = 50;
     let heightSegments = 50;
@@ -218,7 +217,7 @@ export function useMap(inMapData) {
     sphereFrame.position.set(EOS_OFFSET.x, EOS_OFFSET.y, EOS_OFFSET.z);
   };
 
-  const addTorus = () => {
+  const addTorus = (mapData) => {
     let overalRadius = 2618229.42235;
     let innerRadius = 300000;
     let radialSegments = 100;
@@ -337,14 +336,14 @@ export function useMap(inMapData) {
     // }
   };
 
-  const addLight = (xCoord, yCoord, zCoord) => {
+  const addLight = (xCoord, yCoord, zCoord, mapData) => {
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(xCoord, yCoord, zCoord);
     mapData.scene.add(light);
   };
 
   // ============== Control Handlers =======================
-  const panForward = () => {
+  const panForward = (mapData) => {
     if (mapData.lookAtVector === null) {
       mapData.lookAtVector = new THREE.Vector3();
     }
@@ -361,7 +360,7 @@ export function useMap(inMapData) {
     mapData.camera.translateZ(-dist);
   };
 
-  const panBackward = () => {
+  const panBackward = (mapData) => {
     if (mapData.lookAtVector === null) {
       mapData.lookAtVector = new THREE.Vector3();
     }
@@ -379,29 +378,57 @@ export function useMap(inMapData) {
   };
 
   const viewPoint = (point) => {
+    console.log(masterMapData);
     let dist = 10000;
-    mapData.camera.position.set(point.position.x + dist + 1, point.position.z + dist + 1, -(point.position.y + dist + 1));
-    mapData.controls.target.set(point.position.x + dist, point.position.z + dist, -(point.position.y + dist));
+    masterMapData.camera.position.set(point.position.x + dist + 1, point.position.z + dist + 1, -(point.position.y + dist + 1));
+    masterMapData.controls.target.set(point.position.x + dist, point.position.z + dist, -(point.position.y + dist));
 
-    mapData.controls.update();
+    masterMapData.controls.update();
   };
 
-  const showHidePoint = (point) => {
+  const showHidePoint = (point, mapData) => {
     let index = mapData.pointsArray.findIndex((obj) => obj.id === point.id);
     mapData.pointsArray[index].hide = !mapData.pointsArray[index].hide;
-    addPoints(mapData.pointsArray);
+    addPoints(mapData.pointsArray, mapData);
   };
 
-  const addPoint = (point) => {
+  const addPoint = (point, mapData) => {
     mapData.pointsArray.push(point);
-    addPoints(mapData.pointsArray);
+    addPoints(mapData.pointsArray, mapData);
   };
 
-  const deletePoint = (point) => {
+  const deletePoint = (point, mapData) => {
     mapData.pointsArray = mapData.pointsArray.filter((obj) => {
       return obj.id !== point.id;
     });
-    addPoints(mapData.pointsArray);
+    addPoints(mapData.pointsArray, mapData);
+  };
+
+  const mergePoints = (points, mapData) => {
+    console.log('trying to merge points', points);
+    let existingIDs = mapData.pointsArray.map((obj) => {
+      return obj.id;
+    });
+    let skippedPoints = [];
+
+    for (const index in points) {
+      let point = points[index];
+
+      if (existingIDs.includes(point.id)) {
+        skippedPoints.push(point);
+        continue;
+      } else {
+        mapData.pointsArray.push(point);
+      }
+    }
+    addPoints(mapData.pointsArray, mapData);
+
+    if (skippedPoints.length > 0) {
+      let names = skippedPoints.map((obj) => {
+        return obj.name;
+      });
+      Vue.toasted.global.alertError({ message: `${skippedPoints.length} Points were skipped due to duplicate IDs`, description: names.join(', ') });
+    }
   };
 
   // ================= Utilities ========================
@@ -410,7 +437,6 @@ export function useMap(inMapData) {
   };
 
   return {
-    mapData,
     init,
     resizeMap,
     panForward,
@@ -419,5 +445,6 @@ export function useMap(inMapData) {
     showHidePoint,
     addPoint,
     deletePoint,
+    mergePoints,
   };
 }

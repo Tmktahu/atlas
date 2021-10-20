@@ -1,6 +1,7 @@
 export const INDEX_ROUTE = 'index';
 export const LANDING_ROUTE = 'landing';
-export const NEW_WAYPOINT_ROUTE = 'new-waypoint';
+export const MANAGE_WAYPOINT_ROUTE = 'manage-waypoints';
+export const IMPORT_WAYPOINTS_ROUTE = 'import-waypoints';
 
 export default [
   {
@@ -16,10 +17,17 @@ export default [
     },
   },
   {
-    path: '/newWaypoint',
-    name: NEW_WAYPOINT_ROUTE,
+    path: '/newWaypoints',
+    name: MANAGE_WAYPOINT_ROUTE,
     components: {
       default: () => lazyLoadView(import('@/components/dialogs/NewWaypointDialog.vue')),
+    },
+  },
+  {
+    path: '/importWaypoints',
+    name: IMPORT_WAYPOINTS_ROUTE,
+    components: {
+      default: () => lazyLoadView(import('@/components/dialogs/ImportWaypointsDialog.vue')),
     },
   },
 ];

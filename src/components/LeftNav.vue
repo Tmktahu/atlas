@@ -51,7 +51,7 @@
 
       <v-divider />
       <v-list class="pa-0">
-        <v-list-item link style="margin-top: auto; margin-bottom: 0">
+        <v-list-item link style="margin-top: auto; margin-bottom: 0" @click="onGithub">
           <div class="left-nav-icon">
             <v-icon>mdi-github</v-icon>
           </div>
@@ -76,8 +76,8 @@
 </template>
 
 <script>
-import { ref, watch, inject } from '@vue/composition-api';
-import { NEW_WAYPOINT_ROUTE } from '@/router/routes';
+import { ref, watch, inject, toRefs } from '@vue/composition-api';
+import { MANAGE_WAYPOINT_ROUTE, IMPORT_WAYPOINTS_ROUTE } from '@/router/routes';
 
 import electron from 'electron';
 const { BrowserWindow } = require('@electron/remote');
@@ -95,16 +95,22 @@ export default {
 
     const showControls = inject('showControls');
 
-    const mapData = inject('mapData');
+    const masterMapData = inject('masterMapData');
+
+    const refs = toRefs(masterMapData);
+    const pointsArray = refs.pointsArray;
 
     let manageWaypointsWindow = null;
+    let importWaypointsWindow = null;
 
     return {
       leftNav,
       leftNavCondensed,
-      mapData,
+      masterMapData,
       manageWaypointsWindow,
+      importWaypointsWindow,
       showControls,
+      pointsArray,
     };
   },
 
@@ -120,6 +126,15 @@ export default {
     },
   },
 
+  watch: {
+    pointsArray() {
+      console.log('leftnav saw pointArray change');
+      if (this.manageWaypointsWindow) {
+        this.manageWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
+      }
+    },
+  },
+
   methods: {
     onTransitionEnd(event) {
       this.leftNavCondensed = !event.srcElement.classList.contains('v-navigation-drawer--mini-variant');
@@ -127,17 +142,17 @@ export default {
 
     async onManageWaypoint() {
       let routeData = this.$router.resolve({
-        name: NEW_WAYPOINT_ROUTE,
+        name: MANAGE_WAYPOINT_ROUTE,
       });
 
       if (this.manageWaypointsWindow === null || this.manageWaypointsWindow?.closed) {
-        this.manageWaypointsWindow = window.open(routeData.href, '_blank', 'width=700,height=800');
+        this.manageWaypointsWindow = window.open(routeData.href, 'manageFrame', 'width=700,height=800');
 
         setTimeout(() => {
-          this.manageWaypointsWindow.postMessage({ points: this.mapData.pointsArray }, '*');
+          this.manageWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
         }, 1000);
       } else {
-        this.manageWaypointsWindow.postMessage({ points: this.mapData.pointsArray }, '*');
+        this.manageWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
         this.manageWaypointsWindow.focus();
       }
     },
@@ -147,21 +162,39 @@ export default {
     },
 
     onImportWaypoints() {
-      console.log('Coming soon');
-      this.$toasted.global.alertError({ message: 'Testing toast error with a longer title that wraps.' });
-      this.$toasted.global.alertWarning({ message: 'Testing warning error.' });
-      this.$toasted.global.alertInfo({ message: 'Testing info error.', description: 'with a message that has some length to it' });
+      let routeData = this.$router.resolve({
+        name: IMPORT_WAYPOINTS_ROUTE,
+      });
+
+      if (this.importWaypointsWindow === null || this.importWaypointsWindow?.closed) {
+        this.importWaypointsWindow = window.open(routeData.href, 'importFrame', 'width=700,height=800');
+
+        setTimeout(() => {
+          this.importWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
+        }, 1000);
+      } else {
+        this.importWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
+        this.importWaypointsWindow.focus();
+      }
     },
 
     onReload() {
       if (this.manageWaypointsWindow) {
         this.manageWaypointsWindow.close();
       }
+      if (this.importWaypointsWindow) {
+        this.importWaypointsWindow.close();
+      }
       window.location.reload(false);
     },
 
     onControls() {
       this.showControls = !this.showControls;
+    },
+
+    onGithub() {
+      console.log('on github');
+      require('electron').shell.openExternal('https://github.com/Tmktahu/atlas');
     },
   },
 };

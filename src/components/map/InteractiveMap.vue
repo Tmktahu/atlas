@@ -3,7 +3,7 @@
   <div>
     <div ref="mapContainer" v-resize="onResize" class="mapContainer" @keypress="onWDown" />
     <v-slider
-      v-model="mapData.panSpeed"
+      v-model="masterMapData.panSpeed"
       hide-details
       :min="MIN_PAN_SPEED"
       :max="MAX_PAN_SPEED"
@@ -52,12 +52,12 @@ export default {
 
   name: 'InteractiveMap',
   setup() {
-    const mapData = inject('mapData');
+    const masterMapData = inject('masterMapData');
     const showControls = inject('showControls');
     const leftNavCondensed = inject('leftNavCondensed');
     let stats = null;
 
-    const { init: initMap, resizeMap, panForward, panBackward, viewPoint, showHidePoint, addPoint, deletePoint } = useMap(mapData);
+    const { init: initMap, resizeMap, panForward, panBackward, viewPoint, showHidePoint, addPoint, deletePoint, mergePoints } = useMap(masterMapData);
 
     const { dataStoragePath } = useStorage();
 
@@ -66,30 +66,36 @@ export default {
       (event) => {
         if (event.data.command) {
           if (event.data.command === 'view') {
-            viewPoint(event.data.point);
+            console.log('got view command');
+            viewPoint(event.data.point, masterMapData);
           }
 
           if (event.data.command === 'showHide') {
-            showHidePoint(event.data.point);
-            event.source.postMessage({ points: mapData.pointsArray });
+            showHidePoint(event.data.point, masterMapData);
+            event.source.postMessage({ points: masterMapData.pointsArray });
           }
 
           if (event.data.command === 'add') {
-            addPoint(event.data.point);
-            event.source.postMessage({ points: mapData.pointsArray });
+            addPoint(event.data.point, masterMapData);
+            event.source.postMessage({ points: masterMapData.pointsArray });
           }
 
           if (event.data.command === 'delete') {
-            deletePoint(event.data.point);
-            event.source.postMessage({ points: mapData.pointsArray });
+            deletePoint(event.data.point, masterMapData);
+            event.source.postMessage({ points: masterMapData.pointsArray });
+          }
+
+          if (event.data.command === 'import') {
+            mergePoints(event.data.points, masterMapData);
+            event.source.postMessage({ points: masterMapData.pointsArray });
           }
         }
       },
       false
     );
 
-    const intersects = toRefs(mapData).intersects;
-    const isReady = toRefs(mapData).isReady;
+    const intersects = toRefs(masterMapData).intersects;
+    const isReady = toRefs(masterMapData).isReady;
 
     return {
       stats,
@@ -97,7 +103,7 @@ export default {
       resizeMap,
       panForward,
       panBackward,
-      mapData,
+      masterMapData,
       showControls,
       leftNavCondensed,
       MIN_PAN_SPEED,
@@ -119,15 +125,16 @@ export default {
   watch: {
     isReady() {
       if (this.isReady) {
-        this.initMap(this.$refs.mapContainer, this.stats);
+        this.initMap(this.$refs.mapContainer);
+        console.log(this.masterMapData);
       }
     },
 
     intersects() {
-      if (this.mapData.intersects[0]?.object.type === 'Points') {
-        this.$refs.pointName.innerHTML = this.mapData.intersects[0].object.name;
-        this.$refs.pointCoord.innerHTML = `[${this.mapData.intersects[0].object.geometry.attributes.position.array[0]}, ${-this.mapData.intersects[0].object
-          .geometry.attributes.position.array[2]}, ${this.mapData.intersects[0].object.geometry.attributes.position.array[1]}]`;
+      if (this.masterMapData.intersects[0]?.object.type === 'Points') {
+        this.$refs.pointName.innerHTML = this.masterMapData.intersects[0].object.name;
+        this.$refs.pointCoord.innerHTML = `[${this.masterMapData.intersects[0].object.geometry.attributes.position.array[0]}, ${-this.masterMapData
+          .intersects[0].object.geometry.attributes.position.array[2]}, ${this.masterMapData.intersects[0].object.geometry.attributes.position.array[1]}]`;
         this.$refs.pointInfoContainer.style.display = 'block';
       } else {
         this.$refs.pointInfoContainer.style.display = 'none';
@@ -154,8 +161,8 @@ export default {
         }
 
         // eslint-disable-next-line prettier/prettier
-        this.mapData.mapMouse.x = ((event.clientX - 56) / (window.innerWidth - 56))* 2 - 1;
-        this.mapData.mapMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        this.masterMapData.mapMouse.x = ((event.clientX - 56) / (window.innerWidth - 56))* 2 - 1;
+        this.masterMapData.mapMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
       });
 
       window.addEventListener('wheel', (event) => {
@@ -176,19 +183,20 @@ export default {
       this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
       this.stats.domElement.classList = 'fps-tracker';
       this.$refs.mapContainer.appendChild(this.stats.dom);
+      this.masterMapData.stats = this.stats;
     },
 
     onResize() {
-      this.resizeMap();
+      this.resizeMap(this.masterMapData);
     },
 
     // Key Handlers
     onWDown() {
-      this.panForward();
+      this.panForward(this.masterMapData);
     },
 
     onSDown() {
-      this.panBackward();
+      this.panBackward(this.masterMapData);
     },
   },
 };

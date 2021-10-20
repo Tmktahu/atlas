@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import { ref, watch } from '@vue/composition-api';
 const fs = require('fs');
+const fsPromises = fs.promises;
 
 import { ISAN_ORIGIN_POINT, ORIGIN_POINT } from './useMap';
 import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetCoords/eos';
@@ -28,16 +29,19 @@ export function useStorage() {
     }
   };
 
-  const readFromJSON = (container, filePath) => {
-    fs.readFile(filePath, 'utf-8', (error, data) => {
-      if (error) {
-        console.log('Error reading file: ', error);
-        Vue.toasted.global.alertError({ message: 'Error reading JSON file', description: error });
+  const readFromJSON = async (container, filePath) => {
+    try {
+      const data = await fsPromises.readFile(filePath, 'utf-8');
+      if (container) {
+        container.value = JSON.parse(data);
         return;
+      } else {
+        return JSON.parse(data);
       }
-
-      container.value = JSON.parse(data);
-    });
+    } catch (error) {
+      console.log('Error reading file: ', error);
+      Vue.toasted.global.alertError({ message: 'Error reading JSON file', description: error });
+    }
   };
 
   const saveToJSON = async (inData, filePath, container = null) => {

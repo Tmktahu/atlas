@@ -1,5 +1,6 @@
+import './initCompositionAPI.js';
 import Vue from 'vue';
-import VueCompositionAPI, { createApp, provide, h } from '@vue/composition-api';
+import { createApp, provide, h } from '@vue/composition-api';
 import Vuelidate from 'vuelidate';
 import browserDetect from 'vue-browser-detect-plugin';
 import App from '@/App.vue';
@@ -12,7 +13,6 @@ import 'roboto-fontface/css/roboto/roboto-fontface.css';
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
 
 // Import the plugin here
-Vue.use(VueCompositionAPI);
 Vue.use(Vuelidate);
 Vue.use(browserDetect);
 

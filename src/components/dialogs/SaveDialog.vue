@@ -29,7 +29,7 @@ import { useStorage } from '@/models/useStorage.js';
 export default {
   name: 'SaveDialog',
   setup() {
-    const mapData = inject('mapData');
+    const masterMapData = inject('masterMapData');
 
     const showDialog = ref(false);
     const storageOption = ref('storage');
@@ -38,7 +38,7 @@ export default {
     const { saveToJSON, dataStoragePath } = useStorage();
 
     return {
-      mapData,
+      masterMapData,
       showDialog,
       storageOption,
       filePath,
@@ -73,7 +73,7 @@ export default {
 
     async onSave() {
       if (this.storageOption === 'storage') {
-        const errors = await this.saveToJSON(this.mapData.pointsArray, this.dataStoragePath);
+        const errors = await this.saveToJSON(this.masterMapData.pointsArray, this.dataStoragePath);
         if (errors) {
           console.log('File Save Error: ', errors);
           this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });
@@ -81,7 +81,7 @@ export default {
           this.close();
         }
       } else {
-        const errors = await this.saveToJSON(this.mapData.pointsArray, this.filePath);
+        const errors = await this.saveToJSON(this.masterMapData.pointsArray, this.filePath);
         if (errors) {
           console.log('File Save Error: ', errors);
           this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });

@@ -18,8 +18,7 @@
   > i {
     width: 32px;
     height: 32px;
-    padding: 2px 0;
-    margin-right: 12px;
+    padding: 2px;
     font-size: 28px;
     font-weight: 800;
     line-height: 28px;
@@ -60,8 +59,6 @@
     font-size: 24px !important;
   }
 }
-
-
 
 .alert-info {
   color: black !important;
@@ -109,11 +106,5 @@
 
   a .mdi-close {
     color: black !important;
-  }
-}
-
-.alert.with-description {
-  > i {
-    align-self: flex-start;
   }
 }

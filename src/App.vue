@@ -12,7 +12,7 @@
 import { onMounted, ref, watch, provide, computed, inject } from '@vue/composition-api';
 import { LANDING_ROUTE } from '@/router/routes';
 
-import { useMap } from '@/models/useMap.js';
+import { masterMapData } from '@/models/useMap.js';
 import { useStorage } from '@/models/useStorage.js';
 import { useToasts } from '@/models/useToasts.js';
 
@@ -42,18 +42,16 @@ export default {
 
     useToasts();
 
-    const { mapData } = useMap();
-
     const { init: initStorage, pointStorage } = useStorage();
 
-    mapData.pointsArray = initStorage();
+    masterMapData.pointsArray = initStorage();
 
     watch(pointStorage, () => {
-      mapData.pointsArray = pointStorage.value;
-      mapData.isReady = true;
+      masterMapData.pointsArray = pointStorage.value;
+      masterMapData.isReady = true;
     });
 
-    provide('mapData', mapData);
+    provide('masterMapData', masterMapData);
     provide('showControls', showControls);
     provide('leftNavCondensed', leftNavCondensed);
 
