@@ -30,7 +30,7 @@ Atlas allows users to select icons for their custom waypoints. If you are intere
 
 ## Is this a virus?
 
-No. You can read through the code yourself and [build it yourself](https://github.com/Tmktahu/atlas/wiki/How-To-Build) if you want. If you aren't familiar with coding shenanigans, then grab the EXE and run it through any virus scanning tool online or offline that you see fit. The executable won't do anything unless you run it, so it is 100% safe to download and analyze as you see fit.
+No. You can read through the code yourself and [build it yourself](https://github.com/Tmktahu/atlas/wiki/How-To-Build) if you want. If you aren't familiar with coding shenanigans, then grab the EXE and run it through any virus scanning tool online or offline that you see fit. The executable won't do anything unless you run it, so it is 100% safe to download and analyze as you wish.
 
 I've also taken the liberty to upload the current Atlas version executable to several different online virus scanning utilities:
 
