@@ -8,7 +8,7 @@ Atlas is a standalone, interactive 3D mapping tool for the game Starbase. This R
 
 ## How to use Atlas
 
-Atlas is a standalone application build on Electron and Vue. Download the latest executable from the releases section and run it wherever you want. It is a portable application, so it requires no installation.
+Atlas is a standalone application build on Electron and Vue. Download the latest executable from the [releases section](https://github.com/Tmktahu/atlas/releases) and run it wherever you want. It is a portable application, so it requires no installation.
 
 ## Locally Stored Information
 
