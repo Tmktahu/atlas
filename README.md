@@ -14,6 +14,8 @@ Atlas is a standalone application build on Electron and Vue. Download the latest
 
 All waypoint information is stored locally on your computer in the form of JSON files. By default, Atlas functions off a `waypoint_data.json` file that is created in the directory where you run `Atlas.exe`. Atlas also allows you to save your current waypoint information or import waypoints from any JSON file of your choice.
 
-## Demo
+## Demo Video (Youtube)
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/aGvQCEddP10" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+https://www.youtube.com/watch?v=aGvQCEddP10
+<br>
+[![Altas Project - Demo](https://i9.ytimg.com/vi/aGvQCEddP10/mqdefault.jpg?v=616f790f&amp;sqp=CICDvosG&amp;rs=AOn4CLCvkAVs56u7j5skgIzO7oSI-K-DFg)](https://www.youtube.com/watch?v=aGvQCEddP10)
