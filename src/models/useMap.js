@@ -386,26 +386,27 @@ export function useMap(mapData) {
     masterMapData.controls.update();
   };
 
-  const showHidePoint = (point, mapData) => {
+  const showHidePoint = (point) => {
     let index = mapData.pointsArray.findIndex((obj) => obj.id === point.id);
     mapData.pointsArray[index].hide = !mapData.pointsArray[index].hide;
     addPoints(mapData.pointsArray, mapData);
   };
 
-  const addPoint = (point, mapData) => {
+  const addPoint = (point) => {
     mapData.pointsArray.push(point);
     addPoints(mapData.pointsArray, mapData);
   };
 
-  const deletePoint = (point, mapData) => {
+  const deletePoint = (point) => {
     mapData.pointsArray = mapData.pointsArray.filter((obj) => {
       return obj.id !== point.id;
     });
     addPoints(mapData.pointsArray, mapData);
   };
 
-  const mergePoints = (points, mapData) => {
+  const mergePoints = (points) => {
     console.log('trying to merge points', points);
+    console.log(mapData);
     let existingIDs = mapData.pointsArray.map((obj) => {
       return obj.id;
     });
@@ -421,7 +422,12 @@ export function useMap(mapData) {
         mapData.pointsArray.push(point);
       }
     }
-    addPoints(mapData.pointsArray, mapData);
+
+    if (mapData.scene && mapData.isReady) {
+      addPoints(mapData.pointsArray, mapData);
+    } else {
+      mapData.isReady = mapData.pointsArray.length > 0;
+    }
 
     if (skippedPoints.length > 0) {
       let names = skippedPoints.map((obj) => {

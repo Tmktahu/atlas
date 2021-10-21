@@ -4,7 +4,8 @@
     <div class="d-flex flex-column" style="height: 100%">
       <v-btn text class="close-button pa-2" @click="close"><v-icon>mdi-close</v-icon></v-btn>
       <div class="page-title px-6 pt-5">Import Waypoints</div>
-      <div class="page-title--sub px-6">Use the UI below to import and merge waypoints into your working set.</div>
+      <div v-if="initial" class="page-title--sub px-6">Please load a JSON file of waypoints to begin.</div>
+      <div v-else class="page-title--sub px-6">Use the UI below to import and merge waypoints into your working set.</div>
       <v-divider color="primary-blue" class="mt-4" />
 
       <div class="d-flex align-center my-4 mx-6" style="width: fit-content">
@@ -73,10 +74,8 @@
       </div>
 
       <v-divider color="primary-blue" style="margin-top: auto" />
-      <div class="d-flex my-4 mx-6" style="width: fit-content">
-        <div style="max-width: 60%">
-          When you import waypoints, they will be <strong>merged</strong> into your current set. Waypoints that have duplicate IDs will be skippped.
-        </div>
+      <div class="d-flex my-4 mx-6 align-center">
+        <div> When you import waypoints, they will be <strong>merged</strong> into your current set. Waypoints that have duplicate IDs will be skippped. </div>
         <v-btn dense class="select-path-button px-10 py-5" style="margin-right: 0; margin-left: auto" outlined @click="onImport">Import</v-btn>
       </div>
     </div>
@@ -93,6 +92,14 @@ import { ICON_MAP } from '@/models/useIcons.js';
 
 export default {
   name: 'ImportDialog',
+
+  props: {
+    initial: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
   setup() {
     const masterMapData = inject('masterMapData');
     const showDialog = ref(false);
@@ -102,6 +109,7 @@ export default {
     const allChecked = ref(true);
 
     const { readFromJSON } = useStorage();
+    const { mergePoints } = useMap(masterMapData);
 
     const tableHeaders = [
       {
@@ -141,6 +149,7 @@ export default {
       allChecked,
       ICON_MAP,
       checkedWaypoints,
+      mergePoints,
     };
   },
 
@@ -168,6 +177,9 @@ export default {
       let selectedPoints = this.loadedData.filter((obj) => {
         return this.checkedWaypoints.includes(obj.id);
       });
+
+      this.mergePoints(selectedPoints);
+      this.close();
     },
 
     flipAllChecked() {

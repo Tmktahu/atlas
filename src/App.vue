@@ -44,13 +44,6 @@ export default {
 
     const { init: initStorage, pointStorage } = useStorage();
 
-    masterMapData.pointsArray = initStorage();
-
-    watch(pointStorage, () => {
-      masterMapData.pointsArray = pointStorage.value;
-      masterMapData.isReady = true;
-    });
-
     provide('masterMapData', masterMapData);
     provide('showControls', showControls);
     provide('leftNavCondensed', leftNavCondensed);

@@ -1,11 +1,10 @@
 <!-- eslint-disable vue/valid-v-slot */ -->
 <template>
-  <div class="d-flex flex-column" style="height: 100vh">
+  <v-dialog v-model="showDialog" content-class="manage-dialog">
+    <v-btn text class="close-button pa-2" @click="close"><v-icon>mdi-close</v-icon></v-btn>
     <div class="page-title px-6 pt-5">Waypoint Management</div>
-    <div class="page-title--sub px-6">{{ subText }}</div>
+    <div class="page-title--sub px-6">Add a new waypoint with the form below. Manage waypoints with the list.</div>
     <v-divider color="primary-blue" class="mt-4" />
-
-    <div v-if="parentWindow === null" class="error-state-mask" />
 
     <div class="d-flex flex-column px-6 my-6">
       <div class="d-flex align-center">
@@ -84,9 +83,8 @@
     <v-divider color="primary-blue" />
 
     <v-data-table
-      v-if="listReady"
       class="waypoint-list"
-      :items="pointsArray"
+      :items="masterMapData.pointsArray"
       :items-per-page="-1"
       fixed-header
       hide-default-footer
@@ -132,7 +130,7 @@
         </td>
       </template>
     </v-data-table>
-  </div>
+  </v-dialog>
 </template>
 
 <script>
@@ -141,10 +139,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { required } from 'vuelidate/lib/validators';
 
+import { useMap } from '@/models/useMap.js';
 import { ICON_MAP } from '@/models/useIcons.js';
 
 export default {
-  name: 'NewWaypointDialog',
+  name: 'ManageDialog',
 
   validations: {
     newName: { required },
@@ -155,6 +154,10 @@ export default {
   },
 
   setup() {
+    const masterMapData = inject('masterMapData');
+
+    const showDialog = ref(false);
+
     const newIcon = ref(ICON_MAP.pin1.name);
     const newColor = ref(null);
     const newName = ref('');
@@ -188,22 +191,11 @@ export default {
       return { text: value.workingFilePath, value: value.name };
     });
 
-    const pointsArray = ref([]);
-    const listReady = ref(false);
-
-    const parentWindow = ref(null);
-    window.addEventListener(
-      'message',
-      (event) => {
-        if (event.data.points) {
-          parentWindow.value = event.source;
-          pointsArray.value = event.data.points;
-        }
-      },
-      false
-    );
+    const { viewPoint, showHidePoint, addPoint, deletePoint } = useMap(masterMapData);
 
     return {
+      masterMapData,
+      showDialog,
       newIcon,
       newColor,
       newName,
@@ -211,88 +203,71 @@ export default {
       yCoord,
       zCoord,
       tableHeaders,
-      parentWindow,
       icons,
       newGroup,
       ICON_MAP,
-      pointsArray,
-      listReady,
+      viewPoint,
+      showHidePoint,
+      addPoint,
+      deletePoint,
     };
-  },
-
-  computed: {
-    subText() {
-      if (this.parentWindow === null) {
-        return '!!! ERROR: Go back to the main window and press the Waypoints nav option again !!!';
-      } else {
-        return 'Add a new waypoint with the form below. Manage waypoints with the list.';
-      }
-    },
-  },
-
-  watch: {
-    pointsArray() {
-      this.listReady = this.pointsArray;
-    },
   },
 
   methods: {
     onAdd() {
-      if (this.parentWindow !== null) {
-        let color = this.newColor.hexa.substring(0, this.newColor.hexa.length - 2);
-
-        this.parentWindow.postMessage({
-          command: 'add',
-          point: {
-            id: uuidv4(),
-            name: this.newName,
-            position: {
-              x: parseInt(this.xCoord),
-              y: parseInt(this.yCoord),
-              // eslint-disable-next-line id-length
-              z: parseInt(this.zCoord),
-            },
-            color: color,
-            hide: false,
-            icon: this.newIcon,
-            group: this.newGroup,
+      let newPoint = {
+        command: 'add',
+        point: {
+          id: uuidv4(),
+          name: this.newName,
+          position: {
+            x: parseInt(this.xCoord),
+            y: parseInt(this.yCoord),
+            // eslint-disable-next-line id-length
+            z: parseInt(this.zCoord),
           },
-        });
-      }
+          color: color,
+          hide: false,
+          icon: this.newIcon,
+          group: this.newGroup,
+        },
+      };
+
+      this.addPoint(newPoint);
     },
 
     onView(point) {
-      if (this.parentWindow !== null) {
-        console.log('sending view command');
-        this.parentWindow.postMessage({
-          command: 'view',
-          point: point,
-        });
-      }
+      this.viewPoint(point);
     },
 
     onShowHide(point) {
-      if (this.parentWindow !== null) {
-        this.parentWindow.postMessage({
-          command: 'showHide',
-          point: point,
-        });
-      }
+      this.showHidePoint(point);
     },
 
     onDelete(point) {
-      if (this.parentWindow !== null) {
-        this.parentWindow.postMessage({
-          command: 'delete',
-          point: point,
-        });
-      }
+      this.deletePoint(point);
+    },
+
+    open() {
+      this.showDialog = true;
+    },
+
+    close() {
+      this.showDialog = false;
     },
   },
 };
 </script>
 
 <style lang="scss">
+.manage-dialog {
+  position: relative;
+  max-width: 70vw;
+  height: 90vh;
+  overflow: hidden;
+  background: #333;
+}
+
 .v-menu__content--auto {
   top: 180px !important;
   left: 25px !important;
@@ -314,6 +289,14 @@ export default {
 @use 'sass:color';
 
 @import '@/design/variables/_colors';
+
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: fit-content;
+  color: white;
+}
 
 .page-title {
   font-size: 32px;

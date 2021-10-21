@@ -71,6 +71,7 @@
         </v-tooltip>
       </v-list>
     </v-layout>
+    <ManageDialog ref="manageDialog" />
     <SaveDialog ref="saveDialog" />
     <ImportDialog ref="importDialog" />
   </v-navigation-drawer>
@@ -80,13 +81,14 @@
 import { ref, watch, inject, toRefs } from '@vue/composition-api';
 import { MANAGE_WAYPOINT_ROUTE, IMPORT_WAYPOINTS_ROUTE } from '@/router/routes';
 
+import ManageDialog from '@/components/dialogs/ManageDialog.vue';
 import SaveDialog from '@/components/dialogs/SaveDialog.vue';
 import ImportDialog from '@/components/dialogs/ImportDialog.vue';
 
 export default {
   name: 'LeftNav',
 
-  components: { SaveDialog, ImportDialog },
+  components: { ManageDialog, SaveDialog, ImportDialog },
 
   setup() {
     const leftNav = ref(true);
@@ -136,21 +138,8 @@ export default {
       this.leftNavCondensed = !event.srcElement.classList.contains('v-navigation-drawer--mini-variant');
     },
 
-    async onManageWaypoint() {
-      let routeData = this.$router.resolve({
-        name: MANAGE_WAYPOINT_ROUTE,
-      });
-
-      if (this.manageWaypointsWindow === null || this.manageWaypointsWindow?.closed) {
-        this.manageWaypointsWindow = window.open(routeData.href, 'manageFrame', 'width=700,height=800');
-
-        setTimeout(() => {
-          this.manageWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
-        }, 1000);
-      } else {
-        this.manageWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
-        this.manageWaypointsWindow.focus();
-      }
+    onManageWaypoint() {
+      this.$refs.manageDialog.open();
     },
 
     onSave() {

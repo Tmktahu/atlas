@@ -15,6 +15,9 @@
       <div ref="pointName" class="name">Point Name</div>
       <div ref="pointCoord" class="coord">[Coordinate]</div>
     </div>
+    <div class="hardware-accel-info">
+      You must have Hardware Acceleration enabled in your browser, or else this website will max out your CPU trying to render.
+    </div>
     <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed }">
       <div>W: <span>Pan Forward</span></div>
       <div>S: <span>Pan Backward</span></div>
@@ -25,6 +28,7 @@
       <div>Left-Click: <span>Rotate Camera</span></div>
       <div>Right-Click: <span>Pan Camera</span></div>
     </div>
+    <ImportDialog ref="initialImportDialog" :initial="true" />
   </div>
 </template>
 
@@ -37,6 +41,8 @@ import { useMap, MIN_PAN_SPEED, MAX_PAN_SPEED } from '@/models/useMap.js';
 
 import { useStorage } from '@/models/useStorage.js';
 
+import ImportDialog from '@/components/dialogs/ImportDialog.vue';
+
 export default {
   metaInfo() {
     return {
@@ -47,13 +53,15 @@ export default {
   },
 
   name: 'InteractiveMap',
+  components: { ImportDialog },
+
   setup() {
     const masterMapData = inject('masterMapData');
     const showControls = inject('showControls');
     const leftNavCondensed = inject('leftNavCondensed');
     let stats = null;
 
-    const { init: initMap, resizeMap, panForward, panBackward, viewPoint, showHidePoint, addPoint, deletePoint, mergePoints } = useMap(masterMapData);
+    const { init: initMap, resizeMap, panForward, panBackward } = useMap(masterMapData);
 
     const { dataStoragePath } = useStorage();
 
@@ -78,11 +86,6 @@ export default {
 
           if (event.data.command === 'delete') {
             deletePoint(event.data.point, masterMapData);
-            event.source.postMessage({ points: masterMapData.pointsArray });
-          }
-
-          if (event.data.command === 'import') {
-            mergePoints(event.data.points, masterMapData);
             event.source.postMessage({ points: masterMapData.pointsArray });
           }
         }
@@ -132,6 +135,8 @@ export default {
 
   mounted() {
     this.$nextTick(() => {
+      this.$refs.initialImportDialog.open();
+
       window.addEventListener('keydown', (event) => {
         if (event.keyCode === 87) {
           this.onWDown();
@@ -175,6 +180,7 @@ export default {
       this.stats.domElement.classList = 'fps-tracker';
       this.$refs.mapContainer.appendChild(this.stats.dom);
       this.masterMapData.stats = this.stats;
+      console.log(this.stats);
     },
 
     onResize() {
@@ -265,5 +271,14 @@ export default {
   &.out {
     left: 160px !important;
   }
+}
+
+.hardware-accel-info {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30vw;
+  text-align: right;
+  pointer-events: none;
 }
 </style>
