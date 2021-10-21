@@ -20,6 +20,7 @@ import nomads from '@/assets/map_icons/nomads.png';
 import tactical from '@/assets/map_icons/tactical.png';
 import isan from '@/assets/map_icons/isan.png';
 import federation from '@/assets/map_icons/federation.png';
+import united_sentinel_corporation from '@/assets/map_icons/united_sentinel_corporation.png';
 
 export const ICON_FOLDER_PATH = '@/assets/map_icons/';
 
@@ -46,4 +47,10 @@ export const ICON_MAP = {
   tactical: { name: 'tactical', fileName: 'tactical.png', baseFilePath: `${ICON_FOLDER_PATH}tactical.png`, workingFilePath: tactical },
   isan: { name: 'isan', fileName: 'isan.png', baseFilePath: `${ICON_FOLDER_PATH}isan.png`, workingFilePath: isan },
   federation: { name: 'federation', fileName: 'federation.png', baseFilePath: `${ICON_FOLDER_PATH}federation.png`, workingFilePath: federation },
+  united_sentinel_corporation: {
+    name: 'united_sentinel_corporation',
+    fileName: 'united_sentinel_corporation.png',
+    baseFilePath: `${ICON_FOLDER_PATH}united_sentinel_corporation.png`,
+    workingFilePath: united_sentinel_corporation,
+  },
 };
