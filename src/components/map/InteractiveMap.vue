@@ -16,10 +16,6 @@
       <div ref="pointCoord" class="coord">[Coordinate]</div>
     </div>
     <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed }">
-      <div>
-        Local Storage File:
-        <span>{{ localStorageText }}</span>
-      </div>
       <div>W: <span>Pan Forward</span></div>
       <div>S: <span>Pan Backward</span></div>
       <div>A: <span>Pan Left</span></div>
@@ -114,14 +110,6 @@ export default {
     };
   },
 
-  computed: {
-    localStorageText() {
-      let path = require('path');
-      let absolutePath = path.resolve(this.dataStoragePath);
-      return absolutePath;
-    },
-  },
-
   watch: {
     isReady() {
       if (this.isReady) {
@@ -166,10 +154,13 @@ export default {
       });
 
       window.addEventListener('wheel', (event) => {
-        if (event.deltaY > 0) {
-          this.onSDown();
-        } else {
-          this.onWDown();
+        if (document.activeElement === this.$refs.mapContainer) {
+          console.log('trying to pan via scroll');
+          if (event.deltaY > 0) {
+            this.onSDown();
+          } else {
+            this.onWDown();
+          }
         }
       });
 

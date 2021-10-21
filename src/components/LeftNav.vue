@@ -72,6 +72,7 @@
       </v-list>
     </v-layout>
     <SaveDialog ref="saveDialog" />
+    <ImportDialog ref="importDialog" />
   </v-navigation-drawer>
 </template>
 
@@ -79,15 +80,13 @@
 import { ref, watch, inject, toRefs } from '@vue/composition-api';
 import { MANAGE_WAYPOINT_ROUTE, IMPORT_WAYPOINTS_ROUTE } from '@/router/routes';
 
-import electron from 'electron';
-const { BrowserWindow } = require('@electron/remote');
-
 import SaveDialog from '@/components/dialogs/SaveDialog.vue';
+import ImportDialog from '@/components/dialogs/ImportDialog.vue';
 
 export default {
   name: 'LeftNav',
 
-  components: { SaveDialog },
+  components: { SaveDialog, ImportDialog },
 
   setup() {
     const leftNav = ref(true);
@@ -119,9 +118,6 @@ export default {
       return `
         <div>Coded by <strong>Fryke#0746</strong> on Discord</div>
         <div>Atlas Version: ${process.env.VUE_APP_VERSION}</div>
-        <div>Electron: ${process.versions.electron}</div>
-        <div>Chrome: ${process.versions.chrome}</div>
-        <div>Node.js: ${process.versions.node}</div>
       `;
     },
   },
@@ -162,20 +158,7 @@ export default {
     },
 
     onImportWaypoints() {
-      let routeData = this.$router.resolve({
-        name: IMPORT_WAYPOINTS_ROUTE,
-      });
-
-      if (this.importWaypointsWindow === null || this.importWaypointsWindow?.closed) {
-        this.importWaypointsWindow = window.open(routeData.href, 'importFrame', 'width=700,height=800');
-
-        setTimeout(() => {
-          this.importWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
-        }, 1000);
-      } else {
-        this.importWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
-        this.importWaypointsWindow.focus();
-      }
+      this.$refs.importDialog.open();
     },
 
     onReload() {
@@ -194,7 +177,6 @@ export default {
 
     onGithub() {
       console.log('on github');
-      require('electron').shell.openExternal('https://github.com/Tmktahu/atlas');
     },
   },
 };

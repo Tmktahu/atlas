@@ -6,8 +6,6 @@ const fsPromises = fs.promises;
 import { ISAN_ORIGIN_POINT, ORIGIN_POINT } from './useMap';
 import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetCoords/eos';
 
-const remote = require('electron').remote;
-
 export const DEFAULT_DATA = [ORIGIN_POINT, ISAN_ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
 
 export function useStorage() {
@@ -21,27 +19,32 @@ export function useStorage() {
   const pointStorage = ref([]);
 
   const init = async () => {
-    if (fs.existsSync(dataStoragePath.value)) {
-      readFromJSON(pointStorage, dataStoragePath.value);
-    } else {
-      console.log('No storage. Initing json file with default data.');
-      saveToJSON(DEFAULT_DATA, dataStoragePath.value, pointStorage);
-    }
+    // if (fs.existsSync(dataStoragePath.value)) {
+    //   readFromJSON(pointStorage, dataStoragePath.value);
+    // } else {
+    //   console.log('No storage. Initing json file with default data.');
+    //   saveToJSON(DEFAULT_DATA, dataStoragePath.value, pointStorage);
+    // }
   };
 
-  const readFromJSON = async (container, filePath) => {
-    try {
-      const data = await fsPromises.readFile(filePath, 'utf-8');
-      if (container) {
-        container.value = JSON.parse(data);
-        return;
-      } else {
-        return JSON.parse(data);
-      }
-    } catch (error) {
-      console.log('Error reading file: ', error);
-      Vue.toasted.global.alertError({ message: 'Error reading JSON file', description: error });
-    }
+  const readFromJSON = async (file) => {
+    return new Promise((resolve, reject) => {
+      let data = '';
+      const fileReader = new FileReader();
+
+      fileReader.onloadend = function (event) {
+        data = JSON.parse(event.target.result);
+        resolve(data);
+      };
+
+      fileReader.onerror = function (error) {
+        console.log('Error reading file: ', error);
+        Vue.toasted.global.alertError({ message: 'Error reading JSON file', description: error });
+        reject(error);
+      };
+
+      fileReader.readAsText(file);
+    });
   };
 
   const saveToJSON = async (inData, filePath, container = null) => {

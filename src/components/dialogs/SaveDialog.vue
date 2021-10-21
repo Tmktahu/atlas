@@ -22,8 +22,6 @@
 <script>
 import { ref, watch, inject } from '@vue/composition-api';
 
-const { dialog } = require('electron').remote;
-
 import { useStorage } from '@/models/useStorage.js';
 
 export default {
