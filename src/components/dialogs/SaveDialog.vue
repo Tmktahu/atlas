@@ -28,8 +28,8 @@ export default {
   name: 'SaveDialog',
   setup() {
     const masterMapData = inject('masterMapData');
+    const showDialog = inject('showSaveDialog');
 
-    const showDialog = ref(false);
     const storageOption = ref('storage');
     const filePath = ref('');
 

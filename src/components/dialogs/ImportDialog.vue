@@ -102,7 +102,7 @@ export default {
 
   setup() {
     const masterMapData = inject('masterMapData');
-    const showDialog = ref(false);
+    const showDialog = inject('showImportDialog');
 
     const uploadedFile = ref(null);
     const loadedData = ref([]);

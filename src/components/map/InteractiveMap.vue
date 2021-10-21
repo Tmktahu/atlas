@@ -28,7 +28,6 @@
       <div>Left-Click: <span>Rotate Camera</span></div>
       <div>Right-Click: <span>Pan Camera</span></div>
     </div>
-    <ImportDialog ref="initialImportDialog" :initial="true" />
   </div>
 </template>
 
@@ -41,8 +40,6 @@ import { useMap, MIN_PAN_SPEED, MAX_PAN_SPEED } from '@/models/useMap.js';
 
 import { useStorage } from '@/models/useStorage.js';
 
-import ImportDialog from '@/components/dialogs/ImportDialog.vue';
-
 export default {
   metaInfo() {
     return {
@@ -53,7 +50,6 @@ export default {
   },
 
   name: 'InteractiveMap',
-  components: { ImportDialog },
 
   setup() {
     const masterMapData = inject('masterMapData');
@@ -65,36 +61,11 @@ export default {
 
     const { dataStoragePath } = useStorage();
 
-    window.addEventListener(
-      'message',
-      (event) => {
-        if (event.data.command) {
-          if (event.data.command === 'view') {
-            console.log('got view command');
-            viewPoint(event.data.point, masterMapData);
-          }
-
-          if (event.data.command === 'showHide') {
-            showHidePoint(event.data.point, masterMapData);
-            event.source.postMessage({ points: masterMapData.pointsArray });
-          }
-
-          if (event.data.command === 'add') {
-            addPoint(event.data.point, masterMapData);
-            event.source.postMessage({ points: masterMapData.pointsArray });
-          }
-
-          if (event.data.command === 'delete') {
-            deletePoint(event.data.point, masterMapData);
-            event.source.postMessage({ points: masterMapData.pointsArray });
-          }
-        }
-      },
-      false
-    );
-
     const intersects = toRefs(masterMapData).intersects;
-    const isReady = toRefs(masterMapData).isReady;
+
+    const showManageDialog = inject('showManageDialog');
+    const showSaveDialog = inject('showSaveDialog');
+    const showImportDialog = inject('showImportDialog');
 
     return {
       stats,
@@ -108,19 +79,14 @@ export default {
       MIN_PAN_SPEED,
       MAX_PAN_SPEED,
       intersects,
-      isReady,
       dataStoragePath,
+      showManageDialog,
+      showSaveDialog,
+      showImportDialog,
     };
   },
 
   watch: {
-    isReady() {
-      if (this.isReady) {
-        this.initMap(this.$refs.mapContainer);
-        console.log(this.masterMapData);
-      }
-    },
-
     intersects() {
       if (this.masterMapData.intersects[0]?.object.type === 'Points') {
         this.$refs.pointName.innerHTML = this.masterMapData.intersects[0].object.name;
@@ -135,8 +101,6 @@ export default {
 
   mounted() {
     this.$nextTick(() => {
-      this.$refs.initialImportDialog.open();
-
       window.addEventListener('keydown', (event) => {
         if (event.keyCode === 87) {
           this.onWDown();
@@ -159,8 +123,7 @@ export default {
       });
 
       window.addEventListener('wheel', (event) => {
-        if (document.activeElement === this.$refs.mapContainer) {
-          console.log('trying to pan via scroll');
+        if (!this.showSaveDialog && !this.showManageDialog && !this.showImportDialog) {
           if (event.deltaY > 0) {
             this.onSDown();
           } else {
@@ -170,6 +133,7 @@ export default {
       });
 
       this.createStats();
+      this.initMap(this.$refs.mapContainer);
     });
   },
 
@@ -180,7 +144,6 @@ export default {
       this.stats.domElement.classList = 'fps-tracker';
       this.$refs.mapContainer.appendChild(this.stats.dom);
       this.masterMapData.stats = this.stats;
-      console.log(this.stats);
     },
 
     onResize() {
@@ -189,11 +152,11 @@ export default {
 
     // Key Handlers
     onWDown() {
-      this.panForward(this.masterMapData);
+      this.panForward();
     },
 
     onSDown() {
-      this.panBackward(this.masterMapData);
+      this.panBackward();
     },
   },
 };
@@ -250,8 +213,8 @@ export default {
 
 .controls-info {
   position: absolute;
-  top: 36px;
-  left: 15px;
+  top: 16px;
+  left: 16px;
   width: 100%;
   pointer-events: none;
   background: transparent;

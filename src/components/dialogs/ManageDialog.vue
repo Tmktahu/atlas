@@ -155,8 +155,7 @@ export default {
 
   setup() {
     const masterMapData = inject('masterMapData');
-
-    const showDialog = ref(false);
+    const showDialog = inject('showManageDialog');
 
     const newIcon = ref(ICON_MAP.pin1.name);
     const newColor = ref(null);
@@ -215,22 +214,21 @@ export default {
 
   methods: {
     onAdd() {
+      let color = this.newColor.hexa.substring(0, this.newColor.hexa.length - 2);
+
       let newPoint = {
-        command: 'add',
-        point: {
-          id: uuidv4(),
-          name: this.newName,
-          position: {
-            x: parseInt(this.xCoord),
-            y: parseInt(this.yCoord),
-            // eslint-disable-next-line id-length
-            z: parseInt(this.zCoord),
-          },
-          color: color,
-          hide: false,
-          icon: this.newIcon,
-          group: this.newGroup,
+        id: uuidv4(),
+        name: this.newName,
+        position: {
+          x: parseInt(this.xCoord),
+          y: parseInt(this.yCoord),
+          // eslint-disable-next-line id-length
+          z: parseInt(this.zCoord),
         },
+        color: color,
+        hide: false,
+        icon: this.newIcon,
+        group: this.newGroup,
       };
 
       this.addPoint(newPoint);
@@ -262,19 +260,19 @@ export default {
 <style lang="scss">
 .manage-dialog {
   position: relative;
-  max-width: 70vw;
+  max-width: 60vw;
   height: 90vh;
-  overflow: hidden;
+  overflow: hidden !important;
   background: #333;
 }
 
 .v-menu__content--auto {
-  top: 180px !important;
-  left: 25px !important;
+  top: unset !important;
+  bottom: calc(90vh - 240px) !important;
 }
 
 .v-select-list {
-  display: flex;
+  display: flex !important;
   flex-wrap: wrap;
   background: #444 !important;
 
@@ -376,7 +374,7 @@ export default {
   background-color: transparent !important;
 
   .v-data-table__wrapper {
-    height: calc(100vh - 253px);
+    height: calc(90vh - 253px);
   }
 
   .image-wrapper {
@@ -463,7 +461,7 @@ export default {
 
 .color-picker::v-deep {
   width: 200px;
-  background: transparent;
+  background: transparent !important;
 
   .v-color-picker__controls {
     padding: 10px 10px 10px 0 !important;
@@ -502,8 +500,9 @@ export default {
 }
 
 .icon-select::v-deep {
-  width: 50px;
-  min-width: 50px;
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
 
   .v-input__slot {
     padding: 0 !important;

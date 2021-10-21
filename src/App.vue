@@ -2,7 +2,6 @@
   <v-app>
     <LeftNav v-if="showLeftNav" />
     <v-main>
-      <div class="draggable-area-bar" />
       <router-view />
     </v-main>
   </v-app>
@@ -33,6 +32,10 @@ export default {
     const showControls = ref(false);
     const leftNavCondensed = ref(false);
 
+    const showManageDialog = ref(false);
+    const showSaveDialog = ref(false);
+    const showImportDialog = ref(false);
+
     onMounted(() => {
       console.log(
         '%cAtlas Started',
@@ -47,6 +50,10 @@ export default {
     provide('masterMapData', masterMapData);
     provide('showControls', showControls);
     provide('leftNavCondensed', leftNavCondensed);
+
+    provide('showManageDialog', showManageDialog);
+    provide('showSaveDialog', showSaveDialog);
+    provide('showImportDialog', showImportDialog);
 
     return {
       showLeftNav,
@@ -71,15 +78,6 @@ html {
 
 #app {
   color: white;
-  background: #333;
-}
-
-.draggable-area-bar {
-  position: absolute;
-  width: 100%;
-  height: 30px;
-  -webkit-user-select: none;
-  -webkit-app-region: drag;
   background: #333;
 }
 </style>
