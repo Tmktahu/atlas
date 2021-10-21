@@ -142,7 +142,16 @@ export default {
     },
 
     onSave() {
-      this.$refs.saveDialog.open();
+      //this.$refs.saveDialog.open();
+
+      let data = JSON.stringify(this.masterMapData.pointsArray, null, 2);
+
+      let elem = document.createElement('a');
+      let file = new Blob([data], { type: 'text/plain' });
+      elem.href = URL.createObjectURL(file);
+      let today = new Date();
+      elem.download = `waypoint_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`;
+      elem.click();
     },
 
     onImportWaypoints() {

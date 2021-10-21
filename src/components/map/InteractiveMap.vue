@@ -38,8 +38,6 @@ import { ref, inject, watch, toRefs } from '@vue/composition-api';
 
 import { useMap, MIN_PAN_SPEED, MAX_PAN_SPEED } from '@/models/useMap.js';
 
-import { useStorage } from '@/models/useStorage.js';
-
 export default {
   metaInfo() {
     return {
@@ -59,8 +57,6 @@ export default {
 
     const { init: initMap, resizeMap, panForward, panBackward } = useMap(masterMapData);
 
-    const { dataStoragePath } = useStorage();
-
     const intersects = toRefs(masterMapData).intersects;
 
     const showManageDialog = inject('showManageDialog');
@@ -79,7 +75,6 @@ export default {
       MIN_PAN_SPEED,
       MAX_PAN_SPEED,
       intersects,
-      dataStoragePath,
       showManageDialog,
       showSaveDialog,
       showImportDialog,
