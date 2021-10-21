@@ -10,13 +10,18 @@ Atlas is a standalone, interactive 3D mapping tool for the game Starbase. This R
 
 ## How to use Atlas
 
-Atlas is a standalone application build on Electron and Vue. Download the latest executable from the [releases section](https://github.com/Tmktahu/atlas/releases) and run it wherever you want. It is a portable application, so it requires no installation.
+You have 2 options.
+
+1. Download the standalone application built on Electron from the [releases section](https://github.com/Tmktahu/atlas/releases) and run it wherever you want. It is a portable application, so it requires no installation. This is the reccomended method because it allows management UI to be in separate windows and automatically loads a local JSON storage file on launch.
+2. Use the online website version found at https://tmktahu.github.io/atlas/. While functionality is the same, the UI is tighter and requires you to upload your custom JSON data file if you want to use it.
 
 For information on how the coordinate grid is set up, check out the [Independant Positioning System](https://github.com/Tmktahu/IPS) repository and the wiki page I've written about [The Sacred Grid](https://github.com/Tmktahu/IPS/wiki/The-Sacred-Grid).
 
 ## Locally Stored Information
 
 All waypoint information is stored locally on your computer in the form of JSON files. By default, Atlas functions off a `waypoint_data.json` file that is created in the directory where you run `Atlas.exe`. Atlas also allows you to save your current waypoint information or import waypoints from any JSON file of your choice.
+
+For the website version, it loads default waypoint data on initial load. You can upload a custom JSON file to import waypoints and then download the current set of waypoints as a JSON file whenever you wish. But information is NOT saved between page refreshes or browser instances.
 
 ## Demo Video (Youtube)
 
@@ -37,6 +42,8 @@ I've also taken the liberty to upload the current Atlas version executable to se
 - Virus Total: https://www.virustotal.com/gui/file/75171d2a6bb0db461a222bc2dbfd55a923d4dbdecfe65fb0e150fd14cfe9bcee
 - Jotti: https://virusscan.jotti.org/en-US/filescanjob/7vga5rrbh3
 - Kaspersky: https://opentip.kaspersky.com/75171D2A6BB0DB461A222BC2DBFD55A923D4DBDECFE65FB0E150FD14CFE9BCEE/
+
+If this still doesn't convince you, feel free to try out the website version found at https://tmktahu.github.io/atlas/
 
 ## Want to help?
 
