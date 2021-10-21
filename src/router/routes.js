@@ -5,12 +5,14 @@ export const IMPORT_WAYPOINTS_ROUTE = 'import-waypoints';
 
 export default [
   {
-    path: '/index.html',
-    name: INDEX_ROUTE,
-    redirect: '/',
+    path: '/',
+    name: LANDING_ROUTE,
+    components: {
+      default: () => lazyLoadView(import('@/components/map/InteractiveMap.vue')),
+    },
   },
   {
-    path: '/',
+    path: '/atlas',
     name: LANDING_ROUTE,
     components: {
       default: () => lazyLoadView(import('@/components/map/InteractiveMap.vue')),
