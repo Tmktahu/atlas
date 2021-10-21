@@ -72,7 +72,6 @@
       </v-list>
     </v-layout>
     <ManageDialog ref="manageDialog" />
-    <SaveDialog ref="saveDialog" />
     <ImportDialog ref="importDialog" />
   </v-navigation-drawer>
 </template>
@@ -82,13 +81,12 @@ import { ref, watch, inject, toRefs } from '@vue/composition-api';
 import { MANAGE_WAYPOINT_ROUTE, IMPORT_WAYPOINTS_ROUTE } from '@/router/routes';
 
 import ManageDialog from '@/components/dialogs/ManageDialog.vue';
-import SaveDialog from '@/components/dialogs/SaveDialog.vue';
 import ImportDialog from '@/components/dialogs/ImportDialog.vue';
 
 export default {
   name: 'LeftNav',
 
-  components: { ManageDialog, SaveDialog, ImportDialog },
+  components: { ManageDialog, ImportDialog },
 
   setup() {
     const leftNav = ref(true);

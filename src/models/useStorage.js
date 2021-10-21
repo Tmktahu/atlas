@@ -9,23 +9,9 @@ import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetCoords/eos';
 export const DEFAULT_DATA = [ORIGIN_POINT, ISAN_ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
 
 export function useStorage() {
-  let dataStoragePath = ref('');
-  if (process.env.NODE_ENV === 'development') {
-    dataStoragePath.value = 'waypoint_data.json';
-  } else {
-    dataStoragePath.value = `${remote.process.env.PORTABLE_EXECUTABLE_DIR}/waypoint_data.json`;
-  }
-
   const pointStorage = ref([]);
 
-  const init = async () => {
-    // if (fs.existsSync(dataStoragePath.value)) {
-    //   readFromJSON(pointStorage, dataStoragePath.value);
-    // } else {
-    //   console.log('No storage. Initing json file with default data.');
-    //   saveToJSON(DEFAULT_DATA, dataStoragePath.value, pointStorage);
-    // }
-  };
+  const init = async () => {};
 
   const readFromJSON = async (file) => {
     return new Promise((resolve, reject) => {
@@ -71,6 +57,5 @@ export function useStorage() {
     pointStorage,
     readFromJSON,
     saveToJSON,
-    dataStoragePath,
   };
 }
