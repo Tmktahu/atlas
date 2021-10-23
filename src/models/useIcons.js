@@ -21,6 +21,7 @@ import tactical from '@/assets/map_icons/tactical.png';
 import isan from '@/assets/map_icons/isan.png';
 import federation from '@/assets/map_icons/federation.png';
 import united_sentinel_corporation from '@/assets/map_icons/united_sentinel_corporation.png';
+import utopian_pursuit from '@/assets/map_icons/utopian_pursuit.png';
 
 export const ICON_FOLDER_PATH = '@/assets/map_icons/';
 
@@ -52,5 +53,11 @@ export const ICON_MAP = {
     fileName: 'united_sentinel_corporation.png',
     baseFilePath: `${ICON_FOLDER_PATH}united_sentinel_corporation.png`,
     workingFilePath: united_sentinel_corporation,
+  },
+  utopian_pursuit: {
+    name: 'utopian_pursuit',
+    fileName: 'utopian_pursuit.png',
+    baseFilePath: `${ICON_FOLDER_PATH}utopian_pursuit.png`,
+    workingFilePath: utopian_pursuit,
   },
 };
