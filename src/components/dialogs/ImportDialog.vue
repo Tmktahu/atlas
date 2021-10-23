@@ -177,7 +177,6 @@ export default {
   watch: {
     dataContainer() {
       if (this.dataContainer !== undefined) {
-        console.log(this.dataContainer);
         this.loadedData = this.dataContainer;
         this.checkedWaypoints = this.loadedData.map((obj) => {
           return obj.id;
@@ -213,7 +212,6 @@ export default {
         return this.checkedWaypoints.includes(obj.id);
       });
       if (this.parentWindow !== null) {
-        console.log('sending import command');
         this.parentWindow.postMessage({
           command: 'import',
           points: selectedPoints,

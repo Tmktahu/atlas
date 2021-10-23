@@ -33,6 +33,10 @@ export default {
     const showControls = ref(false);
     const leftNavCondensed = ref(false);
 
+    const showManageDialog = ref(false);
+    const showSaveDialog = ref(false);
+    const showImportDialog = ref(false);
+
     onMounted(() => {
       console.log(
         '%cAtlas Started',
@@ -54,6 +58,10 @@ export default {
     provide('masterMapData', masterMapData);
     provide('showControls', showControls);
     provide('leftNavCondensed', leftNavCondensed);
+
+    provide('showManageDialog', showManageDialog);
+    provide('showSaveDialog', showSaveDialog);
+    provide('showImportDialog', showImportDialog);
 
     return {
       showLeftNav,

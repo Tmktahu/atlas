@@ -128,7 +128,6 @@ export default {
 
   watch: {
     pointsArray() {
-      console.log('leftnav saw pointArray change');
       if (this.manageWaypointsWindow) {
         this.manageWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
       }
@@ -193,7 +192,6 @@ export default {
     },
 
     onGithub() {
-      console.log('on github');
       require('electron').shell.openExternal('https://github.com/Tmktahu/atlas');
     },
   },

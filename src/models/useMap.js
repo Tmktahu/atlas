@@ -21,7 +21,7 @@ export const ORIGIN_POINT = {
 export const ISAN_ORIGIN_POINT = {
   name: 'ISAN Origin',
   color: 'orange',
-  position: { x: 15046, y: 3474, z: 1416 },
+  position: { x: 15046, y: -3474, z: -1416 },
   id: '1234',
   hide: false,
   icon: 'isan',
@@ -74,7 +74,6 @@ export const masterMapData = reactive({
 
 export function useMap(mapData) {
   const init = (inContainerElement) => {
-    console.log(mapData);
     mapData.containerElement = inContainerElement;
 
     mapData.scene = new THREE.Scene();
@@ -120,7 +119,7 @@ export function useMap(mapData) {
     addLight(4, 2, 4, mapData);
     addLight(-4, -1, -2, mapData);
 
-    //mapData.pointsArray = [ORIGIN_POINT, ...ORIGIN_STATIONS];
+    //mapData.pointsArray = [ORIGIN_POINT, ISAN_ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
 
     addPoints(mapData.pointsArray, mapData);
 
@@ -183,9 +182,6 @@ export function useMap(mapData) {
     if (mapData.intersects[0]?.object.type === 'Points') {
       mapData.intersects[0].object.material.size = mapData.pointSize * 1.25;
     }
-    //for (let i = 0; i < mapData.intersects.length; i++) {
-    //mapData.intersects[i].object.material.color.set(0xffff00);
-    //}
   };
 
   const resizeMap = (mapData) => {
@@ -276,6 +272,10 @@ export function useMap(mapData) {
     }
     mapData.pointMeshes = [];
 
+    if (points.length === 0) {
+      return;
+    }
+
     for (const index in points) {
       let point = points[index];
       if (point.hide) {
@@ -298,42 +298,6 @@ export function useMap(mapData) {
       mapData.pointMeshes.push(pointMesh);
       mapData.scene.add(pointMesh);
     }
-
-    // const sprite = await new THREE.TextureLoader().load(pointSprite);
-    // const pointMaterial = new THREE.PointsMaterial({ color: 'red', size: 100, map: sprite, sizeAttenuation: true, alphaTest: 0.5, transparent: true });
-
-    // const geometry = new THREE.BufferGeometry();
-    // let formattedVertices = points
-    //   .filter((element) => {
-    //     return !element.hide;
-    //   })
-    //   .map((element) => {
-    //     return [element.position.x, element.position.y, element.position.z];
-    //   })
-    //   .flat();
-
-    // geometry.setAttribute('position', new THREE.Float32BufferAttribute(formattedVertices, 3));
-
-    // mapData.pointsMesh = new THREE.Points(geometry, pointMaterial);
-    // mapData.scene.add(mapData.pointsMesh);
-
-    // const loader = new FontLoader();
-    // const font = loader.parse(pointFont);
-
-    // for (const index in vertices) {
-    //   const textGeometry = new TextGeometry('test', { font: font, size: 100, height: 0 });
-    //   textGeometry.computeBoundingBox();
-    //   const centerOffset = -0.5 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x);
-
-    //   const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, flatShading: true });
-
-    //   const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-    //   textMesh.position.set(vertices[index].position.x, vertices[index].position.y + 100, vertices[index].position.z);
-
-    //   textMeshes.push(textMesh);
-
-    //   scene.add(textMesh);
-    // }
   };
 
   const addLight = (xCoord, yCoord, zCoord, mapData) => {
@@ -344,6 +308,10 @@ export function useMap(mapData) {
 
   // ============== Control Handlers =======================
   const panForward = (mapData) => {
+    if (mapData.camera === null) {
+      return;
+    }
+
     if (mapData.lookAtVector === null) {
       mapData.lookAtVector = new THREE.Vector3();
     }
@@ -361,6 +329,10 @@ export function useMap(mapData) {
   };
 
   const panBackward = (mapData) => {
+    if (mapData.camera === null) {
+      return;
+    }
+
     if (mapData.lookAtVector === null) {
       mapData.lookAtVector = new THREE.Vector3();
     }
@@ -378,7 +350,6 @@ export function useMap(mapData) {
   };
 
   const viewPoint = (point) => {
-    console.log(masterMapData);
     let dist = 10000;
     masterMapData.camera.position.set(point.position.x + dist + 1, point.position.z + dist + 1, -(point.position.y + dist + 1));
     masterMapData.controls.target.set(point.position.x + dist, point.position.z + dist, -(point.position.y + dist));
@@ -405,7 +376,6 @@ export function useMap(mapData) {
   };
 
   const mergePoints = (points, mapData) => {
-    console.log('trying to merge points', points);
     let existingIDs = mapData.pointsArray.map((obj) => {
       return obj.id;
     });
@@ -421,7 +391,10 @@ export function useMap(mapData) {
         mapData.pointsArray.push(point);
       }
     }
-    addPoints(mapData.pointsArray, mapData);
+
+    if (mapData.scene) {
+      addPoints(mapData.pointsArray, mapData);
+    }
 
     if (skippedPoints.length > 0) {
       let names = skippedPoints.map((obj) => {
