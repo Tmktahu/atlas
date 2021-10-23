@@ -168,5 +168,11 @@ module.exports = {
     quotes: ['error', 'single', { allowTemplateLiterals: true }],
     'use-isnan': 'error',
     yoda: 'error', // disallow Yoda conditions
+    'prettier/prettier': [
+      'error',
+      {
+        'endOfLine': 'auto',
+      }
+    ]
   },
 };
