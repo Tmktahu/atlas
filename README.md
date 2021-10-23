@@ -8,6 +8,15 @@ _(Note this is not affiliated with the "Atlas Project" found [here](https://disc
 
 Atlas is an interactive 3D mapping tool for the game Starbase. This README will be updated with current features as the project is upgraded and added to.
 
+## Features
+
+- Interactive 3D scene to visualize locations in the game world.
+- Create waypoints with custom colors and icons.
+- Delete or hide waypoints.
+- Locally stored information - no backend server.
+- Import and export current waypoint set via JSON files.
+- Website version or compiled executable version.
+
 ## How to use Atlas
 
 You have 2 options.
