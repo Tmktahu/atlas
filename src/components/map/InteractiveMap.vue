@@ -66,7 +66,6 @@ export default {
       (event) => {
         if (event.data.command) {
           if (event.data.command === 'view') {
-            console.log('got view command');
             viewPoint(event.data.point, masterMapData);
           }
 
@@ -126,7 +125,6 @@ export default {
     isReady() {
       if (this.isReady) {
         this.initMap(this.$refs.mapContainer);
-        console.log(this.masterMapData);
       }
     },
 

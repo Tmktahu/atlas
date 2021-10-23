@@ -68,6 +68,8 @@ export const masterMapData = reactive({
   intersects: null,
 
   pointSize: 7000,
+
+  isReady: ref(false),
 });
 
 export function useMap(mapData) {
