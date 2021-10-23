@@ -17,17 +17,17 @@ export default [
     },
   },
   {
-    path: '/newWaypoints',
+    path: '/manage',
     name: MANAGE_WAYPOINT_ROUTE,
     components: {
-      default: () => lazyLoadView(import('@/components/dialogs/NewWaypointDialog.vue')),
+      default: () => lazyLoadView(import('@/components/dialogs/ManageDialog.vue')),
     },
   },
   {
-    path: '/importWaypoints',
+    path: '/import',
     name: IMPORT_WAYPOINTS_ROUTE,
     components: {
-      default: () => lazyLoadView(import('@/components/dialogs/ImportWaypointsDialog.vue')),
+      default: () => lazyLoadView(import('@/components/dialogs/ImportDialog.vue')),
     },
   },
 ];
