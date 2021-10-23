@@ -6,7 +6,7 @@ This is the repository for Atlas, coded by Fryke#0746 on Discord.
 <br>
 _(Note this is not affiliated with the "Atlas Project" found [here](https://discord.gg/TURc9vNu))_
 
-Atlas is a standalone, interactive 3D mapping tool for the game Starbase. This README will be updated with current features as the project is upgraded and added to.
+Atlas is an interactive 3D mapping tool for the game Starbase. This README will be updated with current features as the project is upgraded and added to.
 
 ## How to use Atlas
 
