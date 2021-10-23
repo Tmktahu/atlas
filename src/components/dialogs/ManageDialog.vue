@@ -10,11 +10,12 @@
       <div class="d-flex align-center">
         <v-select v-model="newIcon" menu-props="auto" class="icon-select mr-2" dense hide-details :items="icons" background-color="transparent" flat solo>
           <template v-slot:item="{ item }">
-            <v-tooltip top />
-            <template v-slot:activator="{ on }">
-              <img :src="item.text" contain width="24px" style="margin-right: auto; margin-left: auto" v-on="on" />
-            </template>
-            <div class="icon-tooltip-text">item.value</div>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <img :src="item.text" contain width="24px" style="margin-right: auto; margin-left: auto" v-on="on" />
+              </template>
+              <div class="icon-tooltip-text">{{ item.value.replaceAll('_', ' ') }}</div>
+            </v-tooltip>
           </template>
           <template v-slot:selection="{ item }">
             <img :src="item.text" contain width="34px" />
