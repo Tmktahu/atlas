@@ -45,7 +45,7 @@
       </v-col>
 
       <v-col class="input-col mr-6 flex-grow-0">
-        <v-select v-model="leftSelect" class="option-select" outlined hide-details dense :items="conversionOptions" />
+        <v-select v-model="leftSelect" class="option-select" :menu-props="{ nudgeBottom: '45px' }" outlined hide-details dense :items="conversionOptions" />
 
         <div class="d-flex align-center">
           <span class="number-input-label mr-1 pt-1">X: </span>
@@ -99,7 +99,7 @@
       </v-col>
 
       <v-col class="input-col mr-6 flex-grow-0">
-        <v-select v-model="rightSelect" class="option-select" outlined hide-details dense :items="conversionOptions" />
+        <v-select v-model="rightSelect" class="option-select" :menu-props="{ nudgeBottom: '45px' }" outlined hide-details dense :items="conversionOptions" />
 
         <div class="d-flex align-center">
           <span class="number-input-label mr-1 pt-1">X: </span>
