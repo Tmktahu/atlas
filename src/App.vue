@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <LeftNav v-if="showLeftNav" />
+    <ConversionWidget ref="conversionWidget" />
     <v-main>
       <div class="draggable-area-bar" />
       <router-view />
@@ -17,6 +18,7 @@ import { useStorage } from '@/models/useStorage.js';
 import { useToasts } from '@/models/useToasts.js';
 
 import LeftNav from '@/components/LeftNav.vue';
+import ConversionWidget from '@/components/widgets/ConversionWidget.vue';
 
 export default {
   metaInfo: {
@@ -26,7 +28,7 @@ export default {
     },
   },
 
-  components: { LeftNav },
+  components: { LeftNav, ConversionWidget },
 
   setup() {
     const showLeftNav = ref(true);
@@ -36,6 +38,8 @@ export default {
     const showManageDialog = ref(false);
     const showSaveDialog = ref(false);
     const showImportDialog = ref(false);
+
+    const conversionWidgetOpen = ref(false);
 
     onMounted(() => {
       console.log(
@@ -62,6 +66,8 @@ export default {
     provide('showManageDialog', showManageDialog);
     provide('showSaveDialog', showSaveDialog);
     provide('showImportDialog', showImportDialog);
+
+    provide('conversionWidgetOpen', conversionWidgetOpen);
 
     return {
       showLeftNav,
