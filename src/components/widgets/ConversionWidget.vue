@@ -123,6 +123,8 @@
 <script>
 import { ref, watch, inject } from '@vue/composition-api';
 
+import { ISAN_ORIGIN_POINT } from '@/models/useMap.js';
+
 export default {
   setup() {
     const conversionWidgetOpen = inject('conversionWidgetOpen');
@@ -144,7 +146,7 @@ export default {
     const conversionOptions = [
       { text: 'ISAN', value: 'isan' },
       { text: 'IPS', value: 'ips' },
-      { text: 'SignaTrope', value: 'signa' },
+      //{ text: 'SignaTrope', value: 'signa' },
     ];
 
     return {
@@ -193,6 +195,18 @@ export default {
 
   mounted() {
     this.onInputChange('left');
+
+    // this.$nextTick(() => {
+    //   window.addEventListener('keydown', (event) => {
+    //     if (event.keyCode === 87) {
+    //       this.onWDown();
+    //     }
+
+    //     if (event.keyCode === 83) {
+    //       this.onSDown();
+    //     }
+    //   });
+    // });
   },
 
   methods: {
@@ -241,15 +255,19 @@ export default {
     },
 
     convertISANtoIPS() {
-      console.log('Converting from ISAN to IPS');
-      // left = IPS, right = ISAN
-      this.inputRightX = parseInt(this.inputLeftZ) - 15046;
-      this.inputRightY = parseInt(this.inputLeftX) + 3474;
-      this.inputRightZ = parseInt(this.inputLeftY) + 1416;
+      // left = ISAN, right = IPS
+      // ISAN [+Z,+X,+Y] === IPS [+X,+Y,+Z]
+      this.inputRightX = parseInt(this.inputLeftZ) - ISAN_ORIGIN_POINT.position.x;
+      this.inputRightY = parseInt(this.inputLeftX) - ISAN_ORIGIN_POINT.position.y;
+      this.inputRightZ = parseInt(this.inputLeftY) - ISAN_ORIGIN_POINT.position.z;
     },
 
     convertIPStoISAN() {
-      console.log('Converting from IPS to ISAN');
+      // left = IPS, right = ISAN
+      // IPS [+Y,+Z,+X] === ISAN [+X,+Y,+Z]
+      this.inputRightX = parseInt(this.inputLeftY) + ISAN_ORIGIN_POINT.position.y;
+      this.inputRightY = parseInt(this.inputLeftZ) + ISAN_ORIGIN_POINT.position.z;
+      this.inputRightZ = parseInt(this.inputLeftX) + ISAN_ORIGIN_POINT.position.x;
     },
 
     convertSIGNAtoIPS() {
