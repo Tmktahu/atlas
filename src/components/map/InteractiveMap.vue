@@ -18,7 +18,7 @@
     <div class="hardware-accel-info">
       You must have Hardware Acceleration enabled in your browser, or else this website will max out your CPU trying to render.
     </div>
-    <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed }">
+    <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed, 'with-conversion-widget': conversionWidgetOpen }">
       <div>W: <span>Pan Forward</span></div>
       <div>S: <span>Pan Backward</span></div>
       <div>A: <span>Pan Left</span></div>
@@ -53,6 +53,7 @@ export default {
     const masterMapData = inject('masterMapData');
     const showControls = inject('showControls');
     const leftNavCondensed = inject('leftNavCondensed');
+    const conversionWidgetOpen = inject('conversionWidgetOpen');
     let stats = null;
 
     const { init: initMap, resizeMap, panForward, panBackward } = useMap(masterMapData);
@@ -72,6 +73,7 @@ export default {
       masterMapData,
       showControls,
       leftNavCondensed,
+      conversionWidgetOpen,
       MIN_PAN_SPEED,
       MAX_PAN_SPEED,
       intersects,
@@ -118,7 +120,7 @@ export default {
       });
 
       window.addEventListener('wheel', (event) => {
-        if (!this.showSaveDialog && !this.showManageDialog && !this.showImportDialog) {
+        if (!this.showSaveDialog && !this.showManageDialog && !this.showImportDialog && document.activeElement.tagName !== 'INPUT') {
           if (event.deltaY > 0) {
             this.onSDown();
           } else {
@@ -228,6 +230,10 @@ export default {
 
   &.out {
     left: 160px !important;
+  }
+
+  &.with-conversion-widget {
+    top: 170px !important;
   }
 }
 
