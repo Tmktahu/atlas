@@ -257,17 +257,17 @@ export default {
     convertISANtoIPS() {
       // left = ISAN, right = IPS
       // ISAN [+Z,+X,+Y] === IPS [+X,+Y,+Z]
-      this.inputRightX = parseInt(this.inputLeftZ) - ISAN_ORIGIN_POINT.position.x;
-      this.inputRightY = parseInt(this.inputLeftX) - ISAN_ORIGIN_POINT.position.y;
-      this.inputRightZ = parseInt(this.inputLeftY) - ISAN_ORIGIN_POINT.position.z;
+      this.inputRightX = parseInt(this.inputLeftZ) + ISAN_ORIGIN_POINT.position.x;
+      this.inputRightY = parseInt(this.inputLeftX) + ISAN_ORIGIN_POINT.position.y;
+      this.inputRightZ = parseInt(this.inputLeftY) + ISAN_ORIGIN_POINT.position.z;
     },
 
     convertIPStoISAN() {
       // left = IPS, right = ISAN
       // IPS [+Y,+Z,+X] === ISAN [+X,+Y,+Z]
-      this.inputRightX = parseInt(this.inputLeftY) + ISAN_ORIGIN_POINT.position.y;
-      this.inputRightY = parseInt(this.inputLeftZ) + ISAN_ORIGIN_POINT.position.z;
-      this.inputRightZ = parseInt(this.inputLeftX) + ISAN_ORIGIN_POINT.position.x;
+      this.inputRightX = parseInt(this.inputLeftY) - ISAN_ORIGIN_POINT.position.y;
+      this.inputRightY = parseInt(this.inputLeftZ) - ISAN_ORIGIN_POINT.position.z;
+      this.inputRightZ = parseInt(this.inputLeftX) - ISAN_ORIGIN_POINT.position.x;
     },
 
     convertSIGNAtoIPS() {
