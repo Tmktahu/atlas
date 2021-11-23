@@ -19,6 +19,10 @@
       <div ref="pointCoord" class="coord">[Coordinate]</div>
     </div>
     <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed, 'with-conversion-widget': conversionWidgetOpen }">
+      <div>
+        Local Storage File:
+        <span>{{ localStorageText }}</span>
+      </div>
       <div>W: <span>Pan Forward</span></div>
       <div>S: <span>Pan Backward</span></div>
       <div>A: <span>Pan Left</span></div>
@@ -108,7 +112,6 @@ export default {
 
     const intersects = toRefs(masterMapData).intersects;
     const showGrid = toRefs(masterMapData).showGrid;
-    const isReady = toRefs(masterMapData).isReady;
 
     const { scaleUpCoordinate } = useCoordinates();
 
@@ -126,7 +129,6 @@ export default {
       MIN_PAN_SPEED,
       MAX_PAN_SPEED,
       intersects,
-      isReady,
       dataStoragePath,
       scaleUpCoordinate,
       showGrid,
@@ -143,10 +145,8 @@ export default {
   },
 
   watch: {
-    isReady() {
-      if (this.isReady) {
-        this.initMap(this.$refs.mapContainer);
-      }
+    masterPointsArray() {
+      this.initMap(this.$refs.mapContainer, this.masterPointsArray);
     },
 
     intersects() {
@@ -207,11 +207,6 @@ export default {
       });
 
       this.createStats();
-      this.initMap(this.$refs.mapContainer, this.masterPointsArray);
-
-      this.$toasted.global.alertWarning({
-        message: 'You must have Hardware Acceleration enabled in your browser,<br>or else this website will max out your CPU trying to render.',
-      });
     });
   },
 
@@ -269,7 +264,7 @@ export default {
   bottom: 0;
   width: calc(100% - 56px - 90px);
   align-items: center;
-  justify-content: end;
+  justify-content: flex-end;
 
   .pan-speed-slider::v-deep {
     max-width: 500px;

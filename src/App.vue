@@ -15,6 +15,7 @@ import { LANDING_ROUTE } from '@/router/routes';
 
 import { masterMapData } from '@/models/useMap.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
+import { useStorage } from '@/models/useStorage.js';
 import { useToasts } from '@/models/useToasts.js';
 
 import LeftNav from '@/components/LeftNav.vue';
@@ -50,16 +51,17 @@ export default {
 
     useToasts();
 
+    const { init: initStorage, pointStorage } = useStorage();
+
     const { init: initCoordinates } = useCoordinates();
     const { masterPointsArray } = initCoordinates();
 
     provide('masterPointsArray', masterPointsArray);
 
-    masterMapData.pointsArray = initStorage();
+    initStorage(masterPointsArray);
 
-    watch(pointStorage, () => {
-      masterMapData.pointsArray = pointStorage.value;
-      masterMapData.isReady = true;
+    watch(masterPointsArray, () => {
+      masterMapData.pointsArray = masterPointsArray.value;
     });
 
     provide('masterMapData', masterMapData);
