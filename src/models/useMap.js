@@ -313,7 +313,6 @@ export function useMap(mapData) {
 
   const mergePoints = (points) => {
     const { scaleDownCoordinate } = useCoordinates();
-    let newPoint = scaleDownCoordinate(point);
 
     let existingIDs = mapData.pointsArray.map((obj) => {
       return obj.id;
@@ -322,6 +321,7 @@ export function useMap(mapData) {
 
     for (const index in points) {
       let point = points[index];
+      let newPoint = scaleDownCoordinate(point);
 
       if (existingIDs.includes(point.id)) {
         skippedPoints.push(point);
