@@ -1,18 +1,7 @@
 import Vue from 'vue';
-import { ref, watch } from '@vue/composition-api';
 const fs = require('fs');
-const fsPromises = fs.promises;
-
-import { ISAN_ORIGIN_POINT, ORIGIN_POINT } from './useMap';
-import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetCoords/eos';
-
-export const DEFAULT_DATA = [ORIGIN_POINT, ISAN_ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
 
 export function useStorage() {
-  const pointStorage = ref([]);
-
-  const init = async () => {};
-
   const readFromJSON = async (file) => {
     return new Promise((resolve, reject) => {
       let data = '';
@@ -53,8 +42,6 @@ export function useStorage() {
   };
 
   return {
-    init,
-    pointStorage,
     readFromJSON,
     saveToJSON,
   };

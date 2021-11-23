@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <LeftNav v-if="showLeftNav" />
+    <ConversionWidget ref="conversionWidget" />
     <v-main>
       <router-view />
     </v-main>
@@ -12,10 +13,11 @@ import { onMounted, ref, watch, provide, computed, inject } from '@vue/compositi
 import { LANDING_ROUTE } from '@/router/routes';
 
 import { masterMapData } from '@/models/useMap.js';
-import { useStorage } from '@/models/useStorage.js';
+import { useCoordinates } from '@/models/useCoordinates.js';
 import { useToasts } from '@/models/useToasts.js';
 
 import LeftNav from '@/components/LeftNav.vue';
+import ConversionWidget from '@/components/widgets/ConversionWidget.vue';
 
 export default {
   metaInfo: {
@@ -25,7 +27,7 @@ export default {
     },
   },
 
-  components: { LeftNav },
+  components: { LeftNav, ConversionWidget },
 
   setup() {
     const showLeftNav = ref(true);
@@ -36,6 +38,8 @@ export default {
     const showSaveDialog = ref(false);
     const showImportDialog = ref(false);
 
+    const conversionWidgetOpen = ref(false);
+
     onMounted(() => {
       console.log(
         '%cAtlas Started',
@@ -45,7 +49,10 @@ export default {
 
     useToasts();
 
-    const { init: initStorage, pointStorage } = useStorage();
+    const { init: initCoordinates } = useCoordinates();
+    const { masterPointsArray } = initCoordinates();
+
+    provide('masterPointsArray', masterPointsArray);
 
     provide('masterMapData', masterMapData);
     provide('showControls', showControls);
@@ -54,6 +61,8 @@ export default {
     provide('showManageDialog', showManageDialog);
     provide('showSaveDialog', showSaveDialog);
     provide('showImportDialog', showImportDialog);
+
+    provide('conversionWidgetOpen', conversionWidgetOpen);
 
     return {
       showLeftNav,
