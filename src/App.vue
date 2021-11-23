@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <LeftNav v-if="showLeftNav" />
+    <ConversionWidget ref="conversionWidget" />
     <v-main>
       <div class="draggable-area-bar" />
       <router-view />
@@ -13,10 +14,12 @@ import { onMounted, ref, watch, provide, computed, inject } from '@vue/compositi
 import { LANDING_ROUTE } from '@/router/routes';
 
 import { masterMapData } from '@/models/useMap.js';
+import { useCoordinates } from '@/models/useCoordinates.js';
 import { useStorage } from '@/models/useStorage.js';
 import { useToasts } from '@/models/useToasts.js';
 
 import LeftNav from '@/components/LeftNav.vue';
+import ConversionWidget from '@/components/widgets/ConversionWidget.vue';
 
 export default {
   metaInfo: {
@@ -26,7 +29,7 @@ export default {
     },
   },
 
-  components: { LeftNav },
+  components: { LeftNav, ConversionWidget },
 
   setup() {
     const showLeftNav = ref(true);
@@ -36,6 +39,8 @@ export default {
     const showManageDialog = ref(false);
     const showSaveDialog = ref(false);
     const showImportDialog = ref(false);
+
+    const conversionWidgetOpen = ref(false);
 
     onMounted(() => {
       console.log(
@@ -48,11 +53,15 @@ export default {
 
     const { init: initStorage, pointStorage } = useStorage();
 
-    masterMapData.pointsArray = initStorage();
+    const { init: initCoordinates } = useCoordinates();
+    const { masterPointsArray } = initCoordinates();
 
-    watch(pointStorage, () => {
-      masterMapData.pointsArray = pointStorage.value;
-      masterMapData.isReady = true;
+    provide('masterPointsArray', masterPointsArray);
+
+    initStorage(masterPointsArray);
+
+    watch(masterPointsArray, () => {
+      masterMapData.pointsArray = masterPointsArray.value;
     });
 
     provide('masterMapData', masterMapData);
@@ -62,6 +71,8 @@ export default {
     provide('showManageDialog', showManageDialog);
     provide('showSaveDialog', showSaveDialog);
     provide('showImportDialog', showImportDialog);
+
+    provide('conversionWidgetOpen', conversionWidgetOpen);
 
     return {
       showLeftNav,

@@ -1,10 +1,10 @@
 import Vue from 'vue';
-import { ref, watch } from '@vue/composition-api';
+import { ref } from '@vue/composition-api';
 const fs = require('fs');
 const fsPromises = fs.promises;
 
-import { ISAN_ORIGIN_POINT, ORIGIN_POINT } from './useMap';
-import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetCoords/eos';
+import { ISAN_ORIGIN_POINT, ORIGIN_POINT, useCoordinates } from './useCoordinates';
+import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetMapData/eos';
 
 const remote = require('electron').remote;
 
@@ -18,25 +18,29 @@ export function useStorage() {
     dataStoragePath.value = `${remote.process.env.PORTABLE_EXECUTABLE_DIR}/waypoint_data.json`;
   }
 
-  const pointStorage = ref([]);
-
-  const init = async () => {
+  const init = async (storageContainer) => {
     if (fs.existsSync(dataStoragePath.value)) {
-      readFromJSON(pointStorage, dataStoragePath.value);
+      const result = await readFromJSON(storageContainer, dataStoragePath.value);
     } else {
       console.log('No storage. Initing json file with default data.');
-      saveToJSON(DEFAULT_DATA, dataStoragePath.value, pointStorage);
+      const result = await saveToJSON(DEFAULT_DATA, dataStoragePath.value, storageContainer, true);
     }
   };
 
   const readFromJSON = async (container, filePath) => {
     try {
       const data = await fsPromises.readFile(filePath, 'utf-8');
+      let rawData = JSON.parse(data);
+      const { scaleDownCoordinate } = useCoordinates();
+      let scaledDownData = rawData.map((item) => {
+        return scaleDownCoordinate(item);
+      });
+
       if (container) {
-        container.value = JSON.parse(data);
+        container.value = scaledDownData;
         return;
       } else {
-        return JSON.parse(data);
+        return scaledDownData;
       }
     } catch (error) {
       console.log('Error reading file: ', error);
@@ -44,12 +48,26 @@ export function useStorage() {
     }
   };
 
-  const saveToJSON = async (inData, filePath, container = null) => {
-    let stringifiedData = JSON.stringify(inData, null, 2);
+  const saveToJSON = async (inData, filePath, container = null, defaultData = false) => {
+    const { scaleDownCoordinate, scaleUpCoordinate } = useCoordinates();
+    let stringifiedData = null;
+    let scaledData = null;
+    if (defaultData) {
+      scaledData = inData.map((item) => {
+        return scaleDownCoordinate(item);
+      });
+      stringifiedData = JSON.stringify(inData, null, 2);
+    } else {
+      scaledData = inData.map((item) => {
+        return scaleUpCoordinate(item);
+      });
+      stringifiedData = JSON.stringify(scaledData, null, 2);
+    }
+
     try {
       fs.writeFile(filePath, stringifiedData, 'utf-8', () => {
         if (container) {
-          container.value = inData;
+          container.value = scaledData;
           Vue.toasted.global.alertInfo({
             message: 'Initialized default JSON storage',
             description: `No standard JSON file was found, so one was created at ${dataStoragePath.value}`,
@@ -65,7 +83,6 @@ export function useStorage() {
 
   return {
     init,
-    pointStorage,
     readFromJSON,
     saveToJSON,
     dataStoragePath,

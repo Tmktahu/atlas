@@ -2,20 +2,23 @@
 <template>
   <div>
     <div ref="mapContainer" v-resize="onResize" class="mapContainer" @keypress="onWDown" />
-    <v-slider
-      v-model="masterMapData.panSpeed"
-      hide-details
-      :min="MIN_PAN_SPEED"
-      :max="MAX_PAN_SPEED"
-      class="pan-speed-slider pb-1"
-      thumb-label="always"
-      label="Pan Speed:"
-    />
+    <v-row no-gutters class="bottom-controls">
+      <v-checkbox v-model="showGrid" hide-details reverse class="hide-grid-checkbox pr-3" label="Grid" />
+      <v-slider
+        v-model="masterMapData.panSpeed"
+        hide-details
+        :min="MIN_PAN_SPEED"
+        :max="MAX_PAN_SPEED"
+        class="pan-speed-slider"
+        thumb-label="always"
+        label="Pan Speed:"
+      />
+    </v-row>
     <div ref="pointInfoContainer" class="point-info">
       <div ref="pointName" class="name">Point Name</div>
       <div ref="pointCoord" class="coord">[Coordinate]</div>
     </div>
-    <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed }">
+    <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed, 'with-conversion-widget': conversionWidgetOpen }">
       <div>
         Local Storage File:
         <span>{{ localStorageText }}</span>
@@ -38,6 +41,7 @@ import Stats from 'stats.js';
 import { ref, inject, watch, toRefs } from '@vue/composition-api';
 
 import { useMap, MIN_PAN_SPEED, MAX_PAN_SPEED } from '@/models/useMap.js';
+import { useCoordinates } from '@/models/useCoordinates.js';
 
 import { useStorage } from '@/models/useStorage.js';
 
@@ -53,11 +57,24 @@ export default {
   name: 'InteractiveMap',
   setup() {
     const masterMapData = inject('masterMapData');
+    const masterPointsArray = inject('masterPointsArray');
     const showControls = inject('showControls');
     const leftNavCondensed = inject('leftNavCondensed');
+    const conversionWidgetOpen = inject('conversionWidgetOpen');
     let stats = null;
 
-    const { init: initMap, resizeMap, panForward, panBackward, viewPoint, showHidePoint, addPoint, deletePoint, mergePoints } = useMap(masterMapData);
+    const {
+      init: initMap,
+      resizeMap,
+      panForward,
+      panBackward,
+      viewPoint,
+      showHidePoint,
+      addPoint,
+      deletePoint,
+      mergePoints,
+      updateGrid,
+    } = useMap(masterMapData);
 
     const { dataStoragePath } = useStorage();
 
@@ -94,7 +111,9 @@ export default {
     );
 
     const intersects = toRefs(masterMapData).intersects;
-    const isReady = toRefs(masterMapData).isReady;
+    const showGrid = toRefs(masterMapData).showGrid;
+
+    const { scaleUpCoordinate } = useCoordinates();
 
     return {
       stats,
@@ -103,13 +122,17 @@ export default {
       panForward,
       panBackward,
       masterMapData,
+      masterPointsArray,
       showControls,
       leftNavCondensed,
+      conversionWidgetOpen,
       MIN_PAN_SPEED,
       MAX_PAN_SPEED,
       intersects,
-      isReady,
       dataStoragePath,
+      scaleUpCoordinate,
+      showGrid,
+      updateGrid,
     };
   },
 
@@ -122,21 +145,33 @@ export default {
   },
 
   watch: {
-    isReady() {
-      if (this.isReady) {
-        this.initMap(this.$refs.mapContainer);
-      }
+    masterPointsArray() {
+      this.initMap(this.$refs.mapContainer, this.masterPointsArray);
     },
 
     intersects() {
       if (this.masterMapData.intersects[0]?.object.type === 'Points') {
-        this.$refs.pointName.innerHTML = this.masterMapData.intersects[0].object.name;
-        this.$refs.pointCoord.innerHTML = `[${this.masterMapData.intersects[0].object.geometry.attributes.position.array[0]}, ${-this.masterMapData
-          .intersects[0].object.geometry.attributes.position.array[2]}, ${this.masterMapData.intersects[0].object.geometry.attributes.position.array[1]}]`;
+        let object = this.masterMapData.intersects[0]?.object;
+        let coordinate = {
+          position: {
+            x: object.geometry.attributes.position.array[0],
+            y: -object.geometry.attributes.position.array[2],
+            // eslint-disable-next-line id-length
+            z: object.geometry.attributes.position.array[1],
+          },
+        };
+        let expandedCoordinates = this.scaleUpCoordinate(coordinate);
+
+        this.$refs.pointName.innerHTML = object.name;
+        this.$refs.pointCoord.innerHTML = `[${expandedCoordinates.position.x}, ${expandedCoordinates.position.y}, ${expandedCoordinates.position.z}]`;
         this.$refs.pointInfoContainer.style.display = 'block';
       } else {
         this.$refs.pointInfoContainer.style.display = 'none';
       }
+    },
+
+    showGrid(value) {
+      this.updateGrid(this.masterMapData);
     },
   },
 
@@ -223,16 +258,38 @@ export default {
   }
 }
 
-.pan-speed-slider::v-deep {
+.bottom-controls {
   position: absolute;
   right: 90px;
   bottom: 0;
-  width: 30%;
+  width: calc(100% - 56px - 90px);
+  align-items: center;
+  justify-content: flex-end;
 
-  .v-label {
-    font-weight: 400;
-    color: white;
-    letter-spacing: 0.03em;
+  .pan-speed-slider::v-deep {
+    max-width: 500px;
+
+    .v-label {
+      font-weight: 400;
+      color: white;
+      letter-spacing: 0.03em;
+    }
+  }
+
+  .hide-grid-checkbox::v-deep {
+    margin: 0;
+    padding: 0;
+
+    .v-label {
+      font-weight: 400;
+      color: white;
+      letter-spacing: 0.03em;
+      padding-right: 8px;
+    }
+
+    .v-input__slot {
+      flex-direction: row-reverse;
+    }
   }
 }
 
@@ -271,6 +328,10 @@ export default {
 
   &.out {
     left: 160px !important;
+  }
+
+  &.with-conversion-widget {
+    top: 170px !important;
   }
 }
 </style>

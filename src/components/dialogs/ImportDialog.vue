@@ -41,7 +41,7 @@
       </template>
       <template v-slot:item.position="{ item }">
         <div class="d-flex">
-          {{ `[${item.position.x}, ${item.position.y}, ${item.position.z}]` }}
+          {{ `[${scaleUpCoordinate(item.position.x)}, ${scaleUpCoordinate(item.position.y)}, ${scaleUpCoordinate(item.position.z)}]` }}
         </div>
       </template>
       <template v-slot:item.actions="{ item }">
@@ -85,6 +85,7 @@ import { ref, watch, inject } from '@vue/composition-api';
 const { dialog } = require('electron').remote;
 
 import { useStorage } from '@/models/useStorage.js';
+import { useCoordinates } from '@/models/useCoordinates.js';
 import { useMap } from '@/models/useMap.js';
 
 import { ICON_MAP } from '@/models/useIcons.js';
@@ -98,6 +99,7 @@ export default {
     const allChecked = ref(true);
 
     const { readFromJSON } = useStorage();
+    const { scaleUpCoordinate } = useCoordinates();
 
     const tableHeaders = [
       {
@@ -149,6 +151,7 @@ export default {
       allChecked,
       ICON_MAP,
       checkedWaypoints,
+      scaleUpCoordinate,
     };
   },
 

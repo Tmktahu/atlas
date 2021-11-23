@@ -9,7 +9,17 @@
 
     <div class="d-flex flex-column px-6 my-6">
       <div class="d-flex align-center">
-        <v-select v-model="newIcon" menu-props="auto" class="icon-select mr-2" dense hide-details :items="icons" background-color="transparent" flat solo>
+        <v-select
+          v-model="newIcon"
+          :menu-props="{ auto: true, contentClass: 'new-waypoint-icon-select' }"
+          class="icon-select mr-2"
+          dense
+          hide-details
+          :items="icons"
+          background-color="transparent"
+          flat
+          solo
+        >
           <template v-slot:item="{ item }">
             <v-tooltip top>
               <template v-slot:activator="{ on }">
@@ -109,7 +119,7 @@
       </template>
       <template v-slot:item.position="{ item }">
         <div class="d-flex">
-          {{ `[${item.position.x}, ${item.position.y}, ${item.position.z}]` }}
+          {{ `[${scaleUpCoordinate(item.position.x)}, ${scaleUpCoordinate(item.position.y)}, ${scaleUpCoordinate(item.position.z)}]` }}
         </div>
       </template>
       <template v-slot:item.actions="{ item }">
@@ -147,6 +157,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { required } from 'vuelidate/lib/validators';
 
 import { ICON_MAP } from '@/models/useIcons.js';
+import { useCoordinates } from '@/models/useCoordinates.js';
 
 export default {
   name: 'NewWaypointDialog',
@@ -167,6 +178,8 @@ export default {
     const yCoord = ref(null);
     const zCoord = ref(null);
     const newGroup = ref('');
+
+    const { scaleUpCoordinate } = useCoordinates();
 
     const tableHeaders = [
       {
@@ -222,6 +235,7 @@ export default {
       ICON_MAP,
       pointsArray,
       listReady,
+      scaleUpCoordinate,
     };
   },
 
@@ -302,14 +316,19 @@ export default {
   left: 25px !important;
 }
 
-.v-select-list {
-  display: flex;
-  flex-wrap: wrap;
-  background: #444 !important;
+.new-waypoint-icon-select {
+  top: unset !important;
+  bottom: calc(90vh - 240px) !important;
 
-  .v-list-item {
-    max-width: 40px;
-    padding: 0;
+  .v-select-list {
+    display: flex !important;
+    flex-wrap: wrap;
+    background: #444 !important;
+
+    .v-list-item {
+      max-width: 40px;
+      padding: 0;
+    }
   }
 }
 </style>
