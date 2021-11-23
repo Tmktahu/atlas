@@ -4,29 +4,12 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
+import { createSphere, createTorus } from '@/models/useMapObjects.js';
+import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
+
 import { ICON_MAP } from '@/models/useIcons.js';
 
-import stargate from '@/assets/map_icons/stargate.png';
-import isan from '@/assets/map_icons/isan.png';
-
-export const ORIGIN_POINT = {
-  name: 'Origin / WarpGate',
-  color: 'aqua',
-  position: { x: 0, y: 0, z: 0 },
-  id: '0',
-  hide: false,
-  icon: 'stargate',
-  group: 'Origins',
-};
-export const ISAN_ORIGIN_POINT = {
-  name: 'ISAN Origin',
-  color: 'orange',
-  position: { x: 15313, y: -3476, z: -1535 },
-  id: '1234',
-  hide: false,
-  icon: 'isan',
-  group: 'Origins',
-};
+import { ASTROID_BELTS, PLANETS } from './presetMapData/celestialBodies';
 
 export const EOS_OFFSET = {
   x: -8450000,
@@ -35,7 +18,7 @@ export const EOS_OFFSET = {
 };
 
 export const MIN_PAN_SPEED = 1;
-export const MAX_PAN_SPEED = 10000;
+export const MAX_PAN_SPEED = 1000;
 
 export const masterMapData = reactive({
   containerElement: null,
@@ -50,14 +33,11 @@ export const masterMapData = reactive({
   pointMeshes: [],
   pointsArray: ref([]),
 
-  torusFillFrontMesh: null,
-  torusFillBackMesh: null,
-  torusFrameFrontMesh: null,
-  torusFrameBackMesh: null,
+  belts: [],
 
   lookAtVector: new THREE.Vector3(),
 
-  panSpeed: ref(40),
+  panSpeed: ref(100),
 
   raycaster: new THREE.Raycaster(),
   lastRaycast: null,
@@ -67,19 +47,19 @@ export const masterMapData = reactive({
   mapMouse: new THREE.Vector2(),
   intersects: null,
 
-  pointSize: 7000,
+  pointSize: 0.5,
 
-  isReady: ref(false),
+  showGrid: ref(true),
 });
 
 export function useMap(mapData) {
-  const init = (inContainerElement) => {
+  const init = (inContainerElement, initialPoints) => {
     mapData.containerElement = inContainerElement;
 
     mapData.scene = new THREE.Scene();
 
-    const startingCameraPosition = [ORIGIN_POINT.position.x + 70000, ORIGIN_POINT.position.y + 70000, ORIGIN_POINT.position.z + 70000];
-    const startingControlsPosition = [startingCameraPosition[0] - 1, startingCameraPosition[1] - 1, startingCameraPosition[2] - 1];
+    const startingCameraPosition = [ORIGIN_POINT.position.x + 10, ORIGIN_POINT.position.y + 10, ORIGIN_POINT.position.z + 10];
+    const startingControlsPosition = [startingCameraPosition[0] - 0.1, startingCameraPosition[1] - 0.1, startingCameraPosition[2] - 0.1];
 
     // PerspectiveCamera(FOV, Aspect Ratio, Near Clipping Plane, Far Clipping Place)
     mapData.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000000000);
@@ -93,8 +73,8 @@ export function useMap(mapData) {
     mapData.controls = new OrbitControls(mapData.camera, mapData.renderer.domElement);
     mapData.controls.enableZoom = false;
     mapData.controls.listenToKeyEvents(window);
-    mapData.controls.keyPanSpeed = mapData.panSpeed * 100 * 200;
-    mapData.controls.panSpeed = mapData.panSpeed * 100 * 10;
+    mapData.controls.keyPanSpeed = mapData.panSpeed * 50;
+    mapData.controls.panSpeed = mapData.panSpeed;
     mapData.controls.keys = {
       LEFT: 'KeyA',
       UP: 'Space',
@@ -104,24 +84,14 @@ export function useMap(mapData) {
     mapData.controls.target.set(startingControlsPosition[0], startingControlsPosition[1], startingControlsPosition[2]);
     mapData.controls.update();
 
-    const gridMaterial = new THREE.MeshLambertMaterial({ color: '#111111', opacity: 0.8, transparent: true, blending: THREE.AdditiveBlending });
-    gridMaterial.renderOrder = -1;
-    gridMaterial.depthTest = false;
+    updateGrid(mapData);
 
-    const grid = new THREE.GridHelper(1000000000, 300);
-
-    grid.material = gridMaterial;
-    mapData.scene.add(grid);
-
-    addTorus(mapData);
-    addSphere(mapData);
+    setupObjects(mapData);
 
     addLight(4, 2, 4, mapData);
     addLight(-4, -1, -2, mapData);
 
-    //mapData.pointsArray = [ORIGIN_POINT, ISAN_ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
-
-    addPoints(mapData.pointsArray, mapData);
+    addPoints(initialPoints);
 
     mapData.controls.update();
     animate(mapData);
@@ -129,8 +99,8 @@ export function useMap(mapData) {
     const refs = toRefs(mapData);
 
     watch(refs.panSpeed, () => {
-      mapData.controls.keyPanSpeed = mapData.panSpeed * 100 * 200;
-      mapData.controls.panSpeed = mapData.panSpeed * 100 * 10;
+      mapData.controls.keyPanSpeed = mapData.panSpeed * 50;
+      mapData.controls.panSpeed = mapData.panSpeed;
     });
   };
 
@@ -138,19 +108,14 @@ export function useMap(mapData) {
     requestAnimationFrame(animate);
     mapData.stats.begin();
 
-    mapData.torusFillFrontMesh.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
-    mapData.torusFillFrontMesh.rotateX(Math.PI / 2);
+    for (let index in mapData.belts) {
+      mapData.belts[index].front.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
+      mapData.belts[index].front.rotateX(Math.PI / 2);
 
-    mapData.torusFillBackMesh.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
-    mapData.torusFillBackMesh.rotateX(Math.PI / 2);
-    mapData.torusFillBackMesh.rotateZ(Math.PI);
-
-    mapData.torusFrameFrontMesh.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
-    mapData.torusFrameFrontMesh.rotateX(Math.PI / 2);
-
-    mapData.torusFrameBackMesh.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
-    mapData.torusFrameBackMesh.rotateX(Math.PI / 2);
-    mapData.torusFrameBackMesh.rotateZ(Math.PI);
+      mapData.belts[index].back.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
+      mapData.belts[index].back.rotateX(Math.PI / 2);
+      mapData.belts[index].back.rotateZ(Math.PI);
+    }
 
     if (mapData.pointMeshes) {
       for (let i = 0; i < mapData.pointMeshes.length; i++) {
@@ -161,7 +126,7 @@ export function useMap(mapData) {
     }
 
     // update the picking ray with the camera and mouse position
-    mapData.raycaster.params.Points.threshold = 3000;
+    mapData.raycaster.params.Points.threshold = 0.3;
     mapData.raycaster.setFromCamera(mapData.mapMouse, mapData.camera);
 
     if (Date.now() - mapData.lastRaycast > mapData.raycastInterval) {
@@ -194,76 +159,43 @@ export function useMap(mapData) {
   };
 
   // ============ Object Adding Methods ===============
-  const addSphere = (mapData) => {
-    let radius = 5500000;
-    let widthSegments = 50;
-    let heightSegments = 50;
+  const setupObjects = (mapData) => {
+    for (let index in ASTROID_BELTS) {
+      let { torusFrontMesh: front, torusBackMesh: back } = createTorus(ASTROID_BELTS[index], mapData);
 
-    const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+      let newBelt = { front, back };
+      mapData.scene.add(front);
+      mapData.scene.add(back);
 
-    const materialFill = new THREE.MeshLambertMaterial({ color: '#234672', opacity: 0.8 });
-    const sphere = new THREE.Mesh(geometry, materialFill);
-    mapData.scene.add(sphere);
-    sphere.position.set(EOS_OFFSET.x, EOS_OFFSET.y, EOS_OFFSET.z);
+      mapData.belts.push(newBelt);
+    }
 
-    const materialFrame = new THREE.MeshLambertMaterial({ color: '#234672', opacity: 0.3, wireframe: true, blending: THREE.AdditiveBlending });
-    const sphereFrame = new THREE.Mesh(geometry, materialFrame);
-    sphereFrame.lookAt(0, 0, 0);
-    mapData.scene.add(sphereFrame);
-    sphereFrame.position.set(EOS_OFFSET.x, EOS_OFFSET.y, EOS_OFFSET.z);
+    for (let index in PLANETS) {
+      let planet = createSphere(PLANETS[index]);
+      mapData.scene.add(planet);
+    }
   };
 
-  const addTorus = (mapData) => {
-    let overalRadius = 2618229.42235;
-    let innerRadius = 300000;
-    let radialSegments = 100;
-    let tubularSegments = 100;
+  const updateGrid = (mapData) => {
+    if (mapData.showGrid) {
+      const gridMaterial = new THREE.MeshLambertMaterial({
+        color: '#111111',
+        opacity: 0.5,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthFunc: THREE.LessDepth,
+      });
+      gridMaterial.renderOrder = -1;
+      //gridMaterial.depthTest = false;
 
-    const geometry = new THREE.TorusGeometry(overalRadius, innerRadius, radialSegments, tubularSegments, Math.PI);
-    const materialFillFront = new THREE.MeshLambertMaterial({
-      color: '#2c809b',
-      opacity: 0.5,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide,
-    });
-    const materialFillBack = new THREE.MeshLambertMaterial({ color: '#2c809b', opacity: 0.5, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
-    const materialFrameFront = new THREE.MeshLambertMaterial({
-      color: '#2c809b',
-      wireframe: true,
-      opacity: 0.1,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-    });
-    const materialFrameBack = new THREE.MeshLambertMaterial({ color: '#2c809b', wireframe: true, opacity: 0.1, blending: THREE.AdditiveBlending });
+      const grid = new THREE.GridHelper(10000, 3000);
+      grid.material = gridMaterial;
 
-    mapData.torusFillFrontMesh = new THREE.Mesh(geometry, materialFillFront);
-    mapData.torusFillFrontMesh.scale.set(3.6666, 3.6666);
-    mapData.torusFillFrontMesh.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
-    mapData.torusFillFrontMesh.rotateX(Math.PI / 2);
-    mapData.scene.add(mapData.torusFillFrontMesh);
-    mapData.torusFillFrontMesh.position.set(EOS_OFFSET.x, EOS_OFFSET.y, EOS_OFFSET.z);
-
-    mapData.torusFillBackMesh = new THREE.Mesh(geometry, materialFillBack);
-    mapData.torusFillBackMesh.scale.set(3.6666, 3.6666);
-    mapData.torusFillBackMesh.lookAt(-mapData.camera.position.x, 0, -mapData.camera.position.z);
-    mapData.torusFillBackMesh.rotateX(Math.PI / 2);
-    mapData.scene.add(mapData.torusFillBackMesh);
-    mapData.torusFillBackMesh.position.set(EOS_OFFSET.x, EOS_OFFSET.y, EOS_OFFSET.z);
-
-    mapData.torusFrameFrontMesh = new THREE.Mesh(geometry, materialFrameFront);
-    mapData.torusFrameFrontMesh.scale.set(3.6666, 3.6666);
-    mapData.torusFrameFrontMesh.lookAt(-mapData.camera.position.x, 0, -mapData.camera.position.z);
-    mapData.torusFrameFrontMesh.rotateX(Math.PI / 2);
-    mapData.scene.add(mapData.torusFrameFrontMesh);
-    mapData.torusFrameFrontMesh.position.set(EOS_OFFSET.x, EOS_OFFSET.y, EOS_OFFSET.z);
-
-    mapData.torusFrameBackMesh = new THREE.Mesh(geometry, materialFrameBack);
-    mapData.torusFrameBackMesh.scale.set(3.6666, 3.6666);
-    mapData.torusFrameBackMesh.lookAt(-mapData.camera.position.x, 0, -mapData.camera.position.z);
-    mapData.torusFrameBackMesh.rotateX(Math.PI / 2);
-    mapData.scene.add(mapData.torusFrameBackMesh);
-    mapData.torusFrameBackMesh.position.set(EOS_OFFSET.x, EOS_OFFSET.y, EOS_OFFSET.z);
+      mapData.grid = grid;
+      mapData.scene.add(mapData.grid);
+    } else {
+      mapData.scene.remove(mapData.grid);
+    }
   };
 
   const addPoints = async (points) => {
@@ -275,6 +207,8 @@ export function useMap(mapData) {
     if (points.length === 0) {
       return;
     }
+
+    mapData.pointsArray = points;
 
     for (const index in points) {
       let point = points[index];
@@ -317,7 +251,7 @@ export function useMap(mapData) {
     }
     mapData.camera.getWorldDirection(mapData.lookAtVector);
 
-    let dist = mapData.panSpeed * 100;
+    let dist = mapData.panSpeed / 50;
 
     mapData.controls.target.set(
       mapData.controls.target.x + mapData.lookAtVector.x * dist,
@@ -338,7 +272,7 @@ export function useMap(mapData) {
     }
     mapData.camera.getWorldDirection(mapData.lookAtVector);
 
-    let dist = mapData.panSpeed * 100;
+    let dist = mapData.panSpeed / 50;
 
     mapData.controls.target.set(
       mapData.controls.target.x + mapData.lookAtVector.x * -dist,
@@ -350,9 +284,9 @@ export function useMap(mapData) {
   };
 
   const viewPoint = (point) => {
-    let dist = 10000;
-    masterMapData.camera.position.set(point.position.x + dist + 1, point.position.z + dist + 1, -(point.position.y + dist + 1));
-    masterMapData.controls.target.set(point.position.x + dist, point.position.z + dist, -(point.position.y + dist));
+    let dist = 4;
+    masterMapData.camera.position.set(point.position.x + dist + 0.1, point.position.z + dist + 0.1, point.position.y + dist + 0.1);
+    masterMapData.controls.target.set(point.position.x + dist, point.position.z + dist, point.position.y + dist);
 
     masterMapData.controls.update();
   };
@@ -363,8 +297,10 @@ export function useMap(mapData) {
     addPoints(mapData.pointsArray, mapData);
   };
 
-  const addPoint = (point, mapData) => {
-    mapData.pointsArray.push(point);
+  const addPoint = (point) => {
+    const { scaleDownCoordinate } = useCoordinates();
+    let newPoint = scaleDownCoordinate(point);
+    mapData.pointsArray.push(newPoint);
     addPoints(mapData.pointsArray, mapData);
   };
 
@@ -375,7 +311,10 @@ export function useMap(mapData) {
     addPoints(mapData.pointsArray, mapData);
   };
 
-  const mergePoints = (points, mapData) => {
+  const mergePoints = (points) => {
+    const { scaleDownCoordinate } = useCoordinates();
+    let newPoint = scaleDownCoordinate(point);
+
     let existingIDs = mapData.pointsArray.map((obj) => {
       return obj.id;
     });
@@ -388,7 +327,7 @@ export function useMap(mapData) {
         skippedPoints.push(point);
         continue;
       } else {
-        mapData.pointsArray.push(point);
+        mapData.pointsArray.push(newPoint);
       }
     }
 
@@ -419,5 +358,6 @@ export function useMap(mapData) {
     addPoint,
     deletePoint,
     mergePoints,
+    updateGrid,
   };
 }

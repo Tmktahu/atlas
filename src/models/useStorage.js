@@ -1,10 +1,9 @@
 import Vue from 'vue';
-import { ref, watch } from '@vue/composition-api';
 const fs = require('fs');
 const fsPromises = fs.promises;
 
-import { ISAN_ORIGIN_POINT, ORIGIN_POINT } from './useMap';
-import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetCoords/eos';
+import { ISAN_ORIGIN_POINT, ORIGIN_POINT } from './useCoordinates';
+import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetMapData/eos';
 
 const remote = require('electron').remote;
 
@@ -65,7 +64,6 @@ export function useStorage() {
 
   return {
     init,
-    pointStorage,
     readFromJSON,
     saveToJSON,
     dataStoragePath,

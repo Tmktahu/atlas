@@ -14,7 +14,7 @@ import { onMounted, ref, watch, provide, computed, inject } from '@vue/compositi
 import { LANDING_ROUTE } from '@/router/routes';
 
 import { masterMapData } from '@/models/useMap.js';
-import { useStorage } from '@/models/useStorage.js';
+import { useCoordinates } from '@/models/useCoordinates.js';
 import { useToasts } from '@/models/useToasts.js';
 
 import LeftNav from '@/components/LeftNav.vue';
@@ -50,7 +50,10 @@ export default {
 
     useToasts();
 
-    const { init: initStorage, pointStorage } = useStorage();
+    const { init: initCoordinates } = useCoordinates();
+    const { masterPointsArray } = initCoordinates();
+
+    provide('masterPointsArray', masterPointsArray);
 
     masterMapData.pointsArray = initStorage();
 

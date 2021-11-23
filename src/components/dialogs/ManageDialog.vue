@@ -119,7 +119,7 @@
       </template>
       <template v-slot:item.position="{ item }">
         <div class="d-flex">
-          {{ `[${item.position.x}, ${item.position.y}, ${item.position.z}]` }}
+          {{ `[${scaleUpCoordinate(item.position.x)}, ${scaleUpCoordinate(item.position.y)}, ${scaleUpCoordinate(item.position.z)}]` }}
         </div>
       </template>
       <template v-slot:item.actions="{ item }">
@@ -157,6 +157,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { required } from 'vuelidate/lib/validators';
 
 import { ICON_MAP } from '@/models/useIcons.js';
+import { useCoordinates } from '@/models/useCoordinates.js';
 
 export default {
   name: 'NewWaypointDialog',
@@ -177,6 +178,8 @@ export default {
     const yCoord = ref(null);
     const zCoord = ref(null);
     const newGroup = ref('');
+
+    const { scaleUpCoordinate } = useCoordinates();
 
     const tableHeaders = [
       {
@@ -232,6 +235,7 @@ export default {
       ICON_MAP,
       pointsArray,
       listReady,
+      scaleUpCoordinate,
     };
   },
 

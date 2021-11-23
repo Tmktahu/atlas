@@ -91,6 +91,8 @@ const { BrowserWindow } = require('@electron/remote');
 
 import SaveDialog from '@/components/dialogs/SaveDialog.vue';
 
+import { useCoordinates } from '@/models/useCoordinates.js';
+
 export default {
   name: 'LeftNav',
 
@@ -102,7 +104,6 @@ export default {
     const conversionWidgetOpen = inject('conversionWidgetOpen');
 
     const showControls = inject('showControls');
-
     const masterMapData = inject('masterMapData');
 
     const refs = toRefs(masterMapData);
@@ -110,6 +111,8 @@ export default {
 
     let manageWaypointsWindow = null;
     let importWaypointsWindow = null;
+
+    const { scaleUpCoordinate } = useCoordinates();
 
     return {
       leftNav,
@@ -120,6 +123,7 @@ export default {
       importWaypointsWindow,
       showControls,
       pointsArray,
+      scaleUpCoordinate,
     };
   },
 
