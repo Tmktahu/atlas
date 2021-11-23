@@ -1,8 +1,8 @@
 ![](https://i.imgur.com/apTDwvA.png)
 
-[![GPLv3 License](https://img.shields.io/static/v1?label=Licence&message=GPL%20v3&color=green)](https://opensource.org/licenses/) [![GitHub Release](https://img.shields.io/static/v1?label=Version&message=1.0.0&color=blue)]()
+[![GPLv3 License](https://img.shields.io/static/v1?label=Licence&message=GPL%20v3&color=green)](https://opensource.org/licenses/) [![GitHub Release](https://img.shields.io/static/v1?label=Version&message=1.0.0&color=blue)]() [![Discord](https://img.shields.io/static/v1?label=Discord&message=Click%20to%20Join&color=purple)](https://discord.gg/Vafdx5JWBh)
 
-This is the repository for Atlas, coded by Fryke#0746 on Discord.
+This is the repository for Atlas, coded by Fryke#0746 on Discord. Come check out the [Discord Server](https://discord.gg/Vafdx5JWBh).
 <br>
 _(Note this is not affiliated with the "Atlas Project" found [here](https://discord.gg/TURc9vNu))_
 
@@ -56,7 +56,7 @@ If this still doesn't convince you, feel free to try out the website version fou
 
 ## Want to help?
 
-If you are interested in contributing to this project, feel free to look through the [Issues](https://github.com/Tmktahu/atlas/issues) to see what is currently being worked on. Any thoughts, comments, or PRs are much appreciated. If you have any questions or ideas, also feel free to reach out to Fryke#0746 on Discord. You can find me in the official [Starbase Discord](https://discord.com/invite/starbase).
+If you are interested in contributing to this project, feel free to look through the [Issues](https://github.com/Tmktahu/atlas/issues) to see what is currently being worked on. Any thoughts, comments, or PRs are much appreciated. If you have any questions or ideas, feel free to join the [IPS/Atlas Discord](https://discord.gg/Vafdx5JWBh).
 
 ## Special Thanks
 
