@@ -90,6 +90,8 @@ import { MANAGE_WAYPOINT_ROUTE, IMPORT_WAYPOINTS_ROUTE } from '@/router/routes';
 import ManageDialog from '@/components/dialogs/ManageDialog.vue';
 import ImportDialog from '@/components/dialogs/ImportDialog.vue';
 
+import { useCoordinates } from '@/models/useCoordinates.js';
+
 export default {
   name: 'LeftNav',
 
@@ -101,7 +103,6 @@ export default {
     const conversionWidgetOpen = inject('conversionWidgetOpen');
 
     const showControls = inject('showControls');
-
     const masterMapData = inject('masterMapData');
 
     const refs = toRefs(masterMapData);
@@ -109,6 +110,8 @@ export default {
 
     let manageWaypointsWindow = null;
     let importWaypointsWindow = null;
+
+    const { scaleUpCoordinate } = useCoordinates();
 
     return {
       leftNav,
@@ -119,6 +122,7 @@ export default {
       importWaypointsWindow,
       showControls,
       pointsArray,
+      scaleUpCoordinate,
     };
   },
 
@@ -151,7 +155,11 @@ export default {
     onSave() {
       //this.$refs.saveDialog.open();
 
-      let data = JSON.stringify(this.masterMapData.pointsArray, null, 2);
+      let points = this.masterMapData.pointsArray.map((point) => {
+        return this.scaleUpCoordinate(point);
+      });
+
+      let data = JSON.stringify(points, null, 2);
 
       let elem = document.createElement('a');
       let file = new Blob([data], { type: 'text/plain' });

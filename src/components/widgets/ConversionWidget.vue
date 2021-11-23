@@ -123,7 +123,7 @@
 <script>
 import { ref, watch, inject } from '@vue/composition-api';
 
-import { ISAN_ORIGIN_POINT } from '@/models/useMap.js';
+import { useCoordinates, ISAN_ORIGIN_POINT } from '@/models/useCoordinates.js';
 
 export default {
   setup() {
@@ -149,6 +149,8 @@ export default {
       //{ text: 'SignaTrope', value: 'signa' },
     ];
 
+    const { scaleUpCoordinate, scaleDownCoordinate } = useCoordinates();
+
     return {
       conversionWidgetOpen,
       leftNavCondensed,
@@ -162,6 +164,8 @@ export default {
       inputRightX,
       inputRightY,
       inputRightZ,
+      scaleUpCoordinate,
+      scaleDownCoordinate,
     };
   },
 

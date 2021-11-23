@@ -2,21 +2,21 @@
 <template>
   <div>
     <div ref="mapContainer" v-resize="onResize" class="mapContainer" @keypress="onWDown" />
-    <v-slider
-      v-model="masterMapData.panSpeed"
-      hide-details
-      :min="MIN_PAN_SPEED"
-      :max="MAX_PAN_SPEED"
-      class="pan-speed-slider pb-1"
-      thumb-label="always"
-      label="Pan Speed:"
-    />
+    <v-row no-gutters class="bottom-controls">
+      <v-checkbox v-model="showGrid" hide-details reverse class="hide-grid-checkbox pr-3" label="Grid" />
+      <v-slider
+        v-model="masterMapData.panSpeed"
+        hide-details
+        :min="MIN_PAN_SPEED"
+        :max="MAX_PAN_SPEED"
+        class="pan-speed-slider"
+        thumb-label="always"
+        label="Pan Speed:"
+      />
+    </v-row>
     <div ref="pointInfoContainer" class="point-info">
       <div ref="pointName" class="name">Point Name</div>
       <div ref="pointCoord" class="coord">[Coordinate]</div>
-    </div>
-    <div class="hardware-accel-info">
-      You must have Hardware Acceleration enabled in your browser, or else this website will max out your CPU trying to render.
     </div>
     <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed, 'with-conversion-widget': conversionWidgetOpen }">
       <div>W: <span>Pan Forward</span></div>
@@ -37,6 +37,7 @@ import Stats from 'stats.js';
 import { ref, inject, watch, toRefs } from '@vue/composition-api';
 
 import { useMap, MIN_PAN_SPEED, MAX_PAN_SPEED } from '@/models/useMap.js';
+import { useCoordinates } from '@/models/useCoordinates.js';
 
 export default {
   metaInfo() {
@@ -51,18 +52,22 @@ export default {
 
   setup() {
     const masterMapData = inject('masterMapData');
+    const masterPointsArray = inject('masterPointsArray');
     const showControls = inject('showControls');
     const leftNavCondensed = inject('leftNavCondensed');
     const conversionWidgetOpen = inject('conversionWidgetOpen');
     let stats = null;
 
-    const { init: initMap, resizeMap, panForward, panBackward } = useMap(masterMapData);
+    const { init: initMap, resizeMap, panForward, panBackward, updateGrid } = useMap(masterMapData);
 
     const intersects = toRefs(masterMapData).intersects;
+    const showGrid = toRefs(masterMapData).showGrid;
 
     const showManageDialog = inject('showManageDialog');
     const showSaveDialog = inject('showSaveDialog');
     const showImportDialog = inject('showImportDialog');
+
+    const { scaleUpCoordinate } = useCoordinates();
 
     return {
       stats,
@@ -71,6 +76,7 @@ export default {
       panForward,
       panBackward,
       masterMapData,
+      masterPointsArray,
       showControls,
       leftNavCondensed,
       conversionWidgetOpen,
@@ -80,19 +86,36 @@ export default {
       showManageDialog,
       showSaveDialog,
       showImportDialog,
+      scaleUpCoordinate,
+      showGrid,
+      updateGrid,
     };
   },
 
   watch: {
     intersects() {
       if (this.masterMapData.intersects[0]?.object.type === 'Points') {
-        this.$refs.pointName.innerHTML = this.masterMapData.intersects[0].object.name;
-        this.$refs.pointCoord.innerHTML = `[${this.masterMapData.intersects[0].object.geometry.attributes.position.array[0]}, ${-this.masterMapData
-          .intersects[0].object.geometry.attributes.position.array[2]}, ${this.masterMapData.intersects[0].object.geometry.attributes.position.array[1]}]`;
+        let object = this.masterMapData.intersects[0]?.object;
+        let coordinate = {
+          position: {
+            x: object.geometry.attributes.position.array[0],
+            y: -object.geometry.attributes.position.array[2],
+            // eslint-disable-next-line id-length
+            z: object.geometry.attributes.position.array[1],
+          },
+        };
+        let expandedCoordinates = this.scaleUpCoordinate(coordinate);
+
+        this.$refs.pointName.innerHTML = object.name;
+        this.$refs.pointCoord.innerHTML = `[${expandedCoordinates.position.x}, ${expandedCoordinates.position.y}, ${expandedCoordinates.position.z}]`;
         this.$refs.pointInfoContainer.style.display = 'block';
       } else {
         this.$refs.pointInfoContainer.style.display = 'none';
       }
+    },
+
+    showGrid(value) {
+      this.updateGrid(this.masterMapData);
     },
   },
 
@@ -130,7 +153,11 @@ export default {
       });
 
       this.createStats();
-      this.initMap(this.$refs.mapContainer);
+      this.initMap(this.$refs.mapContainer, this.masterPointsArray);
+
+      this.$toasted.global.alertWarning({
+        message: 'You must have Hardware Acceleration enabled in your browser,<br>or else this website will max out your CPU trying to render.',
+      });
     });
   },
 
@@ -182,16 +209,38 @@ export default {
   }
 }
 
-.pan-speed-slider::v-deep {
+.bottom-controls {
   position: absolute;
   right: 90px;
   bottom: 0;
-  width: 30%;
+  width: calc(100% - 56px - 90px);
+  align-items: center;
+  justify-content: end;
 
-  .v-label {
-    font-weight: 400;
-    color: white;
-    letter-spacing: 0.03em;
+  .pan-speed-slider::v-deep {
+    max-width: 500px;
+
+    .v-label {
+      font-weight: 400;
+      color: white;
+      letter-spacing: 0.03em;
+    }
+  }
+
+  .hide-grid-checkbox::v-deep {
+    margin: 0;
+    padding: 0;
+
+    .v-label {
+      font-weight: 400;
+      color: white;
+      letter-spacing: 0.03em;
+      padding-right: 8px;
+    }
+
+    .v-input__slot {
+      flex-direction: row-reverse;
+    }
   }
 }
 
