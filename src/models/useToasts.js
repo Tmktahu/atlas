@@ -57,7 +57,7 @@ export const useToasts = () => {
     (payload) => {
       defaultAlertConfig.icon = 'mdi-alert';
       defaultAlertConfig.className = `alert alert-warning ${payload.description ? 'with-description' : null}`;
-      defaultAlertConfig.duration = 5000;
+      defaultAlertConfig.duration = 10000;
 
       defaultAlertConfig.action = [
         {
