@@ -80,13 +80,13 @@ export function createTorus(options, mapData) {
   torusFrontMesh.scale.set(options.scaleX, options.scaleY);
   torusFrontMesh.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
   torusFrontMesh.rotateX(Math.PI / 2);
-  torusFrontMesh.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.y, scaledDownMeasurements.position.z);
+  torusFrontMesh.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
 
   let torusBackMesh = new THREE.Mesh(geometry, materialBack);
-  torusBackMesh.scale.set(3.6666, 3.6666);
+  torusBackMesh.scale.set(options.scaleX, options.scaleY);
   torusBackMesh.lookAt(-mapData.camera.position.x, 0, -mapData.camera.position.z);
   torusBackMesh.rotateX(Math.PI / 2);
-  torusBackMesh.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.y, scaledDownMeasurements.position.z);
+  torusBackMesh.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
 
   return { torusFrontMesh, torusBackMesh };
 }

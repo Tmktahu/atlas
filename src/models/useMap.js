@@ -147,12 +147,14 @@ export function useMap(mapData) {
 
     for (let index in mapData.warpGatePointMeshes) {
       let point = mapData.warpGatePointMeshes[index];
+
       let distance = calcDistance(mapData.camera.position, {
         x: point.geometry.attributes.position.array[0],
-        y: -point.geometry.attributes.position.array[2],
+        y: -point.geometry.attributes.position.array[1],
         // eslint-disable-next-line id-length
-        z: point.geometry.attributes.position.array[1],
+        z: point.geometry.attributes.position.array[2],
       });
+
       point.material.size = distance / 10;
     }
 
@@ -186,7 +188,7 @@ export function useMap(mapData) {
     for (let index in ASTROID_BELTS) {
       let { torusFrontMesh: front, torusBackMesh: back } = createTorus(ASTROID_BELTS[index], mapData);
 
-      let newBelt = { front, back };
+      let newBelt = { name: ASTROID_BELTS[index].name, front, back };
       mapData.scene.add(front);
       mapData.scene.add(back);
 
@@ -212,7 +214,7 @@ export function useMap(mapData) {
       gridMaterial.renderOrder = -1;
       //gridMaterial.depthTest = false;
 
-      const grid = new THREE.GridHelper(1000, 500);
+      const grid = new THREE.GridHelper(10000, 5000);
       grid.material = gridMaterial;
 
       mapData.grid = grid;
@@ -314,8 +316,8 @@ export function useMap(mapData) {
 
   const viewPoint = (point) => {
     let dist = 4;
-    masterMapData.camera.position.set(point.position.x + dist + 0.1, point.position.z + dist + 0.1, point.position.y + dist + 0.1);
-    masterMapData.controls.target.set(point.position.x + dist, point.position.z + dist, point.position.y + dist);
+    masterMapData.camera.position.set(point.position.x + dist + 0.1, point.position.z + dist + 0.1, -(point.position.y + dist + 0.1));
+    masterMapData.controls.target.set(point.position.x + dist, point.position.z + dist, -(point.position.y + dist));
 
     masterMapData.controls.update();
   };
