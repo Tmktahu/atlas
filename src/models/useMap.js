@@ -18,7 +18,7 @@ export const EOS_OFFSET = {
 };
 
 export const MIN_PAN_SPEED = 1;
-export const MAX_PAN_SPEED = 1000;
+export const MAX_PAN_SPEED = 3000;
 
 export const masterMapData = reactive({
   containerElement: null,
@@ -142,7 +142,7 @@ export function useMap(mapData) {
 
     let cameraPosition = mapData.camera.position;
 
-    mapData.gridScale = Math.pow(2, Math.round(cameraPosition.y / 50));
+    mapData.gridScale = Math.pow(2, Math.round(Math.log(cameraPosition.y)));
     mapData.grid.scale.x = mapData.gridScale;
     mapData.grid.scale.z = mapData.gridScale;
 
@@ -204,7 +204,7 @@ export function useMap(mapData) {
       gridMaterial.renderOrder = -1;
       //gridMaterial.depthTest = false;
 
-      const grid = new THREE.GridHelper(10000, 3000);
+      const grid = new THREE.GridHelper(1000, 500);
       grid.material = gridMaterial;
 
       mapData.grid = grid;
@@ -267,7 +267,7 @@ export function useMap(mapData) {
     }
     mapData.camera.getWorldDirection(mapData.lookAtVector);
 
-    let dist = mapData.panSpeed / 50;
+    let dist = mapData.panSpeed / 100;
 
     mapData.controls.target.set(
       mapData.controls.target.x + mapData.lookAtVector.x * dist,
@@ -288,7 +288,7 @@ export function useMap(mapData) {
     }
     mapData.camera.getWorldDirection(mapData.lookAtVector);
 
-    let dist = mapData.panSpeed / 50;
+    let dist = mapData.panSpeed / 100;
 
     mapData.controls.target.set(
       mapData.controls.target.x + mapData.lookAtVector.x * -dist,
