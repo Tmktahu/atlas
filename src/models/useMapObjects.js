@@ -26,6 +26,14 @@ export function createSphere(options) {
   const material = new THREE.MeshLambertMaterial({ color: options.color, opacity: options.opacity });
   const sphere = new THREE.Mesh(geometry, material);
 
+  if (options.name) {
+    sphere.name = options.name;
+  }
+
+  if (options.celestialType) {
+    sphere.celestialType = options.celestialType;
+  }
+
   sphere.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
   return sphere;
 }
