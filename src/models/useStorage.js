@@ -5,10 +5,11 @@ const fsPromises = fs.promises;
 
 import { ISAN_ORIGIN_POINT, ORIGIN_POINT, useCoordinates } from './useCoordinates';
 import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetMapData/eos';
+import { ELYSIUM_WARP_GATE } from './presetMapData/elysium';
 
 const remote = require('electron').remote;
 
-export const DEFAULT_DATA = [ORIGIN_POINT, ISAN_ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
+export const DEFAULT_DATA = [ORIGIN_POINT, ELYSIUM_WARP_GATE, ISAN_ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
 
 export function useStorage() {
   let dataStoragePath = ref('');

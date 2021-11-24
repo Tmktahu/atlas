@@ -4,12 +4,12 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
-import { createSphere, createTorus } from '@/models/useMapObjects.js';
+import { createRing, createSphere, createTorus } from '@/models/useMapObjects.js';
 import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
 
 import { ICON_MAP } from '@/models/useIcons.js';
 
-import { ASTROID_BELTS, PLANETS } from './presetMapData/celestialBodies';
+import { ASTROID_BELTS, MOONS, ORBIT_RINGS } from './presetMapData/celestialBodies';
 
 export const EOS_OFFSET = {
   x: -8450000,
@@ -18,7 +18,7 @@ export const EOS_OFFSET = {
 };
 
 export const MIN_PAN_SPEED = 1;
-export const MAX_PAN_SPEED = 1000;
+export const MAX_PAN_SPEED = 3000;
 
 export const masterMapData = reactive({
   containerElement: null,
@@ -28,16 +28,17 @@ export const masterMapData = reactive({
   renderer: null,
   controls: null,
 
-  sphereMesh: null,
-  torusMesh: null,
   pointMeshes: [],
   pointsArray: ref([]),
+  warpGatePointMeshes: [],
 
+  moons: [],
   belts: [],
 
   lookAtVector: new THREE.Vector3(),
 
   panSpeed: ref(100),
+  gridScale: 1,
 
   raycaster: new THREE.Raycaster(),
   lastRaycast: null,
@@ -130,13 +131,32 @@ export function useMap(mapData) {
     mapData.raycaster.setFromCamera(mapData.mapMouse, mapData.camera);
 
     if (Date.now() - mapData.lastRaycast > mapData.raycastInterval) {
-      mapData.intersects = mapData.raycaster.intersectObjects(mapData.pointMeshes);
+      let intersectableObjects = [...mapData.warpGatePointMeshes, ...mapData.pointMeshes, ...mapData.moons];
+
+      mapData.intersects = mapData.raycaster.intersectObjects(intersectableObjects);
       mapData.lastRaycast = Date.now();
       mapData.qRaycast = false;
       handleIntersects(mapData);
     }
 
-    // calculate objects intersecting the picking ray
+    let cameraPosition = mapData.camera.position;
+
+    mapData.gridScale = Math.pow(2, Math.round(Math.log(cameraPosition.y)));
+    mapData.grid.scale.x = mapData.gridScale;
+    mapData.grid.scale.z = mapData.gridScale;
+
+    for (let index in mapData.warpGatePointMeshes) {
+      let point = mapData.warpGatePointMeshes[index];
+
+      let distance = calcDistance(mapData.camera.position, {
+        x: point.geometry.attributes.position.array[0],
+        y: -point.geometry.attributes.position.array[1],
+        // eslint-disable-next-line id-length
+        z: point.geometry.attributes.position.array[2],
+      });
+
+      point.material.size = distance / 10;
+    }
 
     mapData.controls.update();
     mapData.renderer.render(mapData.scene, mapData.camera);
@@ -160,19 +180,25 @@ export function useMap(mapData) {
 
   // ============ Object Adding Methods ===============
   const setupObjects = (mapData) => {
+    for (let index in ORBIT_RINGS) {
+      let ring = createRing(ORBIT_RINGS[index]);
+      mapData.scene.add(ring);
+    }
+
     for (let index in ASTROID_BELTS) {
       let { torusFrontMesh: front, torusBackMesh: back } = createTorus(ASTROID_BELTS[index], mapData);
 
-      let newBelt = { front, back };
+      let newBelt = { name: ASTROID_BELTS[index].name, front, back };
       mapData.scene.add(front);
       mapData.scene.add(back);
 
       mapData.belts.push(newBelt);
     }
 
-    for (let index in PLANETS) {
-      let planet = createSphere(PLANETS[index]);
-      mapData.scene.add(planet);
+    for (let index in MOONS) {
+      let moon = createSphere(MOONS[index]);
+      mapData.moons.push(moon);
+      mapData.scene.add(moon);
     }
   };
 
@@ -188,7 +214,7 @@ export function useMap(mapData) {
       gridMaterial.renderOrder = -1;
       //gridMaterial.depthTest = false;
 
-      const grid = new THREE.GridHelper(10000, 3000);
+      const grid = new THREE.GridHelper(10000, 5000);
       grid.material = gridMaterial;
 
       mapData.grid = grid;
@@ -229,7 +255,12 @@ export function useMap(mapData) {
       //geometry.setAttribute('offsets', new THREE.Float32BufferAttribute([1000, 1000], 2));
       const pointMesh = new THREE.Points(geometry, pointMaterial);
       pointMesh.name = point.name;
-      mapData.pointMeshes.push(pointMesh);
+      if (point.type === 'gate') {
+        mapData.warpGatePointMeshes.push(pointMesh);
+      } else {
+        mapData.pointMeshes.push(pointMesh);
+      }
+
       mapData.scene.add(pointMesh);
     }
   };
@@ -251,7 +282,7 @@ export function useMap(mapData) {
     }
     mapData.camera.getWorldDirection(mapData.lookAtVector);
 
-    let dist = mapData.panSpeed / 50;
+    let dist = mapData.panSpeed / 100;
 
     mapData.controls.target.set(
       mapData.controls.target.x + mapData.lookAtVector.x * dist,
@@ -272,7 +303,7 @@ export function useMap(mapData) {
     }
     mapData.camera.getWorldDirection(mapData.lookAtVector);
 
-    let dist = mapData.panSpeed / 50;
+    let dist = mapData.panSpeed / 100;
 
     mapData.controls.target.set(
       mapData.controls.target.x + mapData.lookAtVector.x * -dist,
@@ -285,8 +316,8 @@ export function useMap(mapData) {
 
   const viewPoint = (point) => {
     let dist = 4;
-    masterMapData.camera.position.set(point.position.x + dist + 0.1, point.position.z + dist + 0.1, point.position.y + dist + 0.1);
-    masterMapData.controls.target.set(point.position.x + dist, point.position.z + dist, point.position.y + dist);
+    masterMapData.camera.position.set(point.position.x + dist + 0.1, point.position.z + dist + 0.1, -(point.position.y + dist + 0.1));
+    masterMapData.controls.target.set(point.position.x + dist, point.position.z + dist, -(point.position.y + dist));
 
     masterMapData.controls.update();
   };
