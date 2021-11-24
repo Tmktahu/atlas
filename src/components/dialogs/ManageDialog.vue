@@ -238,6 +238,7 @@ export default {
       let newPoint = {
         id: uuidv4(),
         name: this.newName,
+        type: 'custom',
         position: {
           x: parseInt(this.xCoord),
           y: parseInt(this.yCoord),
