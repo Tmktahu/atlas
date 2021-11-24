@@ -3,16 +3,17 @@
   <div>
     <div ref="mapContainer" v-resize="onResize" class="mapContainer" @keypress="onWDown" />
     <v-row no-gutters class="bottom-controls">
-      <v-checkbox v-model="showGrid" hide-details reverse class="hide-grid-checkbox pr-3" label="Grid" />
+      <v-checkbox v-model="showGrid" hide-details reverse class="hide-grid-checkbox mr-2" label="Grid" />
       <v-slider
         v-model="masterMapData.panSpeed"
         hide-details
         :min="MIN_PAN_SPEED"
         :max="MAX_PAN_SPEED"
-        class="pan-speed-slider"
+        class="pan-speed-slider mr-2"
         thumb-label="always"
         label="Pan Speed:"
       />
+      <v-btn class="mr-2" icon @click="resetPan"><v-icon color="white">mdi-refresh</v-icon></v-btn>
     </v-row>
     <div ref="pointInfoContainer" class="point-info">
       <div ref="pointName" class="name">Point Name</div>
@@ -262,6 +263,10 @@ export default {
       this.resizeMap(this.masterMapData);
     },
 
+    resetPan() {
+      this.masterMapData.panSpeed = 100;
+    },
+
     // Key Handlers
     onWDown() {
       this.panForward(this.masterMapData);
@@ -306,12 +311,11 @@ export default {
           let scaledCoord = this.scaleUpCoordinate(coord);
           let output = `${scaledCoord.position.x},${scaledCoord.position.y},${scaledCoord.position.z}`;
           await navigator.clipboard.writeText(output);
+          this.$toasted.global.alertInfo({ message: 'Copied Coordinate to Clipboard', timeout: 1000 });
         }
       } catch (error) {
         this.$toasted.global.alertError({ message: 'Copy failed' });
         console.error('Failed to copy: ', error);
-      } finally {
-        this.$toasted.global.alertInfo({ message: 'Copied Coordinate to Clipboard', timeout: 1000 });
       }
     },
   },

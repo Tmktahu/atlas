@@ -9,8 +9,8 @@ export function createRing(options) {
   const { scaleDownCoordinate } = useCoordinates();
   let scaledDownMeasurements = scaleDownCoordinate(options);
 
-  const geometry = new THREE.RingGeometry(scaledDownMeasurements.radius - 1, scaledDownMeasurements.radius + 1, 100);
-  const material = new THREE.MeshLambertMaterial({ color: options.color, side: THREE.DoubleSide, opacity: 0.9, blending: THREE.AdditiveBlending });
+  const geometry = new THREE.RingGeometry(scaledDownMeasurements.radius - 2, scaledDownMeasurements.radius + 2, 200);
+  const material = new THREE.MeshLambertMaterial({ color: options.color, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
   const ring = new THREE.Mesh(geometry, material);
   ring.rotateX(Math.PI / 2);
 
