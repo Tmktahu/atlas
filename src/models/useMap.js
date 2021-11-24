@@ -4,12 +4,12 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
-import { createSphere, createTorus } from '@/models/useMapObjects.js';
+import { createRing, createSphere, createTorus } from '@/models/useMapObjects.js';
 import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
 
 import { ICON_MAP } from '@/models/useIcons.js';
 
-import { ASTROID_BELTS, PLANETS } from './presetMapData/celestialBodies';
+import { ASTROID_BELTS, MOONS, ORBIT_RINGS } from './presetMapData/celestialBodies';
 
 export const EOS_OFFSET = {
   x: -8450000,
@@ -38,6 +38,7 @@ export const masterMapData = reactive({
   lookAtVector: new THREE.Vector3(),
 
   panSpeed: ref(100),
+  gridScale: 1,
 
   raycaster: new THREE.Raycaster(),
   lastRaycast: null,
@@ -136,6 +137,12 @@ export function useMap(mapData) {
       handleIntersects(mapData);
     }
 
+    let cameraPosition = mapData.camera.position;
+
+    mapData.gridScale = Math.pow(2, Math.round(cameraPosition.y / 50));
+    mapData.grid.scale.x = mapData.gridScale;
+    mapData.grid.scale.z = mapData.gridScale;
+
     // calculate objects intersecting the picking ray
 
     mapData.controls.update();
@@ -160,6 +167,11 @@ export function useMap(mapData) {
 
   // ============ Object Adding Methods ===============
   const setupObjects = (mapData) => {
+    for (let index in ORBIT_RINGS) {
+      let ring = createRing(ORBIT_RINGS[index]);
+      mapData.scene.add(ring);
+    }
+
     for (let index in ASTROID_BELTS) {
       let { torusFrontMesh: front, torusBackMesh: back } = createTorus(ASTROID_BELTS[index], mapData);
 
@@ -170,9 +182,9 @@ export function useMap(mapData) {
       mapData.belts.push(newBelt);
     }
 
-    for (let index in PLANETS) {
-      let planet = createSphere(PLANETS[index]);
-      mapData.scene.add(planet);
+    for (let index in MOONS) {
+      let moon = createSphere(MOONS[index]);
+      mapData.scene.add(moon);
     }
   };
 

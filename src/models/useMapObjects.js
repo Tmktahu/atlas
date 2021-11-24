@@ -5,6 +5,19 @@ export function useMapObjects() {
   return {};
 }
 
+export function createRing(options) {
+  const { scaleDownCoordinate } = useCoordinates();
+  let scaledDownMeasurements = scaleDownCoordinate(options);
+
+  const geometry = new THREE.RingGeometry(scaledDownMeasurements.radius - 1, scaledDownMeasurements.radius + 1, 100);
+  const material = new THREE.MeshLambertMaterial({ color: options.color, side: THREE.DoubleSide, opacity: 0.9, blending: THREE.AdditiveBlending });
+  const ring = new THREE.Mesh(geometry, material);
+  ring.rotateX(Math.PI / 2);
+
+  ring.position.set(-845, 0, 0);
+  return ring;
+}
+
 export function createSphere(options) {
   const { scaleDownCoordinate } = useCoordinates();
   let scaledDownMeasurements = scaleDownCoordinate(options);
@@ -13,7 +26,7 @@ export function createSphere(options) {
   const material = new THREE.MeshLambertMaterial({ color: options.color, opacity: options.opacity });
   const sphere = new THREE.Mesh(geometry, material);
 
-  sphere.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.y, scaledDownMeasurements.position.z);
+  sphere.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
   return sphere;
 }
 
