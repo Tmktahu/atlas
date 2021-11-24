@@ -52,11 +52,13 @@ export function useCoordinates() {
   };
 
   const scaleDownCoordinate = (inCoord) => {
-    if (inCoord.position) {
+    if (typeof inCoord === 'object') {
       let outCoord = JSON.parse(JSON.stringify(inCoord));
-      outCoord.position.x = inCoord.position.x / COORD_SCALAR;
-      outCoord.position.y = inCoord.position.y / COORD_SCALAR;
-      outCoord.position.z = inCoord.position.z / COORD_SCALAR;
+      if (outCoord.position) {
+        outCoord.position.x = inCoord.position.x / COORD_SCALAR;
+        outCoord.position.y = inCoord.position.y / COORD_SCALAR;
+        outCoord.position.z = inCoord.position.z / COORD_SCALAR;
+      }
 
       if (outCoord.radius) {
         outCoord.radius = inCoord.radius / COORD_SCALAR;
