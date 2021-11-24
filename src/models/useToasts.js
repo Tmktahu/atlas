@@ -15,7 +15,12 @@ export const useToasts = () => {
     (payload) => {
       defaultAlertConfig.icon = 'mdi-information';
       defaultAlertConfig.className = `alert alert-info ${payload.description ? 'with-description' : null}`;
-      defaultAlertConfig.duration = 5000;
+
+      if (payload.timeout) {
+        defaultAlertConfig.duration = payload.timeout;
+      } else {
+        defaultAlertConfig.duration = 5000;
+      }
 
       defaultAlertConfig.action = [
         {
@@ -57,7 +62,12 @@ export const useToasts = () => {
     (payload) => {
       defaultAlertConfig.icon = 'mdi-alert';
       defaultAlertConfig.className = `alert alert-warning ${payload.description ? 'with-description' : null}`;
-      defaultAlertConfig.duration = 10000;
+
+      if (payload.timeout) {
+        defaultAlertConfig.duration = payload.timeout;
+      } else {
+        defaultAlertConfig.duration = 10000;
+      }
 
       defaultAlertConfig.action = [
         {
@@ -99,7 +109,12 @@ export const useToasts = () => {
     (payload) => {
       defaultAlertConfig.icon = 'mdi-close-octagon';
       defaultAlertConfig.className = `alert alert-error ${payload.description ? 'with-description' : null}`;
-      defaultAlertConfig.duration = 0;
+
+      if (payload.timeout) {
+        defaultAlertConfig.duration = payload.timeout;
+      } else {
+        defaultAlertConfig.duration = 0;
+      }
 
       defaultAlertConfig.action = [
         {

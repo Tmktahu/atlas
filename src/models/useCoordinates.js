@@ -1,11 +1,13 @@
 /* eslint-disable id-length */
 import { ref } from '@vue/composition-api';
 import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetMapData/eos';
+import { ELYSIUM_WARP_GATE } from './presetMapData/elysium';
 
 export const COORD_SCALAR = 10000;
 
 export const ORIGIN_POINT = {
-  name: 'Origin / WarpGate',
+  name: 'Origin / Eos WarpGate',
+  type: 'gate',
   color: 'aqua',
   position: { x: 0, y: 0, z: 0 },
   id: '0',
@@ -16,6 +18,7 @@ export const ORIGIN_POINT = {
 
 export const ISAN_ORIGIN_POINT = {
   name: 'ISAN Origin',
+  type: 'misc',
   color: 'orange',
   position: { x: 15313, y: -3476, z: -1535 },
   id: '1234',
@@ -37,7 +40,10 @@ export function useCoordinates() {
 
   const setupInitialPoints = () => {
     let initialPoints = [];
+
     initialPoints.push(scaleDownCoordinate(ORIGIN_POINT));
+    initialPoints.push(scaleDownCoordinate(ELYSIUM_WARP_GATE));
+
     initialPoints.push(scaleDownCoordinate(ISAN_ORIGIN_POINT));
 
     for (let index in ORIGIN_STATIONS) {
@@ -52,11 +58,13 @@ export function useCoordinates() {
   };
 
   const scaleDownCoordinate = (inCoord) => {
-    if (inCoord.position) {
+    if (typeof inCoord === 'object') {
       let outCoord = JSON.parse(JSON.stringify(inCoord));
-      outCoord.position.x = inCoord.position.x / COORD_SCALAR;
-      outCoord.position.y = inCoord.position.y / COORD_SCALAR;
-      outCoord.position.z = inCoord.position.z / COORD_SCALAR;
+      if (outCoord.position) {
+        outCoord.position.x = inCoord.position.x / COORD_SCALAR;
+        outCoord.position.y = inCoord.position.y / COORD_SCALAR;
+        outCoord.position.z = inCoord.position.z / COORD_SCALAR;
+      }
 
       if (outCoord.radius) {
         outCoord.radius = inCoord.radius / COORD_SCALAR;
