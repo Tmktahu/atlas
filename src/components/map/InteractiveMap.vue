@@ -115,6 +115,8 @@ export default {
 
     const { scaleUpCoordinate } = useCoordinates();
 
+    const focusedObject = ref(null);
+
     return {
       stats,
       initMap,
@@ -150,23 +152,48 @@ export default {
     },
 
     intersects() {
-      if (this.masterMapData.intersects[0]?.object.type === 'Points') {
-        let object = this.masterMapData.intersects[0]?.object;
+      this.focusedObject = this.masterMapData.intersects[0]?.object;
+      if (!this.focusedObject) {
+        this.$refs.pointInfoContainer.style.display = 'none';
+        this.$refs.mapContainer.style.cursor = 'auto';
+        return;
+      }
+
+      if (this.focusedObject.type === 'Points') {
         let coordinate = {
           position: {
-            x: object.geometry.attributes.position.array[0],
-            y: -object.geometry.attributes.position.array[2],
+            x: this.focusedObject.geometry.attributes.position.array[0],
+            y: -this.focusedObject.geometry.attributes.position.array[2],
             // eslint-disable-next-line id-length
-            z: object.geometry.attributes.position.array[1],
+            z: this.focusedObject.geometry.attributes.position.array[1],
           },
         };
         let expandedCoordinates = this.scaleUpCoordinate(coordinate);
 
-        this.$refs.pointName.innerHTML = object.name;
+        this.$refs.pointName.innerHTML = this.focusedObject.name;
         this.$refs.pointCoord.innerHTML = `[${expandedCoordinates.position.x}, ${expandedCoordinates.position.y}, ${expandedCoordinates.position.z}]`;
         this.$refs.pointInfoContainer.style.display = 'block';
+
+        this.$refs.mapContainer.style.cursor = 'pointer';
+      } else if (this.focusedObject.type === 'Mesh' && this.focusedObject.celestialType === 'moon') {
+        let coordinate = {
+          position: {
+            x: this.focusedObject.position.x,
+            y: -this.focusedObject.position.z,
+            // eslint-disable-next-line id-length
+            z: this.focusedObject.position.y,
+          },
+        };
+        let expandedCoordinates = this.scaleUpCoordinate(coordinate);
+
+        this.$refs.pointName.innerHTML = this.focusedObject.name;
+        this.$refs.pointCoord.innerHTML = `Estimated [${expandedCoordinates.position.x}, ${expandedCoordinates.position.y}, ${expandedCoordinates.position.z}]`;
+        this.$refs.pointInfoContainer.style.display = 'block';
+
+        this.$refs.mapContainer.style.cursor = 'pointer';
       } else {
         this.$refs.pointInfoContainer.style.display = 'none';
+        this.$refs.mapContainer.style.cursor = 'auto';
       }
     },
 
@@ -206,6 +233,18 @@ export default {
         }
       });
 
+      window.addEventListener('click', (event) => {
+        if (event.target.className === 'mapCanvas') {
+          this.handleMouseClick();
+        }
+      });
+
+      window.addEventListener('contextmenu', (event) => {
+        if (event.target.className === 'mapCanvas') {
+          this.handleRightClick();
+        }
+      });
+
       this.createStats();
     });
   },
@@ -230,6 +269,50 @@ export default {
 
     onSDown() {
       this.panBackward(this.masterMapData);
+    },
+
+    // Click action and context menu handlers
+    handleMouseClick() {
+      if (this.focusedObject && this.focusedObject.position) {
+        this.onCopy();
+      }
+    },
+
+    handleRightClick() {
+      if (this.focusedObject) {
+        console.log('right clicked an object');
+      } else {
+        console.log('right clicked empty space');
+      }
+    },
+
+    async onCopy() {
+      try {
+        if (this.focusedObject && this.focusedObject.position) {
+          let coord = null;
+          if (this.focusedObject.type === 'Mesh') {
+            coord = { position: this.focusedObject.position };
+          } else if (this.focusedObject.type === 'Points') {
+            // eslint-disable-next-line id-length
+            coord = {
+              position: {
+                x: this.focusedObject.geometry.attributes.position.array[0],
+                y: -this.focusedObject.geometry.attributes.position.array[2],
+                // eslint-disable-next-line id-length
+                z: this.focusedObject.geometry.attributes.position.array[1],
+              },
+            };
+          }
+          let scaledCoord = this.scaleUpCoordinate(coord);
+          let output = `${scaledCoord.position.x},${scaledCoord.position.y},${scaledCoord.position.z}`;
+          await navigator.clipboard.writeText(output);
+        }
+      } catch (error) {
+        this.$toasted.global.alertError({ message: 'Copy failed' });
+        console.error('Failed to copy: ', error);
+      } finally {
+        this.$toasted.global.alertInfo({ message: 'Copied Coordinate to Clipboard', timeout: 1000 });
+      }
     },
   },
 };

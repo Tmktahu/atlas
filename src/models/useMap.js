@@ -33,6 +33,7 @@ export const masterMapData = reactive({
   pointMeshes: [],
   pointsArray: ref([]),
 
+  moons: [],
   belts: [],
 
   lookAtVector: new THREE.Vector3(),
@@ -131,7 +132,9 @@ export function useMap(mapData) {
     mapData.raycaster.setFromCamera(mapData.mapMouse, mapData.camera);
 
     if (Date.now() - mapData.lastRaycast > mapData.raycastInterval) {
-      mapData.intersects = mapData.raycaster.intersectObjects(mapData.pointMeshes);
+      let intersectableObjects = [...mapData.pointMeshes, ...mapData.moons];
+
+      mapData.intersects = mapData.raycaster.intersectObjects(intersectableObjects);
       mapData.lastRaycast = Date.now();
       mapData.qRaycast = false;
       handleIntersects(mapData);
@@ -184,6 +187,7 @@ export function useMap(mapData) {
 
     for (let index in MOONS) {
       let moon = createSphere(MOONS[index]);
+      mapData.moons.push(moon);
       mapData.scene.add(moon);
     }
   };
