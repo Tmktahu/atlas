@@ -28,10 +28,9 @@ export const masterMapData = reactive({
   renderer: null,
   controls: null,
 
-  sphereMesh: null,
-  torusMesh: null,
   pointMeshes: [],
   pointsArray: ref([]),
+  warpGatePointMeshes: [],
 
   moons: [],
   belts: [],
@@ -132,7 +131,7 @@ export function useMap(mapData) {
     mapData.raycaster.setFromCamera(mapData.mapMouse, mapData.camera);
 
     if (Date.now() - mapData.lastRaycast > mapData.raycastInterval) {
-      let intersectableObjects = [...mapData.pointMeshes, ...mapData.moons];
+      let intersectableObjects = [...mapData.warpGatePointMeshes, ...mapData.pointMeshes, ...mapData.moons];
 
       mapData.intersects = mapData.raycaster.intersectObjects(intersectableObjects);
       mapData.lastRaycast = Date.now();
@@ -146,7 +145,16 @@ export function useMap(mapData) {
     mapData.grid.scale.x = mapData.gridScale;
     mapData.grid.scale.z = mapData.gridScale;
 
-    // calculate objects intersecting the picking ray
+    for (let index in mapData.warpGatePointMeshes) {
+      let point = mapData.warpGatePointMeshes[index];
+      let distance = calcDistance(mapData.camera.position, {
+        x: point.geometry.attributes.position.array[0],
+        y: -point.geometry.attributes.position.array[2],
+        // eslint-disable-next-line id-length
+        z: point.geometry.attributes.position.array[1],
+      });
+      point.material.size = distance / 10;
+    }
 
     mapData.controls.update();
     mapData.renderer.render(mapData.scene, mapData.camera);
@@ -245,7 +253,12 @@ export function useMap(mapData) {
       //geometry.setAttribute('offsets', new THREE.Float32BufferAttribute([1000, 1000], 2));
       const pointMesh = new THREE.Points(geometry, pointMaterial);
       pointMesh.name = point.name;
-      mapData.pointMeshes.push(pointMesh);
+      if (point.type === 'gate') {
+        mapData.warpGatePointMeshes.push(pointMesh);
+      } else {
+        mapData.pointMeshes.push(pointMesh);
+      }
+
       mapData.scene.add(pointMesh);
     }
   };

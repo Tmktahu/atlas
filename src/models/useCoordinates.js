@@ -6,6 +6,7 @@ export const COORD_SCALAR = 10000;
 
 export const ORIGIN_POINT = {
   name: 'Origin / WarpGate',
+  type: 'gate',
   color: 'aqua',
   position: { x: 0, y: 0, z: 0 },
   id: '0',
@@ -16,6 +17,7 @@ export const ORIGIN_POINT = {
 
 export const ISAN_ORIGIN_POINT = {
   name: 'ISAN Origin',
+  type: 'misc',
   color: 'orange',
   position: { x: 15313, y: -3476, z: -1535 },
   id: '1234',
