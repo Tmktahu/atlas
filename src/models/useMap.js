@@ -323,15 +323,15 @@ export function useMap(mapData, pointArray = ref(null)) {
   };
 
   const showHidePoint = (point) => {
-    let index = masterPointsArray.findIndex((obj) => obj.id === point.id);
-    masterPointsArray[index].hide = !masterPointsArray[index].hide;
+    let index = masterPointsArray.value.findIndex((obj) => obj.id === point.id);
+    masterPointsArray.value[index].hide = !masterPointsArray.value[index].hide;
     addPoints(masterPointsArray, mapData);
   };
 
   const addPoint = (point) => {
     const { scaleDownCoordinate } = useCoordinates();
     let newPoint = scaleDownCoordinate(point);
-    masterPointsArray.push(newPoint);
+    masterPointsArray.value.push(newPoint);
     addPoints(masterPointsArray, mapData);
   };
 
@@ -346,7 +346,7 @@ export function useMap(mapData, pointArray = ref(null)) {
   const mergePoints = (points) => {
     const { scaleDownCoordinate } = useCoordinates();
 
-    let existingIDs = masterPointsArray.map((obj) => {
+    let existingIDs = masterPointsArray.value.map((obj) => {
       return obj.id;
     });
     let skippedPoints = [];
@@ -359,7 +359,7 @@ export function useMap(mapData, pointArray = ref(null)) {
         skippedPoints.push(point);
         continue;
       } else {
-        masterPointsArray.push(newPoint);
+        masterPointsArray.value.push(newPoint);
       }
     }
 

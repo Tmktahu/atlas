@@ -211,10 +211,6 @@ export default {
 
     const { viewPoint, showHidePoint, addPoint, deletePoint } = useMap(masterMapData, masterPointsArray);
 
-    watch(masterPointsArray, () => {
-      console.log('masterPointsArray watch');
-    });
-
     return {
       masterPointsArray,
       showDialog,
