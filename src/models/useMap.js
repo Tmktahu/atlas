@@ -53,8 +53,10 @@ export const masterMapData = reactive({
   showGrid: ref(true),
 });
 
-export function useMap(mapData) {
-  const init = (inContainerElement, initialPoints) => {
+export function useMap(mapData, pointArray = ref(null)) {
+  const masterPointsArray = pointArray;
+
+  const init = (inContainerElement) => {
     mapData.containerElement = inContainerElement;
 
     mapData.scene = new THREE.Scene();
@@ -92,7 +94,7 @@ export function useMap(mapData) {
     addLight(4, 2, 4, mapData);
     addLight(-4, -1, -2, mapData);
 
-    addPoints(initialPoints);
+    addPoints(masterPointsArray);
 
     mapData.controls.update();
     animate(mapData);
@@ -234,10 +236,8 @@ export function useMap(mapData) {
       return;
     }
 
-    mapData.pointsArray = points;
-
-    for (const index in points) {
-      let point = points[index];
+    for (const index in points.value) {
+      let point = points.value[index];
       if (point.hide) {
         continue;
       }
@@ -323,29 +323,30 @@ export function useMap(mapData) {
   };
 
   const showHidePoint = (point) => {
-    let index = mapData.pointsArray.findIndex((obj) => obj.id === point.id);
-    mapData.pointsArray[index].hide = !mapData.pointsArray[index].hide;
-    addPoints(mapData.pointsArray, mapData);
+    let index = masterPointsArray.findIndex((obj) => obj.id === point.id);
+    masterPointsArray[index].hide = !masterPointsArray[index].hide;
+    addPoints(masterPointsArray, mapData);
   };
 
   const addPoint = (point) => {
     const { scaleDownCoordinate } = useCoordinates();
     let newPoint = scaleDownCoordinate(point);
-    mapData.pointsArray.push(newPoint);
-    addPoints(mapData.pointsArray, mapData);
+    masterPointsArray.push(newPoint);
+    addPoints(masterPointsArray, mapData);
   };
 
   const deletePoint = (point) => {
-    mapData.pointsArray = mapData.pointsArray.filter((obj) => {
+    let newPoints = masterPointsArray.value.filter((obj) => {
       return obj.id !== point.id;
     });
-    addPoints(mapData.pointsArray, mapData);
+    masterPointsArray.value = newPoints;
+    addPoints(masterPointsArray, mapData);
   };
 
   const mergePoints = (points) => {
     const { scaleDownCoordinate } = useCoordinates();
 
-    let existingIDs = mapData.pointsArray.map((obj) => {
+    let existingIDs = masterPointsArray.map((obj) => {
       return obj.id;
     });
     let skippedPoints = [];
@@ -358,12 +359,12 @@ export function useMap(mapData) {
         skippedPoints.push(point);
         continue;
       } else {
-        mapData.pointsArray.push(newPoint);
+        masterPointsArray.push(newPoint);
       }
     }
 
     if (mapData.scene) {
-      addPoints(mapData.pointsArray, mapData);
+      addPoints(masterPointsArray, mapData);
     }
 
     if (skippedPoints.length > 0) {

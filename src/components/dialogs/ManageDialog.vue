@@ -99,7 +99,7 @@
 
     <v-data-table
       class="waypoint-list"
-      :items="masterMapData.pointsArray"
+      :items="masterPointsArray"
       :items-per-page="-1"
       fixed-header
       hide-default-footer
@@ -172,6 +172,7 @@ export default {
   setup() {
     const masterMapData = inject('masterMapData');
     const showDialog = inject('showManageDialog');
+    const masterPointsArray = inject('masterPointsArray');
 
     const newIcon = ref(ICON_MAP.pin1.name);
     const newColor = ref(null);
@@ -208,10 +209,14 @@ export default {
       return { text: value.workingFilePath, value: value.name };
     });
 
-    const { viewPoint, showHidePoint, addPoint, deletePoint } = useMap(masterMapData);
+    const { viewPoint, showHidePoint, addPoint, deletePoint } = useMap(masterMapData, masterPointsArray);
+
+    watch(masterPointsArray, () => {
+      console.log('masterPointsArray watch');
+    });
 
     return {
-      masterMapData,
+      masterPointsArray,
       showDialog,
       newIcon,
       newColor,

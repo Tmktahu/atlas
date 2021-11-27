@@ -41,8 +41,36 @@ export function useStorage() {
     }
   };
 
+  const readFromLocalStorage = () => {
+    try {
+      let rawData = window.localStorage.getItem('atlasWaypoints');
+      if (rawData) {
+        let parsedData = JSON.parse(rawData);
+        return parsedData;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.log('Error reading local storage: ', error);
+      Vue.toasted.global.alertError({ message: 'Error reading localstorage', description: error });
+      return null;
+    }
+  };
+
+  const saveToLocalStorage = async (inData) => {
+    try {
+      let stringifiedData = JSON.stringify(inData, null, 2);
+      window.localStorage.setItem('atlasWaypoints', stringifiedData);
+    } catch (error) {
+      console.log('Error writing to local storage: ', error);
+      Vue.toasted.global.alertError({ message: 'Error saving to localstorage', description: error });
+    }
+  };
+
   return {
     readFromJSON,
     saveToJSON,
+    readFromLocalStorage,
+    saveToLocalStorage,
   };
 }

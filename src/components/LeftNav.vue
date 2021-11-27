@@ -101,12 +101,10 @@ export default {
     const leftNav = ref(true);
     const leftNavCondensed = inject('leftNavCondensed');
     const conversionWidgetOpen = inject('conversionWidgetOpen');
+    const masterPointsArray = inject('masterPointsArray');
 
     const showControls = inject('showControls');
     const masterMapData = inject('masterMapData');
-
-    const refs = toRefs(masterMapData);
-    const pointsArray = refs.pointsArray;
 
     let manageWaypointsWindow = null;
     let importWaypointsWindow = null;
@@ -121,7 +119,7 @@ export default {
       manageWaypointsWindow,
       importWaypointsWindow,
       showControls,
-      pointsArray,
+      masterPointsArray,
       scaleUpCoordinate,
     };
   },
@@ -136,9 +134,9 @@ export default {
   },
 
   watch: {
-    pointsArray() {
+    masterPointsArray() {
       if (this.manageWaypointsWindow) {
-        this.manageWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
+        this.manageWaypointsWindow.postMessage({ points: this.masterPointsArray }, '*');
       }
     },
   },
@@ -155,7 +153,7 @@ export default {
     onSave() {
       //this.$refs.saveDialog.open();
 
-      let points = this.masterMapData.pointsArray.map((point) => {
+      let points = this.masterPointsArray.map((point) => {
         return this.scaleUpCoordinate(point);
       });
 
