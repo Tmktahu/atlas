@@ -102,6 +102,7 @@ export default {
 
   setup() {
     const masterMapData = inject('masterMapData');
+    const masterPointsArray = inject('masterPointsArray');
     const showDialog = inject('showImportDialog');
 
     const uploadedFile = ref(null);
@@ -109,7 +110,7 @@ export default {
     const allChecked = ref(true);
 
     const { readFromJSON } = useStorage();
-    const { mergePoints } = useMap(masterMapData);
+    const { mergePoints } = useMap(masterMapData, masterPointsArray);
 
     const tableHeaders = [
       {

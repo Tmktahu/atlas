@@ -14,6 +14,7 @@ import { LANDING_ROUTE } from '@/router/routes';
 
 import { masterMapData } from '@/models/useMap.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
+import { useStorage } from '@/models/useStorage.js';
 import { useToasts } from '@/models/useToasts.js';
 
 import LeftNav from '@/components/LeftNav.vue';
@@ -52,6 +53,8 @@ export default {
     const { init: initCoordinates } = useCoordinates();
     const { masterPointsArray } = initCoordinates();
 
+    const { saveToLocalStorage } = useStorage();
+
     provide('masterPointsArray', masterPointsArray);
 
     provide('masterMapData', masterMapData);
@@ -63,6 +66,10 @@ export default {
     provide('showImportDialog', showImportDialog);
 
     provide('conversionWidgetOpen', conversionWidgetOpen);
+
+    watch(masterPointsArray, () => {
+      saveToLocalStorage(masterPointsArray.value);
+    });
 
     return {
       showLeftNav,

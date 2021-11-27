@@ -59,7 +59,7 @@ export default {
     const conversionWidgetOpen = inject('conversionWidgetOpen');
     let stats = null;
 
-    const { init: initMap, resizeMap, panForward, panBackward, updateGrid } = useMap(masterMapData);
+    const { init: initMap, resizeMap, panForward, panBackward, updateGrid } = useMap(masterMapData, masterPointsArray);
 
     const intersects = toRefs(masterMapData).intersects;
     const showGrid = toRefs(masterMapData).showGrid;
@@ -193,7 +193,7 @@ export default {
       });
 
       this.createStats();
-      this.initMap(this.$refs.mapContainer, this.masterPointsArray);
+      this.initMap(this.$refs.mapContainer);
 
       this.$toasted.global.alertWarning({
         message: 'You must have Hardware Acceleration enabled in your browser,<br>or else this website will max out your CPU trying to render.',
