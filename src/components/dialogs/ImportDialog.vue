@@ -87,6 +87,7 @@ import { ref, watch, inject } from '@vue/composition-api';
 
 import { useStorage } from '@/models/useStorage.js';
 import { useMap } from '@/models/useMap.js';
+import { useCoordinates } from '@/models/useCoordinates.js';
 
 import { ICON_MAP } from '@/models/useIcons.js';
 
@@ -111,6 +112,8 @@ export default {
 
     const { readFromJSON } = useStorage();
     const { mergePoints } = useMap(masterMapData, masterPointsArray);
+
+    const { scaleDownCoordinate } = useCoordinates();
 
     const tableHeaders = [
       {
@@ -150,6 +153,7 @@ export default {
       allChecked,
       ICON_MAP,
       checkedWaypoints,
+      scaleDownCoordinate,
       mergePoints,
     };
   },
@@ -179,7 +183,11 @@ export default {
         return this.checkedWaypoints.includes(obj.id);
       });
 
-      this.mergePoints(selectedPoints);
+      let scaledDownPoints = selectedPoints.map((obj) => {
+        return this.scaleDownCoordinate(obj);
+      });
+
+      this.mergePoints(scaledDownPoints);
       this.close();
     },
 
