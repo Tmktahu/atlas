@@ -31,7 +31,8 @@
       <div>Space: <span>Pan Up</span></div>
       <div>Left-Shift: <span>Pan Down</span></div>
       <div>Left-Click: <span>Rotate Camera</span></div>
-      <div>Right-Click: <span>Pan Camera</span></div>
+      <div>Right-Click Hold: <span>Pan Camera</span></div>
+      <div>Right-Click: <span>Context Menu</span></div>
     </div>
     <ContextMenu ref="contextMenu" />
   </div>
