@@ -87,6 +87,7 @@ const { dialog } = require('electron').remote;
 import { useStorage } from '@/models/useStorage.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
 import { useMap } from '@/models/useMap.js';
+import { useCoordinates } from '@/models/useCoordinates.js';
 
 import { ICON_MAP } from '@/models/useIcons.js';
 
@@ -99,7 +100,7 @@ export default {
     const allChecked = ref(true);
 
     const { readFromJSON } = useStorage();
-    const { scaleUpCoordinate } = useCoordinates();
+    const { scaleUpCoordinate. scaleDownCoordinate } = useCoordinates();
 
     const tableHeaders = [
       {
@@ -152,6 +153,7 @@ export default {
       ICON_MAP,
       checkedWaypoints,
       scaleUpCoordinate,
+      scaleDownCoordinate,
     };
   },
 
@@ -214,12 +216,19 @@ export default {
       let selectedPoints = this.loadedData.filter((obj) => {
         return this.checkedWaypoints.includes(obj.id);
       });
+
+      let scaledDownPoints = selectedPoints.map((obj) => {
+        return this.scaleDownCoordinate(obj);
+      });
+
       if (this.parentWindow !== null) {
         this.parentWindow.postMessage({
           command: 'import',
-          points: selectedPoints,
+          points: scaledDownPoints,
         });
       }
+
+      this.close();
     },
 
     flipAllChecked() {
