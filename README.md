@@ -35,9 +35,9 @@ For the website version, it loads default waypoint data on initial load and save
 
 ## Demo Video (Youtube)
 
-https://www.youtube.com/watch?v=aGvQCEddP10
+https://youtu.be/slYclXJ__5U
 <br>
-<a href="https://www.youtube.com/watch?v=aGvQCEddP10" target="_blank"><img src="https://i.imgur.com/iKY6ibM.png" width="50%"></a>
+<a href="https://youtu.be/slYclXJ__5U" target="_blank"><img src="https://i.imgur.com/odpcdZ0.png" width="50%"></a>
 
 ## Submitting Custom Icons
 
