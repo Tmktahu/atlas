@@ -11,9 +11,10 @@ Atlas is an interactive 3D mapping tool for the game Starbase. This README will 
 ## Features
 
 - Interactive 3D scene to visualize locations in the game world.
+- 3D objects for every celestial object in the game.
 - Create waypoints with custom colors and icons.
-- Delete or hide waypoints.
-- Locally stored information - no backend server.
+- Delete, hide, or view waypoints easily.
+- Locally stored information - no backend server. Leverages JSON files and LocalStorage for persistance.
 - Import and export current waypoint set via JSON files.
 - Website version or compiled executable version.
 
@@ -21,8 +22,8 @@ Atlas is an interactive 3D mapping tool for the game Starbase. This README will 
 
 You have 2 options.
 
-1. Download the standalone application built on Electron from the [releases section](https://github.com/Tmktahu/atlas/releases) and run it wherever you want. It is a portable application, so it requires no installation. This is the reccomended method because it allows management UI to be in separate windows and automatically loads a local JSON storage file on launch.
-2. Use the online website version found at https://tmktahu.github.io/atlas/. While functionality is the same, the UI is tighter and requires you to upload your custom JSON data file if you want to use it.
+1. Use the online website version found at https://tmktahu.github.io/atlas/. Uses LocalStorage to persist waypoint information in combination with uploading/exporting JSON files for sharing data.
+2. Download the standalone application built on Electron from the [releases section](https://github.com/Tmktahu/atlas/releases) and run it wherever you want. It is a portable application, so it requires no installation. Operates on locally stored JSON files.
 
 For information on how the coordinate grid is set up, check out the [Independant Positioning System](https://github.com/Tmktahu/IPS) repository and the wiki page I've written about [The Sacred Grid](https://github.com/Tmktahu/IPS/wiki/The-Sacred-Grid).
 
@@ -30,7 +31,7 @@ For information on how the coordinate grid is set up, check out the [Independant
 
 All waypoint information is stored locally on your computer in the form of JSON files. By default, Atlas functions off a `waypoint_data.json` file that is created in the directory where you run `Atlas.exe`. Atlas also allows you to save your current waypoint information or import waypoints from any JSON file of your choice.
 
-For the website version, it loads default waypoint data on initial load. You can upload a custom JSON file to import waypoints and then download the current set of waypoints as a JSON file whenever you wish. But information is NOT saved between page refreshes or browser instances.
+For the website version, it loads default waypoint data on initial load and saves information to the [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API) of your web browser. You can upload a custom JSON file to import waypoints and then download the current set of waypoints as a JSON file whenever you wish.
 
 ## Demo Video (Youtube)
 
