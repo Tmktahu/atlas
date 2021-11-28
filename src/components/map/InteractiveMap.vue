@@ -33,11 +33,13 @@
       <div>Left-Click: <span>Rotate Camera</span></div>
       <div>Right-Click: <span>Pan Camera</span></div>
     </div>
+    <ContextMenu ref="contextMenu" />
   </div>
 </template>
 
 <script>
 import Stats from 'stats.js';
+import ContextMenu from './ContextMenu.vue';
 
 import { ref, inject, watch, toRefs } from '@vue/composition-api';
 
@@ -56,6 +58,8 @@ export default {
   },
 
   name: 'InteractiveMap',
+  components: { ContextMenu },
+
   setup() {
     const masterMapData = inject('masterMapData');
     const masterPointsArray = inject('masterPointsArray');
@@ -117,6 +121,7 @@ export default {
     const { scaleUpCoordinate } = useCoordinates();
 
     const focusedObject = ref(null);
+    const showContext = false;
 
     return {
       stats,
@@ -136,6 +141,7 @@ export default {
       scaleUpCoordinate,
       showGrid,
       updateGrid,
+      showContext,
     };
   },
 
@@ -224,6 +230,8 @@ export default {
         // eslint-disable-next-line prettier/prettier
         this.masterMapData.mapMouse.x = ((event.clientX - 56) / (window.innerWidth - 56))* 2 - 1;
         this.masterMapData.mapMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        this.showContext = false;
       });
 
       window.addEventListener('wheel', (event) => {
@@ -234,15 +242,20 @@ export default {
         }
       });
 
-      window.addEventListener('click', (event) => {
+      window.addEventListener('mousedown', () => {
         if (event.target.className === 'mapCanvas') {
-          this.handleMouseClick();
+          this.$refs.contextMenu.close();
         }
+        this.showContext = true;
       });
 
-      window.addEventListener('contextmenu', (event) => {
-        if (event.target.className === 'mapCanvas') {
+      window.addEventListener('mouseup', (event) => {
+        if (event.button === 2 && this.showContext && event.target.className === 'mapCanvas') {
           this.handleRightClick();
+        }
+
+        if (event.button === 0 && event.target.className === 'mapCanvas') {
+          this.handleMouseClick();
         }
       });
 
@@ -278,44 +291,16 @@ export default {
 
     // Click action and context menu handlers
     handleMouseClick() {
-      if (this.focusedObject && this.focusedObject.position) {
-        this.onCopy();
-      }
+      // nothing for now
     },
 
     handleRightClick() {
       if (this.focusedObject) {
         console.log('right clicked an object');
+        this.$refs.contextMenu.open(this.focusedObject);
       } else {
         console.log('right clicked empty space');
-      }
-    },
-
-    async onCopy() {
-      try {
-        if (this.focusedObject && this.focusedObject.position) {
-          let coord = null;
-          if (this.focusedObject.type === 'Mesh') {
-            coord = { position: this.focusedObject.position };
-          } else if (this.focusedObject.type === 'Points') {
-            // eslint-disable-next-line id-length
-            coord = {
-              position: {
-                x: this.focusedObject.geometry.attributes.position.array[0],
-                y: -this.focusedObject.geometry.attributes.position.array[2],
-                // eslint-disable-next-line id-length
-                z: this.focusedObject.geometry.attributes.position.array[1],
-              },
-            };
-          }
-          let scaledCoord = this.scaleUpCoordinate(coord);
-          let output = `${scaledCoord.position.x},${scaledCoord.position.y},${scaledCoord.position.z}`;
-          await navigator.clipboard.writeText(output);
-          this.$toasted.global.alertInfo({ message: 'Copied Coordinate to Clipboard', timeout: 1000 });
-        }
-      } catch (error) {
-        this.$toasted.global.alertError({ message: 'Copy failed' });
-        console.error('Failed to copy: ', error);
+        this.$refs.contextMenu.open(null);
       }
     },
   },

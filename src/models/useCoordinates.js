@@ -111,6 +111,7 @@ export function useCoordinates() {
 
   return {
     init,
+    setupInitialPoints,
     scaleDownCoordinate,
     scaleUpCoordinate,
   };
