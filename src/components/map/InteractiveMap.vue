@@ -13,7 +13,12 @@
         thumb-label="always"
         label="Pan Speed:"
       />
-      <v-btn class="mr-2" icon @click="resetPan"><v-icon color="white">mdi-refresh</v-icon></v-btn>
+      <v-tooltip top nudge-left="40" nudge-bottom="10">
+        <template v-slot:activator="{ on }">
+          <v-btn class="mr-2" icon v-on="on" @click="resetPan"><v-icon color="white">mdi-refresh</v-icon></v-btn>
+        </template>
+        <div>Reset Pan Speed</div>
+      </v-tooltip>
     </v-row>
     <div ref="pointInfoContainer" class="point-info">
       <div ref="pointName" class="name">Point Name</div>
