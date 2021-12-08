@@ -4,7 +4,14 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
-import { createRing, createSphere, createTorus } from '@/models/useMapObjects.js';
+import {
+  createRing,
+  createSphere,
+  createTorus,
+  createSphereIntersectionRing,
+  createTorusIntersectionRings,
+  createPointIntersectionObjects,
+} from '@/models/useMapObjects.js';
 import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
 
 import { ICON_MAP } from '@/models/useIcons.js';
@@ -30,10 +37,13 @@ export const masterMapData = reactive({
 
   pointMeshes: [],
   pointsArray: ref([]),
+  pointIntersectionObject: null,
   warpGatePointMeshes: [],
 
   moons: [],
+  moonIntersectionRings: [],
   belts: [],
+  beltIntersectionRings: [],
 
   lookAtVector: new THREE.Vector3(),
 
@@ -167,7 +177,38 @@ export function useMap(mapData, pointArray = ref(null)) {
 
   const handleIntersects = (mapData) => {
     if (mapData.intersects[0]?.object.type === 'Points') {
-      mapData.intersects[0].object.material.size = mapData.pointSize * 1.25;
+      let object = mapData.intersects[0].object;
+      object.material.size = mapData.pointSize * 1.25;
+
+      let coordinate = {
+        position: {
+          x: object.geometry.attributes.position.array[0],
+          y: -object.geometry.attributes.position.array[2],
+          // eslint-disable-next-line id-length
+          z: object.geometry.attributes.position.array[1],
+        },
+      };
+
+      let { line, ring } = createPointIntersectionObjects(coordinate);
+      let pointIntersectionObject = { name: object.name, line, ring };
+
+      if (mapData.pointIntersectionObject !== null && mapData.pointIntersectionObject.name !== object.name) {
+        mapData.scene.remove(mapData.pointIntersectionObject.line);
+        mapData.scene.remove(mapData.pointIntersectionObject.ring);
+        mapData.pointIntersectionObject = null;
+      }
+
+      if (mapData.pointIntersectionObject === null) {
+        mapData.pointIntersectionObject = pointIntersectionObject;
+        mapData.scene.add(pointIntersectionObject.line);
+        mapData.scene.add(pointIntersectionObject.ring);
+      }
+    } else {
+      if (mapData.pointIntersectionObject !== null) {
+        mapData.scene.remove(mapData.pointIntersectionObject.line);
+        mapData.scene.remove(mapData.pointIntersectionObject.ring);
+        mapData.pointIntersectionObject = null;
+      }
     }
   };
 
@@ -189,18 +230,26 @@ export function useMap(mapData, pointArray = ref(null)) {
 
     for (let index in ASTROID_BELTS) {
       let { torusFrontMesh: front, torusBackMesh: back } = createTorus(ASTROID_BELTS[index], mapData);
-
       let newBelt = { name: ASTROID_BELTS[index].name, front, back };
       mapData.scene.add(front);
       mapData.scene.add(back);
-
       mapData.belts.push(newBelt);
+
+      let { innerRing, outerRing } = createTorusIntersectionRings(ASTROID_BELTS[index]);
+      let newIntersectionRings = { name: ASTROID_BELTS[index].name, innerRing, outerRing };
+      mapData.scene.add(innerRing);
+      mapData.scene.add(outerRing);
+      mapData.beltIntersectionRings.push(newIntersectionRings);
     }
 
     for (let index in MOONS) {
       let moon = createSphere(MOONS[index]);
       mapData.moons.push(moon);
       mapData.scene.add(moon);
+
+      let intersectionRing = createSphereIntersectionRing(MOONS[index]);
+      mapData.moonIntersectionRings.push(intersectionRing);
+      mapData.scene.add(intersectionRing);
     }
   };
 
@@ -314,6 +363,7 @@ export function useMap(mapData, pointArray = ref(null)) {
     mapData.camera.translateZ(-dist);
   };
 
+  // ============== Point CRUD =======================
   const viewPoint = (point) => {
     let dist = 4;
     masterMapData.camera.position.set(point.position.x + dist + 0.1, point.position.z + dist + 0.1, -(point.position.y + dist + 0.1));
