@@ -125,3 +125,66 @@ export function createTorusFrame(options, mapData) {
 
   return { torusFrontMesh, torusBackMesh };
 }
+
+// ============= Plane Intersection Objects =============
+
+export function createSphereIntersectionRing(options) {
+  const { scaleDownCoordinate } = useCoordinates();
+  let scaledDownMeasurements = scaleDownCoordinate(options);
+
+  const geometry = new THREE.RingGeometry(
+    scaledDownMeasurements.radius,
+    scaledDownMeasurements.radius + scaledDownMeasurements.radius / 100,
+    options.widthSegments
+  );
+  const material = new THREE.MeshBasicMaterial({ color: options.color, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+  const ring = new THREE.Mesh(geometry, material);
+  ring.rotateX(Math.PI / 2);
+
+  ring.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
+  return ring;
+}
+
+export function createTorusIntersectionRings(options) {
+  const { scaleDownCoordinate } = useCoordinates();
+  let scaledDownMeasurements = scaleDownCoordinate(options);
+
+  let outerRingRadius = (scaledDownMeasurements.overalRadius + scaledDownMeasurements.innerRadius) * scaledDownMeasurements.scaleX;
+  let innerRingRadius = (scaledDownMeasurements.overalRadius - scaledDownMeasurements.innerRadius) * scaledDownMeasurements.scaleX;
+
+  const material = new THREE.MeshBasicMaterial({ color: options.color, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+
+  const innerGeometry = new THREE.RingGeometry(innerRingRadius, innerRingRadius + innerRingRadius / 3000, options.tubularSegments * 2);
+  const innerRing = new THREE.Mesh(innerGeometry, material);
+  innerRing.rotateX(Math.PI / 2);
+
+  innerRing.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
+
+  const outerGeometry = new THREE.RingGeometry(outerRingRadius, outerRingRadius - outerRingRadius / 3000, options.tubularSegments);
+  const outerRing = new THREE.Mesh(outerGeometry, material);
+  outerRing.rotateX(Math.PI / 2);
+
+  outerRing.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
+
+  return { innerRing, outerRing };
+}
+
+export function createPointIntersectionObjects(options) {
+  const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, blending: THREE.AdditiveBlending });
+  const points = [];
+  points.push(new THREE.Vector3(options.position.x, options.position.z, -options.position.y));
+  points.push(new THREE.Vector3(options.position.x, 0, -options.position.y));
+
+  const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+  const line = new THREE.Line(lineGeometry, lineMaterial);
+
+  const ringMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+
+  const ringGeometry = new THREE.RingGeometry(0.3, 0.35, 50);
+  const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+  ring.rotateX(Math.PI / 2);
+
+  ring.position.set(options.position.x, 0, -options.position.y);
+
+  return { line, ring };
+}
