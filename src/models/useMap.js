@@ -378,6 +378,16 @@ export function useMap(mapData, pointArray = ref(null)) {
     masterMapData.pointMeshes[meshIndex].visible = !masterPointsArray.value[index].hide;
   };
 
+  const showAllPoints = () => {
+    for (let index in masterPointsArray.value) {
+      masterPointsArray.value[index].hide = false;
+    }
+
+    for (let index in masterMapData.pointMeshes) {
+      masterMapData.pointMeshes[index].visible = true;
+    }
+  };
+
   const addPoint = (point) => {
     const { scaleDownCoordinate } = useCoordinates();
     let newPoint = scaleDownCoordinate(point);
@@ -435,6 +445,7 @@ export function useMap(mapData, pointArray = ref(null)) {
     viewPoint,
     selectPoint,
     showHidePoint,
+    showAllPoints,
     addPoint,
     deletePoint,
     mergePoints,
