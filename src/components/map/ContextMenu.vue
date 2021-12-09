@@ -1,5 +1,6 @@
 <template>
   <div ref="container" class="context-menu" :class="{ hide: !showMenu }">
+    <v-btn v-if="object" small text @click="onView">View</v-btn>
     <v-btn v-if="object" small text @click="onCopy">Copy Coordinate</v-btn>
     <v-btn v-if="object && isPoint" small text @click="onHide">Hide Point</v-btn>
     <v-btn v-if="!object" small text @click="onShowAll">Show All Points</v-btn>
@@ -25,7 +26,7 @@ export default {
 
     const { scaleUpCoordinate, setupInitialPoints } = useCoordinates();
 
-    const { showHidePoint, showAllPoints, mergePoints } = useMap(masterMapData, masterPointsArray);
+    const { viewObject, showHidePoint, showAllPoints, mergePoints } = useMap(masterMapData, masterPointsArray);
 
     return {
       showMenu,
@@ -33,6 +34,7 @@ export default {
       scaleUpCoordinate,
       setupInitialPoints,
       mergePoints,
+      viewObject,
       showHidePoint,
       showAllPoints,
     };
@@ -61,6 +63,10 @@ export default {
 
     // Actions
 
+    onView() {
+      this.viewObject(this.object);
+    },
+
     async onCopy() {
       try {
         if (this.object && this.object.position) {
@@ -68,7 +74,6 @@ export default {
           if (this.object.type === 'Mesh') {
             coord = { position: this.object.position };
           } else if (this.object.type === 'Points') {
-            // eslint-disable-next-line id-length
             coord = {
               position: {
                 x: this.object.geometry.attributes.position.array[0],
