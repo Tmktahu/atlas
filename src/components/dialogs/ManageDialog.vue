@@ -294,7 +294,7 @@ export default {
       if (this.parentWindow !== null) {
         this.parentWindow.postMessage({
           command: 'showHide',
-          point: point,
+          point: point.id,
         });
       }
     },

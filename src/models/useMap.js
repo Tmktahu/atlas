@@ -124,7 +124,8 @@ export function useMap(mapData) {
     mapData.raycaster.setFromCamera(mapData.mapMouse, mapData.camera);
 
     if (Date.now() - mapData.lastRaycast > mapData.raycastInterval) {
-      let intersectableObjects = [...mapData.warpGatePointMeshes, ...mapData.pointMeshes, ...mapData.moons];
+      let points = mapData.pointMeshes.filter((point) => point.visible);
+      let intersectableObjects = [...mapData.warpGatePointMeshes, ...points, ...mapData.moons];
 
       mapData.intersects = mapData.raycaster.intersectObjects(intersectableObjects);
       mapData.lastRaycast = Date.now();
@@ -269,9 +270,7 @@ export function useMap(mapData) {
 
     for (const index in points) {
       let point = points[index];
-      if (point.hide) {
-        continue;
-      }
+
       const sprite = await new THREE.TextureLoader().load(ICON_MAP[point.icon].workingFilePath);
       let color = new THREE.Color(point.color);
 
@@ -363,18 +362,20 @@ export function useMap(mapData) {
     masterMapData.controls.update();
   };
 
-  const showHidePoint = (point, mapData) => {
-    let index = mapData.pointsArray.findIndex((obj) => obj.id === point.id);
-    mapData.pointsArray[index].hide = !mapData.pointsArray[index].hide;
-    addPoints(mapData.pointsArray, mapData);
-  };
-
   const selectPoint = (id) => {
     let index = masterPointsArray.value.findIndex((obj) => obj.id === id);
     masterPointsArray.value[index].selected = !masterPointsArray.value[index].selected;
 
     let meshIndex = masterMapData.pointMeshes.findIndex((obj) => obj.pointId === id);
     masterMapData.pointMeshes[meshIndex].selected = masterPointsArray.value[index].selected;
+  };
+
+  const showHidePoint = (id) => {
+    let index = masterPointsArray.value.findIndex((obj) => obj.id === id);
+    masterPointsArray.value[index].hide = !masterPointsArray.value[index].hide;
+
+    let meshIndex = masterMapData.pointMeshes.findIndex((obj) => obj.pointId === id);
+    masterMapData.pointMeshes[meshIndex].visible = !masterPointsArray.value[index].hide;
   };
 
   const addPoint = (point) => {
