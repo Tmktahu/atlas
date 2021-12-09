@@ -3,6 +3,7 @@
     <v-btn v-if="object" small text @click="onView">View</v-btn>
     <v-btn v-if="object" small text @click="onCopy">Copy Coordinate</v-btn>
     <v-btn v-if="object && isPoint" small text @click="onHide">Hide Point</v-btn>
+    <v-btn v-if="!object" small text @click="onViewOrigin">View Origin</v-btn>
     <v-btn v-if="!object" small text @click="onShowAll">Show All Points</v-btn>
     <v-btn v-if="!object" small text @click="onResetDefaults">Reset Default Points</v-btn>
   </div>
@@ -98,6 +99,11 @@ export default {
     onHide() {
       this.showHidePoint(this.object.pointId);
       this.close();
+    },
+
+    onViewOrigin() {
+      // eslint-disable-next-line id-length
+      this.viewObject({ position: { x: 0, y: 0, z: 0 } });
     },
 
     onShowAll() {
