@@ -2,6 +2,7 @@
   <div ref="container" class="context-menu" :class="{ hide: !showMenu }">
     <v-btn v-if="object" small text @click="onCopy">Copy Coordinate</v-btn>
     <v-btn v-if="object && isPoint" small text @click="onHide">Hide Point</v-btn>
+    <v-btn v-if="!object" small text @click="onShowAll">Show All Points</v-btn>
     <v-btn v-if="!object" small text @click="onResetDefaults">Reset Default Points</v-btn>
   </div>
 </template>
@@ -24,7 +25,7 @@ export default {
 
     const { scaleUpCoordinate, setupInitialPoints } = useCoordinates();
 
-    const { showHidePoint, mergePoints } = useMap(masterMapData, masterPointsArray);
+    const { showHidePoint, showAllPoints, mergePoints } = useMap(masterMapData, masterPointsArray);
 
     return {
       showMenu,
@@ -33,6 +34,7 @@ export default {
       setupInitialPoints,
       mergePoints,
       showHidePoint,
+      showAllPoints,
     };
   },
 
@@ -90,10 +92,15 @@ export default {
 
     onHide() {
       this.showHidePoint(this.object.pointId);
+      this.close();
+    },
+
+    onShowAll() {
+      this.showAllPoints();
+      this.close();
     },
 
     onResetDefaults() {
-      console.log('trying to reset defaults');
       let defaultPoints = this.setupInitialPoints();
       this.mergePoints(defaultPoints);
       this.close();
