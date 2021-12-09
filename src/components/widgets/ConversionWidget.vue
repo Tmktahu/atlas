@@ -222,8 +222,6 @@ export default {
       let from = '';
       let to = '';
 
-      console.log(inputSide);
-
       if (inputSide === 'left') {
         from = this.leftSelect;
         to = this.rightSelect;

@@ -18,12 +18,25 @@ export function createRing(options) {
   return ring;
 }
 
-export function createSphere(options) {
+export async function createSphere(options) {
+  let texture = null;
+  if (options.texture) {
+    let textureLoader = new THREE.TextureLoader();
+    texture = await textureLoader.load(options.texture);
+  }
+
   const { scaleDownCoordinate } = useCoordinates();
   let scaledDownMeasurements = scaleDownCoordinate(options);
 
   const geometry = new THREE.SphereGeometry(scaledDownMeasurements.radius, options.widthSegments, options.heightSegments);
-  const material = new THREE.MeshLambertMaterial({ color: options.color, opacity: options.opacity });
+  const material = new THREE.MeshLambertMaterial({ opacity: options.opacity });
+
+  if (texture) {
+    material.map = texture;
+  } else {
+    material.color = new THREE.Color(options.color);
+  }
+
   const sphere = new THREE.Mesh(geometry, material);
 
   if (options.name) {
@@ -59,36 +72,23 @@ export function createTorus(options, mapData) {
     scaledDownMeasurements.overalRadius,
     scaledDownMeasurements.innerRadius,
     options.radialSegments,
-    options.tubularSegments,
-    Math.PI
+    options.tubularSegments
   );
-  const materialFront = new THREE.MeshLambertMaterial({
+  const material = new THREE.MeshLambertMaterial({
     color: options.color,
     opacity: options.opacity,
     transparent: true,
     blending: THREE.AdditiveBlending,
     side: THREE.DoubleSide,
   });
-  const materialBack = new THREE.MeshLambertMaterial({
-    color: options.color,
-    opacity: options.opacity,
-    blending: THREE.AdditiveBlending,
-    side: THREE.DoubleSide,
-  });
 
-  let torusFrontMesh = new THREE.Mesh(geometry, materialFront);
-  torusFrontMesh.scale.set(options.scaleX, options.scaleY);
-  torusFrontMesh.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
-  torusFrontMesh.rotateX(Math.PI / 2);
-  torusFrontMesh.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
+  let torusMesh = new THREE.Mesh(geometry, material);
+  torusMesh.scale.set(options.scaleX, options.scaleY);
+  torusMesh.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
+  torusMesh.rotateX(Math.PI / 2);
+  torusMesh.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
 
-  let torusBackMesh = new THREE.Mesh(geometry, materialBack);
-  torusBackMesh.scale.set(options.scaleX, options.scaleY);
-  torusBackMesh.lookAt(-mapData.camera.position.x, 0, -mapData.camera.position.z);
-  torusBackMesh.rotateX(Math.PI / 2);
-  torusBackMesh.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
-
-  return { torusFrontMesh, torusBackMesh };
+  return torusMesh;
 }
 
 export function createTorusFrame(options, mapData) {

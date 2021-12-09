@@ -16,7 +16,7 @@ import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
 
 import { ICON_MAP } from '@/models/useIcons.js';
 
-import { ASTROID_BELTS, MOONS, ORBIT_RINGS } from './presetMapData/celestialBodies';
+import { ASTROID_BELTS, MOONS, ORBIT_RINGS, EOS_BELT_ZONES } from './presetMapData/celestialBodies';
 
 export const EOS_OFFSET = {
   x: -8450000,
@@ -40,10 +40,37 @@ export const masterMapData = reactive({
   pointIntersectionObjects: [],
   warpGatePointMeshes: [],
 
+  belts: {
+    eos: {
+      zones: [],
+      showZones: ref(false),
+    },
+    elysium: {
+      zones: [],
+      showZones: ref(false),
+    },
+    chemosh: {
+      zones: [],
+      showZones: ref(false),
+    },
+    kumi: {
+      zones: [],
+      showZones: ref(false),
+    },
+    szellem: {
+      zones: [],
+      showZones: ref(false),
+    },
+    alstel: {
+      zones: [],
+      showZones: ref(false),
+    },
+  },
+
+  otherBelts: [],
+
   moons: [],
   moonIntersectionRings: [],
-  belts: [],
-  beltIntersectionRings: [],
 
   lookAtVector: new THREE.Vector3(),
 
@@ -66,7 +93,7 @@ export const masterMapData = reactive({
 export function useMap(mapData, pointArray = ref(null)) {
   const masterPointsArray = pointArray;
 
-  const init = (inContainerElement) => {
+  const init = async (inContainerElement) => {
     mapData.containerElement = inContainerElement;
 
     mapData.scene = new THREE.Scene();
@@ -99,7 +126,7 @@ export function useMap(mapData, pointArray = ref(null)) {
 
     updateGrid(mapData);
 
-    setupObjects(mapData);
+    await setupObjects(mapData);
 
     addLight(4, 2, 4, mapData);
     addLight(-4, -1, -2, mapData);
@@ -133,15 +160,6 @@ export function useMap(mapData, pointArray = ref(null)) {
       mapData.lastRaycast = Date.now();
       mapData.qRaycast = false;
       handleIntersects(mapData);
-    }
-
-    for (let index in mapData.belts) {
-      mapData.belts[index].front.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
-      mapData.belts[index].front.rotateX(Math.PI / 2);
-
-      mapData.belts[index].back.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
-      mapData.belts[index].back.rotateX(Math.PI / 2);
-      mapData.belts[index].back.rotateZ(Math.PI);
     }
 
     if (mapData.pointMeshes) {
@@ -183,6 +201,19 @@ export function useMap(mapData, pointArray = ref(null)) {
       point.material.size = distance / 10;
     }
 
+    for (let index in mapData.belts) {
+      if (mapData.belts[index]?.zones !== undefined) {
+        for (let zindex in mapData.belts[index].zones) {
+          mapData.belts[index].zones[zindex].mesh.visible = mapData.belts[index].showZones;
+          mapData.belts[index].zones[zindex].intersectionRings.innerRing.visible = mapData.belts[index].showZones;
+          mapData.belts[index].zones[zindex].intersectionRings.outerRing.visible = mapData.belts[index].showZones;
+        }
+      }
+      mapData.belts[index].belt.mesh.visible = !mapData.belts[index].showZones;
+      mapData.belts[index].belt.intersectionRings.innerRing.visible = !mapData.belts[index].showZones;
+      mapData.belts[index].belt.intersectionRings.outerRing.visible = !mapData.belts[index].showZones;
+    }
+
     mapData.controls.update();
     mapData.renderer.render(mapData.scene, mapData.camera);
     mapData.stats.end();
@@ -205,28 +236,45 @@ export function useMap(mapData, pointArray = ref(null)) {
   };
 
   // ============ Object Adding Methods ===============
-  const setupObjects = (mapData) => {
+  const setupObjects = async (mapData) => {
     for (let index in ORBIT_RINGS) {
       let ring = createRing(ORBIT_RINGS[index]);
       mapData.scene.add(ring);
     }
 
     for (let index in ASTROID_BELTS) {
-      let { torusFrontMesh: front, torusBackMesh: back } = createTorus(ASTROID_BELTS[index], mapData);
-      let newBelt = { name: ASTROID_BELTS[index].name, front, back };
-      mapData.scene.add(front);
-      mapData.scene.add(back);
-      mapData.belts.push(newBelt);
+      let torusMesh = createTorus(ASTROID_BELTS[index], mapData);
+      mapData.scene.add(torusMesh);
 
       let { innerRing, outerRing } = createTorusIntersectionRings(ASTROID_BELTS[index]);
-      let newIntersectionRings = { name: ASTROID_BELTS[index].name, innerRing, outerRing };
       mapData.scene.add(innerRing);
       mapData.scene.add(outerRing);
-      mapData.beltIntersectionRings.push(newIntersectionRings);
+
+      let newBelt = { name: ASTROID_BELTS[index].name, moon: ASTROID_BELTS[index].moon, mesh: torusMesh, intersectionRings: { innerRing, outerRing } };
+
+      mapData.belts[ASTROID_BELTS[index].moon].belt = newBelt;
+    }
+
+    for (let index in EOS_BELT_ZONES) {
+      let torusMesh = createTorus(EOS_BELT_ZONES[index], mapData);
+      mapData.scene.add(torusMesh);
+
+      let { innerRing, outerRing } = createTorusIntersectionRings(EOS_BELT_ZONES[index]);
+      mapData.scene.add(innerRing);
+      mapData.scene.add(outerRing);
+
+      let newZone = {
+        name: EOS_BELT_ZONES[index].name,
+        moon: EOS_BELT_ZONES[index].moon,
+        mesh: torusMesh,
+        intersectionRings: { innerRing, outerRing },
+      };
+
+      mapData.belts[EOS_BELT_ZONES[index].moon].zones.push(newZone);
     }
 
     for (let index in MOONS) {
-      let moon = createSphere(MOONS[index]);
+      let moon = await createSphere(MOONS[index]);
       mapData.moons.push(moon);
       mapData.scene.add(moon);
 
