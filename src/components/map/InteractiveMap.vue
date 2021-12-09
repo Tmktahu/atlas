@@ -82,7 +82,7 @@ export default {
     const { scaleUpCoordinate } = useCoordinates();
 
     const focusedObject = ref(null);
-    const showContext = false;
+    const mouseMoved = false;
 
     const { selectPoint } = useMap(masterMapData, masterPointsArray);
 
@@ -107,7 +107,7 @@ export default {
       showGrid,
       showEosZones,
       updateGrid,
-      showContext,
+      mouseMoved,
       selectPoint,
     };
   },
@@ -186,7 +186,7 @@ export default {
         this.masterMapData.mapMouse.x = ((event.clientX - 56) / (window.innerWidth - 56))* 2 - 1;
         this.masterMapData.mapMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        this.showContext = false;
+        this.mouseMoved = true;
       });
 
       window.addEventListener('wheel', (event) => {
@@ -203,15 +203,15 @@ export default {
         if (event.target.className === 'mapCanvas') {
           this.$refs.contextMenu.close();
         }
-        this.showContext = true;
+        this.mouseMoved = false;
       });
 
       window.addEventListener('mouseup', (event) => {
-        if (event.button === 2 && this.showContext && event.target.className === 'mapCanvas') {
+        if (event.button === 2 && !this.mouseMoved && event.target.className === 'mapCanvas') {
           this.handleRightClick();
         }
 
-        if (event.button === 0 && event.target.className === 'mapCanvas') {
+        if (event.button === 0 && !this.mouseMoved && event.target.className === 'mapCanvas') {
           this.handleMouseClick();
         }
       });
