@@ -25,7 +25,7 @@ export const EOS_OFFSET = {
 };
 
 export const MIN_PAN_SPEED = 1;
-export const MAX_PAN_SPEED = 3000;
+export const MAX_PAN_SPEED = 5000;
 
 export const masterMapData = reactive({
   containerElement: null,
