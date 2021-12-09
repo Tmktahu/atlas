@@ -364,8 +364,8 @@ export function useMap(mapData) {
       };
 
       let dist = 4;
-      masterMapData.camera.position.set(coord.x + dist + 0.1, coord.z + dist + 0.1, -(coord.y + dist + 0.1));
-      masterMapData.controls.target.set(coord.x + dist, coord.z + dist, -(coord.y + dist));
+      masterMapData.camera.position.set(coord.x + dist + 0.1, coord.z + dist + 0.1, coord.y + dist + 0.1);
+      masterMapData.controls.target.set(coord.x + dist, coord.z + dist, coord.y + dist);
 
       masterMapData.controls.update();
     } else if (object.type === 'Mesh') {
@@ -376,8 +376,8 @@ export function useMap(mapData) {
       masterMapData.controls.update();
     } else if (object.position) {
       let dist = 4;
-      masterMapData.camera.position.set(object.position.x + dist + 0.1, object.position.z + dist + 0.1, -(object.position.y + dist + 0.1));
-      masterMapData.controls.target.set(object.position.x + dist, object.position.z + dist, -(object.position.y + dist));
+      masterMapData.camera.position.set(object.position.x + dist + 0.1, object.position.z + dist + 0.1, object.position.y + dist + 0.1);
+      masterMapData.controls.target.set(object.position.x + dist, object.position.z + dist, object.position.y + dist);
 
       masterMapData.controls.update();
     }
