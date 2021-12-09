@@ -292,22 +292,45 @@ export function useMap(mapData, pointArray = ref(null)) {
 
   const updateGrid = (mapData) => {
     if (mapData.showGrid) {
-      const gridMaterial = new THREE.MeshLambertMaterial({
-        color: '#111111',
-        opacity: 0.5,
+      const planeMaterial = new THREE.MeshLambertMaterial({
+        color: '#ffeda3',
+        opacity: 0.1,
         transparent: true,
         blending: THREE.AdditiveBlending,
         depthFunc: THREE.LessDepth,
+        side: THREE.DoubleSide,
+      });
+      const plainGeometry = new THREE.CircleGeometry(14000, 500);
+      const plane = new THREE.Mesh(plainGeometry, planeMaterial);
+      plane.rotateX(Math.PI / 2);
+      mapData.plane = plane;
+      mapData.scene.add(plane);
+
+      const gridMaterial = new THREE.LineBasicMaterial({
+        color: new THREE.Color(0.5, 0.5, 0.5),
+        linewidth: 10,
+        opacity: 0.6,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthFunc: THREE.LessDepth,
+        side: THREE.DoubleSide,
       });
       gridMaterial.renderOrder = -1;
       //gridMaterial.depthTest = false;
 
-      const grid = new THREE.GridHelper(10000, 5000);
-      grid.material = gridMaterial;
+      const grid = new THREE.PolarGridHelper(500, 4, 100, 200, '#000000', '#000000');
+      //grid.material = gridMaterial;
+      console.log(grid);
+      //grid.material.linewidth = 3;
+      // grid.material.color = new THREE.Color(0.5, 0.5, 0.5);
+      grid.material.opacity = 0.5;
+      // grid.material.side = THREE.DoubleSide;
+      //grid.position.set(-845, 0, 0);
 
       mapData.grid = grid;
       mapData.scene.add(mapData.grid);
     } else {
+      mapData.scene.remove(mapData.plane);
       mapData.scene.remove(mapData.grid);
     }
   };
