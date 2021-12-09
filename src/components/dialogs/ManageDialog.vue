@@ -2,7 +2,12 @@
 <template>
   <div class="d-flex flex-column" style="height: 100vh">
     <div class="page-title px-6 pt-5">Waypoint Management</div>
+    <<<<<<< HEAD
     <div class="page-title--sub px-6">{{ subText }}</div>
+    =======
+    <div class="page-title--sub px-6">Add a new waypoint with the form below. Manage waypoints with the list.</div>
+    <div class="page-title--sub px-6">!!! Note this map uses <a href="https://github.com/Tmktahu/IPS" target="_blank">IPS</a> Coordinates !!!</div>
+    >>>>>>> 19f6b2c... style tweaking and adding note
     <v-divider color="primary-blue" class="mt-4" />
 
     <div v-if="parentWindow === null" class="error-state-mask" />
@@ -112,7 +117,7 @@
       <template v-slot:item.name="{ item }">
         <div class="d-flex align-center">
           <div class="image-wrapper" :style="{ 'background-color': item.color }">
-            <img :src="ICON_MAP[item.icon].workingFilePath" contain width="32px" height="32px" style="filter: invert(1)" />
+            <img :src="ICON_MAP[item.icon].workingFilePath" contain width="20px" height="20px" style="filter: invert(1)" />
           </div>
           <span class="pl-3"> {{ item.name }}</span>
         </div>
@@ -124,11 +129,11 @@
       </template>
       <template v-slot:item.actions="{ item }">
         <div class="d-flex">
-          <v-btn class="action-button view mr-2" dense outlined @click="onView(item)">View</v-btn>
-          <v-btn class="action-button mr-2" :class="{ show: item.hide, hide: !item.hide }" dense outlined @click="onShowHide(item)">{{
+          <v-btn class="action-button view mr-2" small dense outlined @click="onView(item)">View</v-btn>
+          <v-btn class="action-button mr-2" :class="{ show: item.hide, hide: !item.hide }" small dense outlined @click="onShowHide(item)">{{
             item.hide ? 'Show' : 'Hide'
           }}</v-btn>
-          <v-btn class="action-button delete" dense outlined @click="onDelete(item)">Delete</v-btn>
+          <v-btn class="action-button delete" small dense outlined @click="onDelete(item)">Delete</v-btn>
         </div>
       </template>
       <template v-slot:no-data>
@@ -140,9 +145,9 @@
       <template v-slot:group.header="{ group, toggle, isOpen }">
         <td colspan="3" class="group-header-row" @click="toggle">
           <div class="d-flex justify-center align-center group-header-text">
-            <v-icon size="32" class="mr-3">{{ isOpen ? 'mdi-minus' : 'mdi-plus' }}</v-icon>
+            <v-icon size="20" class="mr-3">{{ isOpen ? 'mdi-arrow-expand-up' : 'mdi-arrow-expand-down' }}</v-icon>
             <div class="group-header"> "{{ group }}" Waypoints </div>
-            <v-icon size="32" class="ml-3">{{ isOpen ? 'mdi-minus' : 'mdi-plus' }}</v-icon>
+            <v-icon size="20" class="ml-3">{{ isOpen ? 'mdi-arrow-expand-up' : 'mdi-arrow-expand-down' }}</v-icon>
           </div>
         </td>
       </template>
@@ -417,16 +422,16 @@ export default {
   background-color: transparent !important;
 
   .v-data-table__wrapper {
-    height: calc(100vh - 253px);
+    height: calc(100vh - 277px);
   }
 
   .image-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 16px;
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
   }
 
   th {
@@ -447,6 +452,7 @@ export default {
   }
 
   td {
+    height: 32px !important;
     color: white;
     border-bottom: 1px solid #666 !important;
   }
@@ -464,7 +470,7 @@ export default {
   }
 
   .group-header-row {
-    height: 26px;
+    height: 26px !important;
     padding: 0 !important;
 
     &:hover {
@@ -475,6 +481,7 @@ export default {
 }
 
 .action-button {
+  height: 20px !important;
   text-transform: none;
 
   &.view {
