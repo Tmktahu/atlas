@@ -260,7 +260,7 @@ export default {
     },
 
     onShowHide(point) {
-      this.showHidePoint(point);
+      this.showHidePoint(point.id);
     },
 
     onDelete(point) {

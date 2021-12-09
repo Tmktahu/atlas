@@ -126,7 +126,8 @@ export function useMap(mapData, pointArray = ref(null)) {
     mapData.raycaster.setFromCamera(mapData.mapMouse, mapData.camera);
 
     if (Date.now() - mapData.lastRaycast > mapData.raycastInterval) {
-      let intersectableObjects = [...mapData.warpGatePointMeshes, ...mapData.pointMeshes, ...mapData.moons];
+      let points = mapData.pointMeshes.filter((point) => point.visible);
+      let intersectableObjects = [...mapData.warpGatePointMeshes, ...points, ...mapData.moons];
 
       mapData.intersects = mapData.raycaster.intersectObjects(intersectableObjects);
       mapData.lastRaycast = Date.now();
@@ -269,9 +270,7 @@ export function useMap(mapData, pointArray = ref(null)) {
 
     for (const index in points.value) {
       let point = points.value[index];
-      if (point.hide) {
-        continue;
-      }
+
       const sprite = await new THREE.TextureLoader().load(ICON_MAP[point.icon].workingFilePath);
       let color = new THREE.Color(point.color);
 
@@ -371,10 +370,12 @@ export function useMap(mapData, pointArray = ref(null)) {
     masterMapData.pointMeshes[meshIndex].selected = masterPointsArray.value[index].selected;
   };
 
-  const showHidePoint = (point) => {
-    let index = masterPointsArray.value.findIndex((obj) => obj.id === point.id);
+  const showHidePoint = (id) => {
+    let index = masterPointsArray.value.findIndex((obj) => obj.id === id);
     masterPointsArray.value[index].hide = !masterPointsArray.value[index].hide;
-    addPoints(masterPointsArray, mapData);
+
+    let meshIndex = masterMapData.pointMeshes.findIndex((obj) => obj.pointId === id);
+    masterMapData.pointMeshes[meshIndex].visible = !masterPointsArray.value[index].hide;
   };
 
   const addPoint = (point) => {

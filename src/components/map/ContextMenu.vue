@@ -1,6 +1,7 @@
 <template>
   <div ref="container" class="context-menu" :class="{ hide: !showMenu }">
     <v-btn v-if="object" small text @click="onCopy">Copy Coordinate</v-btn>
+    <v-btn v-if="object && isPoint" small text @click="onHide">Hide Point</v-btn>
     <v-btn v-if="!object" small text @click="onResetDefaults">Reset Default Points</v-btn>
   </div>
 </template>
@@ -23,7 +24,7 @@ export default {
 
     const { scaleUpCoordinate, setupInitialPoints } = useCoordinates();
 
-    const { mergePoints } = useMap(masterMapData, masterPointsArray);
+    const { showHidePoint, mergePoints } = useMap(masterMapData, masterPointsArray);
 
     return {
       showMenu,
@@ -31,7 +32,14 @@ export default {
       scaleUpCoordinate,
       setupInitialPoints,
       mergePoints,
+      showHidePoint,
     };
+  },
+
+  computed: {
+    isPoint() {
+      return this.object.type === 'Points';
+    },
   },
 
   methods: {
@@ -80,6 +88,10 @@ export default {
       }
     },
 
+    onHide() {
+      this.showHidePoint(this.object.pointId);
+    },
+
     onResetDefaults() {
       console.log('trying to reset defaults');
       let defaultPoints = this.setupInitialPoints();
@@ -96,11 +108,17 @@ export default {
 @import '@/design/variables/_colors';
 
 .context-menu {
+  display: flex;
+  flex-direction: column;
   border: 1px solid black;
   background: color.change($primary-blue, $lightness: 60%, $saturation: 60%);
   top: 0;
   position: fixed;
   z-index: 10;
+
+  button {
+    justify-content: flex-start;
+  }
 
   &.hide {
     display: none;
