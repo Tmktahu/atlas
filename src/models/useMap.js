@@ -1,7 +1,7 @@
 /* eslint-disable id-length */
 import Vue from 'vue';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from '@/controls/OrbitControls.js';
 
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
 import {
@@ -121,6 +121,11 @@ export function useMap(mapData, pointArray = ref(null)) {
       RIGHT: 'KeyD',
       BOTTOM: 'ShiftLeft',
     };
+    mapData.controls.mouseButtons = {
+      LEFT: null,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: THREE.MOUSE.PAN,
+    };
     mapData.controls.target.set(startingControlsPosition[0], startingControlsPosition[1], startingControlsPosition[2]);
     mapData.controls.update();
 
@@ -170,7 +175,7 @@ export function useMap(mapData, pointArray = ref(null)) {
         }
 
         if (mapData.pointMeshes[i].selected) {
-          mapData.pointMeshes[i].material.color = new THREE.Color(100, 0, 0);
+          mapData.pointMeshes[i].material.color = new THREE.Color(1, 1, 1);
         } else {
           let index = masterPointsArray.value.findIndex((obj) => obj.id === mapData.pointMeshes[i].pointId);
           mapData.pointMeshes[i].material.color = new THREE.Color(masterPointsArray.value[index].color);
