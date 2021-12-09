@@ -307,10 +307,8 @@ export default {
 
     handleRightClick() {
       if (this.focusedObject) {
-        console.log('right clicked an object');
         this.$refs.contextMenu.open(this.focusedObject);
       } else {
-        console.log('right clicked empty space');
         this.$refs.contextMenu.open(null);
       }
     },

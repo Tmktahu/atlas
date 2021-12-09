@@ -218,11 +218,13 @@ export default {
       this.conversionWidgetOpen = !this.conversionWidgetOpen;
     },
 
-    onInputChange(side) {
+    onInputChange(inputSide) {
       let from = '';
       let to = '';
 
-      if (side === 'left') {
+      console.log(inputSide);
+
+      if (inputSide === 'left') {
         from = this.leftSelect;
         to = this.rightSelect;
       } else {
@@ -232,49 +234,61 @@ export default {
 
       // IPS <=> ISAN
       if (from === 'isan' && to === 'ips') {
-        this.convertISANtoIPS();
+        this.convertISANtoIPS(inputSide);
       }
 
       if (from === 'ips' && to === 'isan') {
-        this.convertIPStoISAN();
+        this.convertIPStoISAN(inputSide);
       }
 
       // SIGNA <=> IPS
       if (from === 'signa' && to === 'ips') {
-        this.convertSIGNAtoIPS();
+        this.convertSIGNAtoIPS(inputSide);
       }
 
       if (from === 'ips' && to === 'signa') {
-        this.convertIPStoSIGNA();
+        this.convertIPStoSIGNA(inputSide);
       }
 
       // SIGNA <=> ISAN
       if (from === 'signa' && to === 'isan') {
-        this.convertIPStoSIGNA();
+        this.convertIPStoSIGNA(inputSide);
       }
 
       if (from === 'isan' && to === 'signa') {
-        this.convertIPStoSIGNA();
+        this.convertIPStoSIGNA(inputSide);
       }
     },
 
-    convertISANtoIPS() {
+    convertISANtoIPS(inputSide) {
       // left = ISAN, right = IPS
       // ISAN [+Z,+X,+Y] === IPS [+X,+Y,+Z]
-      this.inputRightX = parseInt(this.inputLeftZ) + ISAN_ORIGIN_POINT.position.x;
-      this.inputRightY = parseInt(this.inputLeftX) + ISAN_ORIGIN_POINT.position.y;
-      this.inputRightZ = parseInt(this.inputLeftY) + ISAN_ORIGIN_POINT.position.z;
+      if (inputSide === 'left') {
+        this.inputRightX = parseInt(this.inputLeftZ) + ISAN_ORIGIN_POINT.position.x;
+        this.inputRightY = parseInt(this.inputLeftX) + ISAN_ORIGIN_POINT.position.y;
+        this.inputRightZ = parseInt(this.inputLeftY) + ISAN_ORIGIN_POINT.position.z;
+      } else {
+        this.inputLeftX = parseInt(this.inputRightZ) + ISAN_ORIGIN_POINT.position.x;
+        this.inputLeftY = parseInt(this.inputRightX) + ISAN_ORIGIN_POINT.position.y;
+        this.inputLeftZ = parseInt(this.inputRightY) + ISAN_ORIGIN_POINT.position.z;
+      }
     },
 
-    convertIPStoISAN() {
+    convertIPStoISAN(inputSide) {
       // left = IPS, right = ISAN
       // IPS [+Y,+Z,+X] === ISAN [+X,+Y,+Z]
-      this.inputRightX = parseInt(this.inputLeftY) - ISAN_ORIGIN_POINT.position.y;
-      this.inputRightY = parseInt(this.inputLeftZ) - ISAN_ORIGIN_POINT.position.z;
-      this.inputRightZ = parseInt(this.inputLeftX) - ISAN_ORIGIN_POINT.position.x;
+      if (inputSide === 'left') {
+        this.inputRightX = parseInt(this.inputLeftY) - ISAN_ORIGIN_POINT.position.y;
+        this.inputRightY = parseInt(this.inputLeftZ) - ISAN_ORIGIN_POINT.position.z;
+        this.inputRightZ = parseInt(this.inputLeftX) - ISAN_ORIGIN_POINT.position.x;
+      } else {
+        this.inputLeftX = parseInt(this.inputRightY) - ISAN_ORIGIN_POINT.position.y;
+        this.inputLeftY = parseInt(this.inputRightZ) - ISAN_ORIGIN_POINT.position.z;
+        this.inputLeftZ = parseInt(this.inputRightX) - ISAN_ORIGIN_POINT.position.x;
+      }
     },
 
-    convertSIGNAtoIPS() {
+    convertSIGNAtoIPS(inputSide) {
       console.log('Converting from SIGNA to IPS');
       // left = SIGNA, right = IPS
 
@@ -429,16 +443,16 @@ export default {
       // Signa [120933.866224, 0, 0] should equal IPS [-5000, 60000, 0]
     },
 
-    convertIPStoSIGNA() {
+    convertIPStoSIGNA(inputSide) {
       console.log('Converting from IPS to SIGNA');
     },
 
-    convertSIGNAtoISAN() {
+    convertSIGNAtoISAN(inputSide) {
       console.log('Converting from SIGNA to ISAN');
       // left = SIGNA, right = ISAN
     },
 
-    convertISANtoSIGNA() {
+    convertISANtoSIGNA(inputSide) {
       console.log('Converting from ISAN to SIGNA');
       // left = ISAN, right = SIGNA
       // subtract [-56525 1408 -35301] from ISAN (X,Y,Z)
