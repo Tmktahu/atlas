@@ -210,7 +210,7 @@ export default {
       return { text: value.workingFilePath, value: value.name };
     });
 
-    const { viewPoint, showHidePoint, addPoint, deletePoint } = useMap(masterMapData, masterPointsArray);
+    const { viewObject, showHidePoint, addPoint, deletePoint } = useMap(masterMapData, masterPointsArray);
 
     return {
       masterPointsArray,
@@ -225,7 +225,7 @@ export default {
       icons,
       newGroup,
       ICON_MAP,
-      viewPoint,
+      viewObject,
       showHidePoint,
       addPoint,
       deletePoint,
@@ -257,7 +257,7 @@ export default {
     },
 
     onView(point) {
-      this.viewPoint(point);
+      this.viewObject(point);
     },
 
     onShowHide(point) {

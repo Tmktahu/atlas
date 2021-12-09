@@ -354,12 +354,33 @@ export function useMap(mapData, pointArray = ref(null)) {
   };
 
   // ============== Point CRUD =======================
-  const viewPoint = (point) => {
-    let dist = 4;
-    masterMapData.camera.position.set(point.position.x + dist + 0.1, point.position.z + dist + 0.1, -(point.position.y + dist + 0.1));
-    masterMapData.controls.target.set(point.position.x + dist, point.position.z + dist, -(point.position.y + dist));
+  const viewObject = (object) => {
+    if (object.type === 'Points') {
+      let coord = {
+        x: object.geometry.attributes.position.array[0],
+        y: -object.geometry.attributes.position.array[2],
+        // eslint-disable-next-line id-length
+        z: object.geometry.attributes.position.array[1],
+      };
 
-    masterMapData.controls.update();
+      let dist = 4;
+      masterMapData.camera.position.set(coord.x + dist + 0.1, coord.z + dist + 0.1, -(coord.y + dist + 0.1));
+      masterMapData.controls.target.set(coord.x + dist, coord.z + dist, -(coord.y + dist));
+
+      masterMapData.controls.update();
+    } else if (object.type === 'Mesh') {
+      let dist = object.geometry.boundingSphere.radius * 1.5;
+      masterMapData.camera.position.set(object.position.x + dist + 0.1, object.position.y + dist + 0.1, object.position.z + dist + 0.1);
+      masterMapData.controls.target.set(object.position.x + dist, object.position.y + dist, object.position.z + dist);
+
+      masterMapData.controls.update();
+    } else if (object.position) {
+      let dist = 4;
+      masterMapData.camera.position.set(object.position.x + dist + 0.1, object.position.z + dist + 0.1, -(object.position.y + dist + 0.1));
+      masterMapData.controls.target.set(object.position.x + dist, object.position.z + dist, -(object.position.y + dist));
+
+      masterMapData.controls.update();
+    }
   };
 
   const selectPoint = (id) => {
@@ -442,7 +463,7 @@ export function useMap(mapData, pointArray = ref(null)) {
     resizeMap,
     panForward,
     panBackward,
-    viewPoint,
+    viewObject,
     selectPoint,
     showHidePoint,
     showAllPoints,
