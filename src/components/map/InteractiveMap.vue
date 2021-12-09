@@ -31,10 +31,11 @@
       <div>A: <span>Pan Left</span></div>
       <div>D: <span>Pan Right</span></div>
       <div>Space: <span>Pan Up</span></div>
-      <div>Left-Shift: <span>Pan Down</span></div>
-      <div>Left-Click: <span>Rotate Camera</span></div>
-      <div>Right-Click Hold: <span>Pan Camera</span></div>
-      <div>Right-Click: <span>Context Menu</span></div>
+      <div>L-Shift: <span>Pan Down</span></div>
+      <div>L-Click Hold + R-Click Hold: <span>Rotate Camera</span></div>
+      <div>R-Click Hold: <span>Pan Camera</span></div>
+      <div>R-Click: <span>Context Menu</span></div>
+      <div>L-Click: <span>Select Point</span></div>
     </div>
     <ContextMenu ref="contextMenu" />
   </div>
