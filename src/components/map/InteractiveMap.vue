@@ -129,6 +129,8 @@ export default {
     const focusedObject = ref(null);
     const showContext = false;
 
+    const { selectPoint } = useMap(masterMapData, masterPointsArray);
+
     return {
       stats,
       initMap,
@@ -148,6 +150,7 @@ export default {
       showGrid,
       updateGrid,
       showContext,
+      selectPoint,
     };
   },
 
@@ -297,7 +300,9 @@ export default {
 
     // Click action and context menu handlers
     handleMouseClick() {
-      // nothing for now
+      if (this.focusedObject?.type === 'Points') {
+        this.selectPoint(this.focusedObject.pointId);
+      }
     },
 
     handleRightClick() {

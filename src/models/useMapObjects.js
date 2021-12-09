@@ -177,14 +177,15 @@ export function createPointIntersectionObjects(options) {
 
   const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
   const line = new THREE.Line(lineGeometry, lineMaterial);
+  line.visible = false;
 
   const ringMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
 
   const ringGeometry = new THREE.RingGeometry(0.3, 0.35, 50);
   const ring = new THREE.Mesh(ringGeometry, ringMaterial);
   ring.rotateX(Math.PI / 2);
-
   ring.position.set(options.position.x, 0, -options.position.y);
+  ring.visible = false;
 
   return { line, ring };
 }
