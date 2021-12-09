@@ -3,6 +3,7 @@
   <div>
     <div ref="mapContainer" v-resize="onResize" class="mapContainer" @keypress="onWDown" />
     <v-row no-gutters class="bottom-controls">
+      <v-checkbox v-model="showEosZones" hide-details reverse class="hide-grid-checkbox mr-2" label="Eos Zones" />
       <v-checkbox v-model="showGrid" hide-details reverse class="hide-grid-checkbox mr-2" label="Grid" />
       <v-slider
         v-model="masterMapData.panSpeed"
@@ -123,6 +124,7 @@ export default {
 
     const intersects = toRefs(masterMapData).intersects;
     const showGrid = toRefs(masterMapData).showGrid;
+    const showEosZones = toRefs(masterMapData.belts['eos']).showZones;
 
     const { scaleUpCoordinate } = useCoordinates();
 
@@ -148,6 +150,7 @@ export default {
       dataStoragePath,
       scaleUpCoordinate,
       showGrid,
+      showEosZones,
       updateGrid,
       showContext,
       selectPoint,
