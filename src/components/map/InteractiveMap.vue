@@ -81,13 +81,13 @@ export default {
       resizeMap,
       panForward,
       panBackward,
-      viewPoint,
+      viewObject,
       showHidePoint,
       addPoint,
       deletePoint,
       mergePoints,
       updateGrid,
-    } = useMap(masterMapData);
+    } = useMap(masterMapData, masterPointsArray);
 
     const { dataStoragePath } = useStorage();
 
@@ -96,7 +96,8 @@ export default {
       (event) => {
         if (event.data.command) {
           if (event.data.command === 'view') {
-            viewPoint(event.data.point, masterMapData);
+            event.data.point.position.y = -event.data.point.position.y;
+            viewObject(event.data.point);
           }
 
           if (event.data.command === 'showHide') {

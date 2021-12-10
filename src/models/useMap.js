@@ -93,8 +93,7 @@ export const masterMapData = reactive({
 export function useMap(mapData, pointArray = ref(null)) {
   const masterPointsArray = pointArray;
 
-  const init = (inContainerElement, initialPoints) => {
-
+  const init = async (inContainerElement, initialPoints) => {
     mapData.containerElement = inContainerElement;
 
     mapData.scene = new THREE.Scene();
@@ -437,7 +436,7 @@ export function useMap(mapData, pointArray = ref(null)) {
     if (object.type === 'Points') {
       let coord = {
         x: object.geometry.attributes.position.array[0],
-        y: -object.geometry.attributes.position.array[2],
+        y: object.geometry.attributes.position.array[2],
         // eslint-disable-next-line id-length
         z: object.geometry.attributes.position.array[1],
       };

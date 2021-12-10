@@ -2,12 +2,8 @@
 <template>
   <div class="d-flex flex-column" style="height: 100vh">
     <div class="page-title px-6 pt-5">Waypoint Management</div>
-    <<<<<<< HEAD
     <div class="page-title--sub px-6">{{ subText }}</div>
-    =======
-    <div class="page-title--sub px-6">Add a new waypoint with the form below. Manage waypoints with the list.</div>
     <div class="page-title--sub px-6">!!! Note this map uses <a href="https://github.com/Tmktahu/IPS" target="_blank">IPS</a> Coordinates !!!</div>
-    >>>>>>> 19f6b2c... style tweaking and adding note
     <v-divider color="primary-blue" class="mt-4" />
 
     <div v-if="parentWindow === null" class="error-state-mask" />
