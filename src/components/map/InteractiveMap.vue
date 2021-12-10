@@ -3,6 +3,7 @@
   <div>
     <div ref="mapContainer" v-resize="onResize" class="mapContainer" @keypress="onWDown" />
     <v-row no-gutters class="bottom-controls">
+      <v-checkbox v-model="showEosZones" hide-details reverse class="hide-grid-checkbox mr-2" label="Eos Zones" />
       <v-checkbox v-model="showGrid" hide-details reverse class="hide-grid-checkbox mr-2" label="Grid" />
       <v-slider
         v-model="masterMapData.panSpeed"
@@ -34,10 +35,11 @@
       <div>A: <span>Pan Left</span></div>
       <div>D: <span>Pan Right</span></div>
       <div>Space: <span>Pan Up</span></div>
-      <div>Left-Shift: <span>Pan Down</span></div>
-      <div>Left-Click: <span>Rotate Camera</span></div>
-      <div>Right-Click Hold: <span>Pan Camera</span></div>
-      <div>Right-Click: <span>Context Menu</span></div>
+      <div>L-Shift: <span>Pan Down</span></div>
+      <div>L-Click Hold + R-Click Hold: <span>Rotate Camera</span></div>
+      <div>R-Click Hold: <span>Pan Camera</span></div>
+      <div>R-Click: <span>Context Menu</span></div>
+      <div>L-Click: <span>Select Point</span></div>
     </div>
     <ContextMenu ref="contextMenu" />
   </div>
@@ -79,13 +81,13 @@ export default {
       resizeMap,
       panForward,
       panBackward,
-      viewPoint,
+      viewObject,
       showHidePoint,
       addPoint,
       deletePoint,
       mergePoints,
       updateGrid,
-    } = useMap(masterMapData);
+    } = useMap(masterMapData, masterPointsArray);
 
     const { dataStoragePath } = useStorage();
 
@@ -94,7 +96,8 @@ export default {
       (event) => {
         if (event.data.command) {
           if (event.data.command === 'view') {
-            viewPoint(event.data.point, masterMapData);
+            event.data.point.position.y = -event.data.point.position.y;
+            viewObject(event.data.point);
           }
 
           if (event.data.command === 'showHide') {
@@ -123,11 +126,14 @@ export default {
 
     const intersects = toRefs(masterMapData).intersects;
     const showGrid = toRefs(masterMapData).showGrid;
+    const showEosZones = toRefs(masterMapData.belts['eos']).showZones;
 
     const { scaleUpCoordinate } = useCoordinates();
 
     const focusedObject = ref(null);
-    const showContext = false;
+    const mouseMoved = false;
+
+    const { selectPoint } = useMap(masterMapData, masterPointsArray);
 
     return {
       stats,
@@ -146,8 +152,10 @@ export default {
       dataStoragePath,
       scaleUpCoordinate,
       showGrid,
+      showEosZones,
       updateGrid,
-      showContext,
+      mouseMoved,
+      selectPoint,
     };
   },
 
@@ -237,7 +245,7 @@ export default {
         this.masterMapData.mapMouse.x = ((event.clientX - 56) / (window.innerWidth - 56))* 2 - 1;
         this.masterMapData.mapMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        this.showContext = false;
+        this.mouseMoved = true;
       });
 
       window.addEventListener('wheel', (event) => {
@@ -252,15 +260,15 @@ export default {
         if (event.target.className === 'mapCanvas') {
           this.$refs.contextMenu.close();
         }
-        this.showContext = true;
+        this.mouseMoved = false;
       });
 
       window.addEventListener('mouseup', (event) => {
-        if (event.button === 2 && this.showContext && event.target.className === 'mapCanvas') {
+        if (event.button === 2 && !this.mouseMoved && event.target.className === 'mapCanvas') {
           this.handleRightClick();
         }
 
-        if (event.button === 0 && event.target.className === 'mapCanvas') {
+        if (event.button === 0 && !this.mouseMoved && event.target.className === 'mapCanvas') {
           this.handleMouseClick();
         }
       });
@@ -297,15 +305,15 @@ export default {
 
     // Click action and context menu handlers
     handleMouseClick() {
-      // nothing for now
+      if (this.focusedObject?.type === 'Points') {
+        this.selectPoint(this.focusedObject.pointId);
+      }
     },
 
     handleRightClick() {
       if (this.focusedObject) {
-        console.log('right clicked an object');
         this.$refs.contextMenu.open(this.focusedObject);
       } else {
-        console.log('right clicked empty space');
         this.$refs.contextMenu.open(null);
       }
     },

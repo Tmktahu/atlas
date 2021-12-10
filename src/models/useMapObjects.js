@@ -9,8 +9,8 @@ export function createRing(options) {
   const { scaleDownCoordinate } = useCoordinates();
   let scaledDownMeasurements = scaleDownCoordinate(options);
 
-  const geometry = new THREE.RingGeometry(scaledDownMeasurements.radius - 2, scaledDownMeasurements.radius + 2, 200);
-  const material = new THREE.MeshLambertMaterial({ color: options.color, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+  const geometry = new THREE.RingGeometry(scaledDownMeasurements.radius - 3, scaledDownMeasurements.radius + 3, 200);
+  const material = new THREE.MeshStandardMaterial({ color: options.color, side: THREE.DoubleSide, blending: THREE.NoBlending });
   const ring = new THREE.Mesh(geometry, material);
   ring.rotateX(Math.PI / 2);
 
@@ -18,12 +18,25 @@ export function createRing(options) {
   return ring;
 }
 
-export function createSphere(options) {
+export async function createSphere(options) {
+  let texture = null;
+  if (options.texture) {
+    let textureLoader = new THREE.TextureLoader();
+    texture = await textureLoader.load(options.texture);
+  }
+
   const { scaleDownCoordinate } = useCoordinates();
   let scaledDownMeasurements = scaleDownCoordinate(options);
 
   const geometry = new THREE.SphereGeometry(scaledDownMeasurements.radius, options.widthSegments, options.heightSegments);
-  const material = new THREE.MeshLambertMaterial({ color: options.color, opacity: options.opacity });
+  const material = new THREE.MeshLambertMaterial({ opacity: options.opacity });
+
+  if (texture) {
+    material.map = texture;
+  } else {
+    material.color = new THREE.Color(options.color);
+  }
+
   const sphere = new THREE.Mesh(geometry, material);
 
   if (options.name) {
@@ -59,36 +72,23 @@ export function createTorus(options, mapData) {
     scaledDownMeasurements.overalRadius,
     scaledDownMeasurements.innerRadius,
     options.radialSegments,
-    options.tubularSegments,
-    Math.PI
+    options.tubularSegments
   );
-  const materialFront = new THREE.MeshLambertMaterial({
+  const material = new THREE.MeshLambertMaterial({
     color: options.color,
     opacity: options.opacity,
     transparent: true,
     blending: THREE.AdditiveBlending,
     side: THREE.DoubleSide,
   });
-  const materialBack = new THREE.MeshLambertMaterial({
-    color: options.color,
-    opacity: options.opacity,
-    blending: THREE.AdditiveBlending,
-    side: THREE.DoubleSide,
-  });
 
-  let torusFrontMesh = new THREE.Mesh(geometry, materialFront);
-  torusFrontMesh.scale.set(options.scaleX, options.scaleY);
-  torusFrontMesh.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
-  torusFrontMesh.rotateX(Math.PI / 2);
-  torusFrontMesh.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
+  let torusMesh = new THREE.Mesh(geometry, material);
+  torusMesh.scale.set(options.scaleX, options.scaleY);
+  torusMesh.lookAt(mapData.camera.position.x, 0, mapData.camera.position.z);
+  torusMesh.rotateX(Math.PI / 2);
+  torusMesh.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
 
-  let torusBackMesh = new THREE.Mesh(geometry, materialBack);
-  torusBackMesh.scale.set(options.scaleX, options.scaleY);
-  torusBackMesh.lookAt(-mapData.camera.position.x, 0, -mapData.camera.position.z);
-  torusBackMesh.rotateX(Math.PI / 2);
-  torusBackMesh.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
-
-  return { torusFrontMesh, torusBackMesh };
+  return torusMesh;
 }
 
 export function createTorusFrame(options, mapData) {
@@ -124,4 +124,68 @@ export function createTorusFrame(options, mapData) {
   torusBackMesh.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.y, scaledDownMeasurements.position.z);
 
   return { torusFrontMesh, torusBackMesh };
+}
+
+// ============= Plane Intersection Objects =============
+
+export function createSphereIntersectionRing(options) {
+  const { scaleDownCoordinate } = useCoordinates();
+  let scaledDownMeasurements = scaleDownCoordinate(options);
+
+  const geometry = new THREE.RingGeometry(
+    scaledDownMeasurements.radius,
+    scaledDownMeasurements.radius + scaledDownMeasurements.radius / 100,
+    options.widthSegments
+  );
+  const material = new THREE.MeshBasicMaterial({ color: options.color, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+  const ring = new THREE.Mesh(geometry, material);
+  ring.rotateX(Math.PI / 2);
+
+  ring.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
+  return ring;
+}
+
+export function createTorusIntersectionRings(options) {
+  const { scaleDownCoordinate } = useCoordinates();
+  let scaledDownMeasurements = scaleDownCoordinate(options);
+
+  let outerRingRadius = (scaledDownMeasurements.overalRadius + scaledDownMeasurements.innerRadius) * scaledDownMeasurements.scaleX;
+  let innerRingRadius = (scaledDownMeasurements.overalRadius - scaledDownMeasurements.innerRadius) * scaledDownMeasurements.scaleX;
+
+  const material = new THREE.MeshBasicMaterial({ color: options.color, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+
+  const innerGeometry = new THREE.RingGeometry(innerRingRadius, innerRingRadius + innerRingRadius / 3000, options.tubularSegments * 2);
+  const innerRing = new THREE.Mesh(innerGeometry, material);
+  innerRing.rotateX(Math.PI / 2);
+
+  innerRing.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
+
+  const outerGeometry = new THREE.RingGeometry(outerRingRadius, outerRingRadius - outerRingRadius / 3000, options.tubularSegments);
+  const outerRing = new THREE.Mesh(outerGeometry, material);
+  outerRing.rotateX(Math.PI / 2);
+
+  outerRing.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
+
+  return { innerRing, outerRing };
+}
+
+export function createPointIntersectionObjects(options) {
+  const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, blending: THREE.AdditiveBlending });
+  const points = [];
+  points.push(new THREE.Vector3(options.position.x, options.position.z, -options.position.y));
+  points.push(new THREE.Vector3(options.position.x, 0, -options.position.y));
+
+  const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+  const line = new THREE.Line(lineGeometry, lineMaterial);
+  line.visible = false;
+
+  const ringMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+
+  const ringGeometry = new THREE.RingGeometry(0.3, 0.35, 50);
+  const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+  ring.rotateX(Math.PI / 2);
+  ring.position.set(options.position.x, 0, -options.position.y);
+  ring.visible = false;
+
+  return { line, ring };
 }
