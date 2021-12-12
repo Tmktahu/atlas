@@ -109,6 +109,10 @@ export default {
 </script>
 
 <style lang="scss">
+@use 'sass:color';
+
+@import '@/design/variables/_colors';
+
 html {
   overflow: hidden;
 }
@@ -125,5 +129,26 @@ html {
   -webkit-user-select: none;
   -webkit-app-region: drag;
   background: #333;
+
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #444;
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: $primary-blue;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: white;
 }
 </style>
