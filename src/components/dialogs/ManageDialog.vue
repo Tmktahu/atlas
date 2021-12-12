@@ -317,22 +317,6 @@ export default {
   top: 180px !important;
   left: 25px !important;
 }
-
-.new-waypoint-icon-select {
-  top: unset !important;
-  bottom: calc(90vh - 240px) !important;
-
-  .v-select-list {
-    display: flex !important;
-    flex-wrap: wrap;
-    background: #444 !important;
-
-    .v-list-item {
-      max-width: 40px;
-      padding: 0;
-    }
-  }
-}
 </style>
 
 <style lang="scss" scoped>
@@ -478,6 +462,7 @@ export default {
 
 .action-button {
   height: 20px !important;
+
   text-transform: none;
 
   &.view {
@@ -503,62 +488,5 @@ export default {
   &:hover {
     overflow-y: overlay !important;
   }
-}
-
-.color-picker::v-deep {
-  width: 200px;
-  background: transparent;
-
-  .v-color-picker__controls {
-    padding: 10px 10px 10px 0 !important;
-  }
-
-  .v-slider__thumb {
-    cursor: pointer;
-  }
-
-  .v-color-picker__hue {
-    margin-top: 2px;
-    margin-bottom: 0 !important;
-  }
-
-  .v-slider__thumb::after {
-    width: 12px;
-    height: 12px;
-  }
-
-  .v-color-picker__alpha {
-    display: none;
-  }
-
-  .v-slider__thumb::before {
-    top: -6px;
-    left: -6px;
-    width: 24px !important;
-    height: 24px !important;
-  }
-
-  .v-slider__thumb-container--active {
-    .v-slider__thumb::before {
-      transform: scale(1) !important;
-    }
-  }
-}
-
-.icon-select::v-deep {
-  width: 50px;
-  min-width: 50px;
-
-  .v-input__slot {
-    padding: 0 !important;
-  }
-
-  i {
-    color: white !important;
-  }
-}
-
-.icon-tooltip-text {
-  text-transform: capitalize;
 }
 </style>

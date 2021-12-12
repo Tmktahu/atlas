@@ -32,7 +32,7 @@
           <span class="left-nav-label pl-5">Import Waypoints</span>
         </v-list-item>
 
-        <v-list-item link :class="{ selected: conversionWidgetOpen }" @click="onCoordinateConversion">
+        <v-list-item link :class="{ selected: showConversionWidget }" @click="onCoordinateConversion">
           <div class="left-nav-icon">
             <v-icon>mdi-swap-horizontal</v-icon>
           </div>
@@ -101,13 +101,17 @@ export default {
   setup() {
     const leftNav = ref(true);
     const leftNavCondensed = inject('leftNavCondensed');
-    const conversionWidgetOpen = inject('conversionWidgetOpen');
+
+    const showConversionWidget = inject('showConversionWidget');
+    const masterPointsArray = inject('masterPointsArray');
 
     const showControls = inject('showControls');
     const masterMapData = inject('masterMapData');
 
     const refs = toRefs(masterMapData);
     const pointsArray = refs.pointsArray;
+
+    const showWaypointWidget = inject('showWaypointWidget');
 
     let manageWaypointsWindow = null;
     let importWaypointsWindow = null;
@@ -117,13 +121,14 @@ export default {
     return {
       leftNav,
       leftNavCondensed,
-      conversionWidgetOpen,
+      showConversionWidget,
       masterMapData,
       manageWaypointsWindow,
       importWaypointsWindow,
       showControls,
       pointsArray,
       scaleUpCoordinate,
+      showWaypointWidget,
     };
   },
 
@@ -152,21 +157,8 @@ export default {
       this.leftNavCondensed = !event.srcElement.classList.contains('v-navigation-drawer--mini-variant');
     },
 
-    async onManageWaypoint() {
-      let routeData = this.$router.resolve({
-        name: MANAGE_WAYPOINT_ROUTE,
-      });
-
-      if (this.manageWaypointsWindow === null || this.manageWaypointsWindow?.closed) {
-        this.manageWaypointsWindow = window.open(routeData.href, 'manageFrame', 'width=700,height=800');
-
-        setTimeout(() => {
-          this.manageWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
-        }, 1000);
-      } else {
-        this.manageWaypointsWindow.postMessage({ points: this.masterMapData.pointsArray }, '*');
-        this.manageWaypointsWindow.focus();
-      }
+    onManageWaypoint() {
+      this.showWaypointWidget = true;
     },
 
     onSave() {
@@ -191,7 +183,7 @@ export default {
     },
 
     onCoordinateConversion() {
-      this.conversionWidgetOpen = !this.conversionWidgetOpen;
+      this.showConversionWidget = !this.showConversionWidget;
     },
 
     onReload() {

@@ -2,6 +2,7 @@
   <v-app>
     <LeftNav v-if="showLeftNav" />
     <ConversionWidget ref="conversionWidget" />
+    <WaypointManagementWidget ref="waypointManagementWidget" />
     <v-main>
       <div class="draggable-area-bar" />
       <router-view />
@@ -10,16 +11,17 @@
 </template>
 
 <script>
-import { onMounted, ref, watch, provide, computed, inject } from '@vue/composition-api';
+import { onMounted, ref, watch, provide, computed, inject, toRefs } from '@vue/composition-api';
 import { LANDING_ROUTE } from '@/router/routes';
 
-import { masterMapData } from '@/models/useMap.js';
+import { useMap } from '@/models/useMap.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
 import { useStorage } from '@/models/useStorage.js';
 import { useToasts } from '@/models/useToasts.js';
 
 import LeftNav from '@/components/LeftNav.vue';
 import ConversionWidget from '@/components/widgets/ConversionWidget.vue';
+import WaypointManagementWidget from '@/components/widgets/WaypointManagementWidget.vue';
 
 export default {
   metaInfo: {
@@ -29,7 +31,7 @@ export default {
     },
   },
 
-  components: { LeftNav, ConversionWidget },
+  components: { LeftNav, ConversionWidget, WaypointManagementWidget },
 
   setup() {
     const showLeftNav = ref(true);
@@ -40,7 +42,9 @@ export default {
     const showSaveDialog = ref(false);
     const showImportDialog = ref(false);
 
-    const conversionWidgetOpen = ref(false);
+    const showConversionWidget = ref(false);
+    const showWaypointWidget = ref(false);
+    const showWaypointCRUDWidget = ref(false);
 
     onMounted(() => {
       console.log(
@@ -56,6 +60,18 @@ export default {
     const { init: initCoordinates } = useCoordinates();
     const { masterPointsArray } = initCoordinates();
 
+    const { saveToLocalStorage } = useStorage();
+
+    const { initMasterMapData, getPointData } = useMap();
+    const masterMapData = initMasterMapData();
+
+    let points = toRefs(masterMapData).points;
+    watch(points, () => {
+      let pointData = getPointData(masterMapData);
+      saveToLocalStorage(pointData);
+    });
+
+    provide('masterMapData', masterMapData);
     provide('masterPointsArray', masterPointsArray);
 
     initStorage(masterPointsArray);
@@ -72,7 +88,9 @@ export default {
     provide('showSaveDialog', showSaveDialog);
     provide('showImportDialog', showImportDialog);
 
-    provide('conversionWidgetOpen', conversionWidgetOpen);
+    provide('showConversionWidget', showConversionWidget);
+    provide('showWaypointWidget', showWaypointWidget);
+    provide('showWaypointCRUDWidget', showWaypointCRUDWidget);
 
     return {
       showLeftNav,
