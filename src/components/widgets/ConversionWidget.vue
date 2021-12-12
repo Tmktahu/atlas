@@ -1,5 +1,5 @@
 <template>
-  <div v-if="conversionWidgetOpen" class="conversion-widget py-3 px-2">
+  <div v-if="showConversionWidget" class="conversion-widget py-3 px-2">
     <v-row no-gutters>
       <v-col>
         <div style="color: black; font-size: 16px">
@@ -127,7 +127,7 @@ import { useCoordinates, ISAN_ORIGIN_POINT } from '@/models/useCoordinates.js';
 
 export default {
   setup() {
-    const conversionWidgetOpen = inject('conversionWidgetOpen');
+    const showConversionWidget = inject('showConversionWidget');
     const leftNavCondensed = inject('leftNavCondensed');
 
     const leftSelect = ref('isan');
@@ -152,7 +152,7 @@ export default {
     const { scaleUpCoordinate, scaleDownCoordinate } = useCoordinates();
 
     return {
-      conversionWidgetOpen,
+      showConversionWidget,
       leftNavCondensed,
       conversionOptions,
       ignoreUpdate,
@@ -215,7 +215,7 @@ export default {
 
   methods: {
     toggle() {
-      this.conversionWidgetOpen = !this.conversionWidgetOpen;
+      this.showConversionWidget = !this.showConversionWidget;
     },
 
     onInputChange(inputSide) {
