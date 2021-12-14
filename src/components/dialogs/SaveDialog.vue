@@ -31,7 +31,7 @@ export default {
   setup() {
     const masterMapData = inject('masterMapData');
 
-    const showDialog = ref(false);
+    const showDialog = inject('showSaveDialog');
     const storageOption = ref('storage');
     const filePath = ref('');
 
