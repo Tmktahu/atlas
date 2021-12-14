@@ -3,6 +3,8 @@ import { ref } from '@vue/composition-api';
 import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetMapData/eos';
 import { ELYSIUM_WARP_GATE } from './presetMapData/elysium';
 
+import { useStorage } from '@/models/useStorage.js';
+
 export const COORD_SCALAR = 10000;
 
 export const ORIGIN_POINT = {
@@ -28,10 +30,21 @@ export const ISAN_ORIGIN_POINT = {
 };
 
 export function useCoordinates() {
-  const init = () => {
+  const init = (isElectron) => {
     const masterPointsArray = ref([]);
 
-    masterPointsArray.value = setupInitialPoints();
+    if (!isElectron) {
+      const { readFromLocalStorage } = useStorage();
+
+      let localStorageData = readFromLocalStorage();
+      if (localStorageData) {
+        masterPointsArray.value = localStorageData;
+      } else {
+        masterPointsArray.value = setupInitialPoints();
+      }
+    } else {
+      masterPointsArray.value = setupInitialPoints();
+    }
 
     return {
       masterPointsArray,
