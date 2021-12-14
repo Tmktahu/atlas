@@ -400,7 +400,7 @@ export function useMap(mapData, pointArray = ref(null)) {
   };
 
   // ============== Control Handlers =======================
-  const panForward = (mapData) => {
+  const panForward = () => {
     if (mapData.camera === null) {
       return;
     }
@@ -421,7 +421,7 @@ export function useMap(mapData, pointArray = ref(null)) {
     mapData.camera.translateZ(-dist);
   };
 
-  const panBackward = (mapData) => {
+  const panBackward = () => {
     if (mapData.camera === null) {
       return;
     }

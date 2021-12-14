@@ -317,11 +317,11 @@ export default {
 
     // Key Handlers
     onWDown() {
-      this.panForward(this.masterMapData);
+      this.panForward();
     },
 
     onSDown() {
-      this.panBackward(this.masterMapData);
+      this.panBackward();
     },
 
     // Click action and context menu handlers
