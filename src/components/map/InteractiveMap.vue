@@ -26,6 +26,10 @@
       <div ref="pointCoord" class="coord">[Coordinate]</div>
     </div>
     <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed, 'with-conversion-widget': showConversionWidget }">
+      <div v-if="isElectron">
+        Local Storage File:
+        <span>{{ localStorageText }}</span>
+      </div>
       <div>W: <span>Pan Forward</span></div>
       <div>S: <span>Pan Backward</span></div>
       <div>A: <span>Pan Left</span></div>
@@ -50,6 +54,8 @@ import { ref, inject, watch, toRefs } from '@vue/composition-api';
 import { useMap, MIN_PAN_SPEED, MAX_PAN_SPEED } from '@/models/useMap.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
 
+import { useStorage } from '@/models/useStorage.js';
+
 export default {
   metaInfo() {
     return {
@@ -63,6 +69,7 @@ export default {
   components: { ContextMenu },
 
   setup() {
+    const isElectron = inject('isElectron');
     const masterMapData = inject('masterMapData');
     const masterPointsArray = inject('masterPointsArray');
     const showControls = inject('showControls');
@@ -70,13 +77,13 @@ export default {
     const showConversionWidget = inject('showConversionWidget');
     let stats = null;
 
+    const { dataStoragePath } = useStorage(isElectron);
     const { init: initMap, resizeMap, panForward, panBackward, updateGrid } = useMap(masterMapData, masterPointsArray);
 
     const intersects = toRefs(masterMapData).intersects;
     const showGrid = toRefs(masterMapData).showGrid;
     const showEosZones = toRefs(masterMapData.belts['eos']).showZones;
 
-    const showManageDialog = inject('showManageDialog');
     const showSaveDialog = inject('showSaveDialog');
     const showImportDialog = inject('showImportDialog');
 
@@ -90,6 +97,7 @@ export default {
     const hoveredElement = ref(null);
 
     return {
+      isElectron,
       stats,
       initMap,
       resizeMap,
@@ -103,7 +111,7 @@ export default {
       MIN_PAN_SPEED,
       MAX_PAN_SPEED,
       intersects,
-      showManageDialog,
+      dataStoragePath,
       showSaveDialog,
       showImportDialog,
       scaleUpCoordinate,
@@ -114,6 +122,14 @@ export default {
       viewObject,
       hoveredElement,
     };
+  },
+
+  computed: {
+    localStorageText() {
+      let path = require('path');
+      let absolutePath = path.resolve(this.dataStoragePath);
+      return absolutePath;
+    },
   },
 
   watch: {
@@ -326,7 +342,7 @@ export default {
   bottom: 0;
   width: calc(100% - 56px - 90px);
   align-items: center;
-  justify-content: end;
+  justify-content: flex-end;
 
   .pan-speed-slider::v-deep {
     max-width: 500px;
@@ -395,14 +411,5 @@ export default {
   &.with-conversion-widget {
     top: 170px !important;
   }
-}
-
-.hardware-accel-info {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 30vw;
-  text-align: right;
-  pointer-events: none;
 }
 </style>
