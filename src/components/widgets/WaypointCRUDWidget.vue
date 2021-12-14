@@ -1,6 +1,6 @@
 <template>
   <div class="waypoint-crud-widget pa-3 pr-4" :class="{ open: showWaypointCRUDWidget }">
-    <div v-if="type === 'create'" class="widget-title">Create Waypoint (Uses <a href="https://github.com/Tmktahu/IPS" target="_blank">IPS Coordinates</a>)</div>
+    <div v-if="type === 'create'" class="widget-title">Create Waypoint</div>
     <div v-if="type === 'edit'" class="widget-title">Edit Waypoint</div>
 
     <v-row no-gutters class="mt-2">
@@ -70,7 +70,7 @@
           </v-card>
         </v-menu>
       </v-col>
-      <v-col>
+      <v-col v-if="mode === 'ips'">
         <v-text-field
           v-model="formInfo.position.x"
           type="number"
@@ -84,7 +84,7 @@
           @input="$v.formInfo.position.x.$touch"
         />
       </v-col>
-      <v-col class="px-2">
+      <v-col v-if="mode === 'ips'" class="px-2">
         <v-text-field
           v-model="formInfo.position.y"
           type="number"
@@ -98,7 +98,7 @@
           @input="$v.formInfo.position.y.$touch"
         />
       </v-col>
-      <v-col>
+      <v-col v-if="mode === 'ips'">
         <v-text-field
           v-model="formInfo.position.z"
           outlined
@@ -112,27 +112,117 @@
           @input="$v.formInfo.position.z.$touch"
         />
       </v-col>
+      <v-col v-if="mode === 'isan'">
+        <v-text-field
+          v-model="isanX"
+          type="number"
+          label="X"
+          class="coord-input"
+          outlined
+          hide-details
+          flat
+          solo
+          :error="$v.formInfo.position.y.$invalid"
+          @input="$v.formInfo.position.y.$touch"
+        />
+      </v-col>
+      <v-col v-if="mode === 'isan'" class="px-2">
+        <v-text-field
+          v-model="isanY"
+          type="number"
+          outlined
+          label="Y"
+          class="coord-input"
+          hide-details
+          solo
+          flat
+          :error="$v.formInfo.position.z.$invalid"
+          @input="$v.formInfo.position.z.$touch"
+        />
+      </v-col>
+      <v-col v-if="mode === 'isan'">
+        <v-text-field
+          v-model="isanZ"
+          outlined
+          type="number"
+          label="Z"
+          class="coord-input"
+          hide-details
+          flat
+          solo
+          :error="$v.formInfo.position.x.$invalid"
+          @input="$v.formInfo.position.x.$touch"
+        />
+      </v-col>
+    </v-row>
+
+    <v-row v-if="mode === 'isan'" no-gutters class="mt-2 align-center">
+      <v-col class="flex-grow-0 mr-2" style="color: black; font-weight: 600; min-width: 115px; font-size: 14px"> Converted to IPS: </v-col>
+      <v-col>
+        <v-text-field
+          v-model="formInfo.position.x"
+          label="IPS X"
+          class="coord-input faded"
+          outlined
+          disabled
+          hide-details
+          flat
+          solo
+          @change="$v.formInfo.position.y.$touch"
+        />
+      </v-col>
+      <v-col class="px-2">
+        <v-text-field
+          v-model="formInfo.position.y"
+          outlined
+          disabled
+          label="IPS Y"
+          class="coord-input faded"
+          hide-details
+          solo
+          flat
+          @change="$v.formInfo.position.z.$touch"
+        />
+      </v-col>
+      <v-col>
+        <v-text-field
+          v-model="formInfo.position.z"
+          outlined
+          disabled
+          label="IPS Z"
+          class="coord-input faded"
+          hide-details
+          flat
+          solo
+          @change="$v.formInfo.position.x.$touch"
+        />
+      </v-col>
     </v-row>
 
     <v-row no-gutters class="mt-2">
-      <v-btn class="form-button mr-2" dense small outlined @click="onPaste"><v-icon size="16" class="mr-1">mdi-content-paste</v-icon>Paste Coord</v-btn>
+      <v-btn class="form-button mr-1 px-1" dense small outlined @click="onPaste"><v-icon size="16" class="mr-1">mdi-content-paste</v-icon>Paste Coord</v-btn>
+      <div class="mode-wrapper d-flex flex-grow-0 px-1 mr-1 align-center">
+        <span>IPS</span>
+        <v-switch v-model="mode" hide-details dense true-value="isan" class="ma-0 pl-2" style="padding-top: 2px" false-value="ips" />
+        <span style="margin-left: -2px">ISAN</span>
+      </div>
       <v-spacer />
-      <v-btn v-if="type === 'create'" class="form-button mr-2" dense small outlined :disabled="$v.$invalid" @click="onCreate">Create</v-btn>
-      <v-btn v-if="type === 'edit'" class="form-button mr-2" dense small outlined :disabled="$v.$invalid" @click="onSave">Save</v-btn>
-      <v-btn class="form-button" dense small outlined @click="close">Cancel</v-btn>
+      <v-btn v-if="type === 'create'" class="form-button mr-2 px-1" dense small outlined :disabled="$v.$invalid" @click="onCreate">Create</v-btn>
+      <v-btn v-if="type === 'edit'" class="form-button mr-2 px-1" dense small outlined :disabled="$v.$invalid" @click="onSave">Save</v-btn>
+      <v-btn class="form-button px-1" dense small outlined @click="close">Cancel</v-btn>
     </v-row>
   </div>
 </template>
 
 <script>
-import { ref, inject, reactive } from '@vue/composition-api';
+import { ref, inject, watch, reactive } from '@vue/composition-api';
 import { v4 as uuidv4 } from 'uuid';
 
 import { required } from 'vuelidate/lib/validators';
 
 import { useMap } from '@/models/useMap.js';
 import { ICON_MAP } from '@/models/useIcons.js';
-import { useCoordinates } from '@/models/useCoordinates.js';
+import { useCoordinates, ISAN_ORIGIN_POINT } from '@/models/useCoordinates.js';
 
 export default {
   validations: {
@@ -148,12 +238,17 @@ export default {
     },
   },
 
-  setup() {
+  setup(_, context) {
     const showWaypointCRUDWidget = inject('showWaypointCRUDWidget');
     const masterMapData = inject('masterMapData');
     const masterPointsArray = inject('masterPointsArray');
 
     const type = ref('create');
+    const mode = ref('ips');
+
+    const isanX = ref(null);
+    const isanY = ref(null);
+    const isanZ = ref(null);
 
     const formInfo = ref({
       name: '',
@@ -177,9 +272,17 @@ export default {
     const { createNewPoint, savePoint } = useMap(masterMapData, masterPointsArray);
     const { scaleUpCoordinate, scaleDownCoordinate } = useCoordinates();
 
+    watch([isanX, isanY, isanZ, mode], () => {
+      formInfo.value.position.x = isanZ.value ? parseInt(isanZ.value) + ISAN_ORIGIN_POINT.position.x : null;
+      formInfo.value.position.y = isanX.value ? parseInt(isanX.value) + ISAN_ORIGIN_POINT.position.y : null;
+      // eslint-disable-next-line id-length
+      formInfo.value.position.z = isanY.value ? parseInt(isanY.value) + ISAN_ORIGIN_POINT.position.z : null;
+    });
+
     return {
       showWaypointCRUDWidget,
       type,
+      mode,
       formInfo,
       colorPickerMenu,
       icons,
@@ -187,6 +290,9 @@ export default {
       savePoint,
       scaleUpCoordinate,
       scaleDownCoordinate,
+      isanX,
+      isanY,
+      isanZ,
     };
   },
 
@@ -213,7 +319,6 @@ export default {
       if (point) {
         let scaledUpPoint = this.scaleUpCoordinate(point.data);
         this.formInfo = scaledUpPoint;
-        console.log(this.formInfo.color);
       }
 
       this.showWaypointCRUDWidget = true;
@@ -415,6 +520,35 @@ export default {
     min-height: 0 !important;
     background-color: color.change($primary-blue, $lightness: 80%, $saturation: 80%) !important;
   }
+
+  &.faded {
+    .v-input__slot {
+      min-height: 0 !important;
+      background-color: color.change($primary-blue, $lightness: 80%, $saturation: 40%) !important;
+    }
+
+    .v-input__control {
+      min-height: 15px;
+    }
+
+    .v-input__slot {
+      min-height: 15px !important;
+      padding: 0 6px !important;
+    }
+
+    input {
+      font-size: 14px;
+      padding-top: 0;
+      line-height: 16px;
+      padding-top: 4px;
+      padding-bottom: 4px;
+    }
+
+    .v-label {
+      font-size: 14px;
+      line-height: 17px;
+    }
+  }
 }
 
 .icon-select::v-deep {
@@ -435,6 +569,16 @@ export default {
 
 .icon-tooltip-text {
   text-transform: capitalize;
+}
+
+.mode-wrapper {
+  border: thin solid black;
+  border-radius: 4px;
+
+  span {
+    color: black;
+    font-weight: 500;
+  }
 }
 
 .form-button {
