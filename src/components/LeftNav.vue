@@ -94,7 +94,6 @@ import { useCoordinates } from '@/models/useCoordinates.js';
 
 export default {
   name: 'LeftNav',
-
   components: { ImportDialog, SaveDialog },
 
   setup() {
