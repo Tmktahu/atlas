@@ -25,8 +25,8 @@
       <div ref="pointName" class="name">Point Name</div>
       <div ref="pointCoord" class="coord">[Coordinate]</div>
     </div>
-    <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed, 'with-conversion-widget': conversionWidgetOpen }">
-      <div>
+    <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed, 'with-conversion-widget': showConversionWidget }">
+      <div v-if="isElectron">
         Local Storage File:
         <span>{{ localStorageText }}</span>
       </div>
@@ -69,6 +69,7 @@ export default {
   components: { ContextMenu },
 
   setup() {
+    const isElectron = inject('isElectron');
     const masterMapData = inject('masterMapData');
     const masterPointsArray = inject('masterPointsArray');
     const showControls = inject('showControls');
@@ -76,57 +77,15 @@ export default {
     const showConversionWidget = inject('showConversionWidget');
     let stats = null;
 
-    const {
-      init: initMap,
-      resizeMap,
-      panForward,
-      panBackward,
-      viewObject,
-      showHidePoint,
-      addPoint,
-      deletePoint,
-      mergePoints,
-      updateGrid,
-    } = useMap(masterMapData, masterPointsArray);
-
     const { dataStoragePath } = useStorage();
-
-    window.addEventListener(
-      'message',
-      (event) => {
-        if (event.data.command) {
-          if (event.data.command === 'view') {
-            event.data.point.position.y = -event.data.point.position.y;
-            viewObject(event.data.point);
-          }
-
-          if (event.data.command === 'showHide') {
-            showHidePoint(event.data.point, masterMapData);
-            event.source.postMessage({ points: masterMapData.pointsArray });
-          }
-
-          if (event.data.command === 'add') {
-            addPoint(event.data.point, masterMapData);
-            event.source.postMessage({ points: masterMapData.pointsArray });
-          }
-
-          if (event.data.command === 'delete') {
-            deletePoint(event.data.point, masterMapData);
-            event.source.postMessage({ points: masterMapData.pointsArray });
-          }
-
-          if (event.data.command === 'import') {
-            mergePoints(event.data.points, masterMapData);
-            event.source.postMessage({ points: masterMapData.pointsArray });
-          }
-        }
-      },
-      false
-    );
+    const { init: initMap, resizeMap, panForward, panBackward, viewObject, updateGrid } = useMap(masterMapData, masterPointsArray);
 
     const intersects = toRefs(masterMapData).intersects;
     const showGrid = toRefs(masterMapData).showGrid;
     const showEosZones = toRefs(masterMapData.belts['eos']).showZones;
+
+    const showSaveDialog = inject('showSaveDialog');
+    const showImportDialog = inject('showImportDialog');
 
     const { scaleUpCoordinate } = useCoordinates();
 
@@ -136,6 +95,7 @@ export default {
     const hoveredElement = ref(null);
 
     return {
+      isElectron,
       stats,
       initMap,
       resizeMap,
@@ -150,6 +110,8 @@ export default {
       MAX_PAN_SPEED,
       intersects,
       dataStoragePath,
+      showSaveDialog,
+      showImportDialog,
       scaleUpCoordinate,
       showGrid,
       showEosZones,
@@ -169,10 +131,6 @@ export default {
   },
 
   watch: {
-    masterPointsArray() {
-      this.initMap(this.$refs.mapContainer, this.masterPointsArray);
-    },
-
     intersects() {
       this.focusedObject = this.masterMapData.intersects[0]?.object;
       if (!this.focusedObject) {
@@ -295,6 +253,11 @@ export default {
       });
 
       this.createStats();
+      this.initMap(this.$refs.mapContainer);
+
+      this.$toasted.global.alertWarning({
+        message: 'You must have Hardware Acceleration enabled in your browser,<br>or else this website will max out your CPU trying to render.',
+      });
     });
   },
 
