@@ -11,7 +11,8 @@
       <div class="page-title--sub">!!! Note this map uses <a href="https://github.com/Tmktahu/IPS" target="_blank">IPS Coordinates</a> !!!</div>
 
       <v-row no-gutters class="mt-2">
-        <v-btn class="action-button" small outlined @click="onCreateWaypoint">Create Waypoint</v-btn>
+        <v-btn class="action-button mr-2" small outlined @click="onCreateWaypoint">Create Waypoint</v-btn>
+        <v-btn class="action-button" small outlined @click="onResetDefaults">Reset Default Points</v-btn>
       </v-row>
 
       <v-row no-gutters class="mt-2">
@@ -91,7 +92,7 @@ export default {
     const masterMapData = inject('masterMapData');
     const masterPointsArray = inject('masterPointsArray');
 
-    const { scaleUpCoordinate } = useCoordinates();
+    const { scaleUpCoordinate, setupInitialPoints } = useCoordinates();
 
     const tableHeaders = [
       {
@@ -114,7 +115,7 @@ export default {
       },
     ];
 
-    const { viewObject, showHidePoint, addPoint, deletePoint } = useMap(masterMapData, masterPointsArray);
+    const { viewObject, showHidePoint, addPoint, deletePoint, mergePoints } = useMap(masterMapData, masterPointsArray);
 
     return {
       showWaypointWidget,
@@ -124,8 +125,10 @@ export default {
       viewObject,
       showHidePoint,
       deletePoint,
+      mergePoints,
       ICON_MAP,
       scaleUpCoordinate,
+      setupInitialPoints,
     };
   },
 
@@ -157,6 +160,12 @@ export default {
 
     onDelete(point) {
       this.deletePoint(point);
+    },
+
+    onResetDefaults() {
+      let defaultPoints = this.setupInitialPoints();
+      this.mergePoints(defaultPoints);
+      this.close();
     },
   },
 };
