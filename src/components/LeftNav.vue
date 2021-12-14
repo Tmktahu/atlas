@@ -78,7 +78,6 @@
         </v-tooltip>
       </v-list>
     </v-layout>
-    <ManageDialog ref="manageDialog" />
     <ImportDialog ref="importDialog" />
   </v-navigation-drawer>
 </template>
@@ -87,7 +86,6 @@
 import { ref, watch, inject, toRefs } from '@vue/composition-api';
 import { MANAGE_WAYPOINT_ROUTE, IMPORT_WAYPOINTS_ROUTE } from '@/router/routes';
 
-import ManageDialog from '@/components/dialogs/ManageDialog.vue';
 import ImportDialog from '@/components/dialogs/ImportDialog.vue';
 
 import { useCoordinates } from '@/models/useCoordinates.js';
@@ -95,9 +93,10 @@ import { useCoordinates } from '@/models/useCoordinates.js';
 export default {
   name: 'LeftNav',
 
-  components: { ManageDialog, ImportDialog },
+  components: { ImportDialog },
 
   setup() {
+    const isElectron = inject('isElectron');
     const leftNav = ref(true);
     const leftNavCondensed = inject('leftNavCondensed');
     const showConversionWidget = inject('showConversionWidget');
@@ -114,6 +113,7 @@ export default {
     const { scaleUpCoordinate } = useCoordinates();
 
     return {
+      isElectron,
       leftNav,
       leftNavCondensed,
       showConversionWidget,
@@ -129,10 +129,20 @@ export default {
 
   computed: {
     aboutText() {
-      return `
-        <div>Coded by <strong>Fryke#0746</strong> on Discord</div>
-        <div>Atlas Version: ${process.env.VUE_APP_VERSION}</div>
-      `;
+      if (this.isElectron) {
+        return `
+          <div>Coded by <strong>Fryke#0746</strong> on Discord</div>
+          <div>Atlas Version: ${process.env.VUE_APP_VERSION}</div>
+          <div>Electron: ${process.versions.electron}</div>
+          <div>Chrome: ${process.versions.chrome}</div>
+          <div>Node.js: ${process.versions.node}</div>
+        `;
+      } else {
+        return `
+          <div>Coded by <strong>Fryke#0746</strong> on Discord</div>
+          <div>Atlas Version: ${process.env.VUE_APP_VERSION}</div>
+        `;
+      }
     },
   },
 
@@ -154,20 +164,22 @@ export default {
     },
 
     onSave() {
-      //this.$refs.saveDialog.open();
+      if (this.isElectron) {
+        this.$refs.saveDialog.open();
+      } else {
+        let points = this.masterPointsArray.map((point) => {
+          return this.scaleUpCoordinate(point);
+        });
 
-      let points = this.masterPointsArray.map((point) => {
-        return this.scaleUpCoordinate(point);
-      });
+        let data = JSON.stringify(points, null, 2);
 
-      let data = JSON.stringify(points, null, 2);
-
-      let elem = document.createElement('a');
-      let file = new Blob([data], { type: 'text/plain' });
-      elem.href = URL.createObjectURL(file);
-      let today = new Date();
-      elem.download = `waypoint_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`;
-      elem.click();
+        let elem = document.createElement('a');
+        let file = new Blob([data], { type: 'text/plain' });
+        elem.href = URL.createObjectURL(file);
+        let today = new Date();
+        elem.download = `waypoint_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`;
+        elem.click();
+      }
     },
 
     onImportWaypoints() {
@@ -193,7 +205,11 @@ export default {
     },
 
     onGithub() {
-      window.open('https://github.com/Tmktahu/atlas', '_blank').focus();
+      if (this.isElectron) {
+        require('electron').shell.openExternal('https://github.com/Tmktahu/atlas');
+      } else {
+        window.open('https://github.com/Tmktahu/atlas', '_blank').focus();
+      }
     },
   },
 };
