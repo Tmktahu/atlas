@@ -71,14 +71,13 @@ export default {
   setup() {
     const isElectron = inject('isElectron');
     const masterMapData = inject('masterMapData');
-    const masterPointsArray = inject('masterPointsArray');
     const showControls = inject('showControls');
     const leftNavCondensed = inject('leftNavCondensed');
     const showConversionWidget = inject('showConversionWidget');
     let stats = null;
 
     const { dataStoragePath } = useStorage(isElectron);
-    const { init: initMap, resizeMap, panForward, panBackward, viewObject, updateGrid } = useMap(masterMapData, masterPointsArray);
+    const { init: initMap, resizeMap, panForward, panBackward, viewObject, updateGrid } = useMap(masterMapData);
 
     const intersects = toRefs(masterMapData).intersects;
     const showGrid = toRefs(masterMapData).showGrid;
@@ -102,7 +101,6 @@ export default {
       panForward,
       panBackward,
       masterMapData,
-      masterPointsArray,
       showControls,
       leftNavCondensed,
       showConversionWidget,

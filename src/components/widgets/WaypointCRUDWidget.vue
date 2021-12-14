@@ -241,7 +241,6 @@ export default {
   setup(_, context) {
     const showWaypointCRUDWidget = inject('showWaypointCRUDWidget');
     const masterMapData = inject('masterMapData');
-    const masterPointsArray = inject('masterPointsArray');
 
     const type = ref('create');
     const mode = ref('ips');
@@ -269,7 +268,7 @@ export default {
       return { text: value.workingFilePath, value: value.name };
     });
 
-    const { createNewPoint, savePoint } = useMap(masterMapData, masterPointsArray);
+    const { createNewPoint, savePoint } = useMap(masterMapData);
     const { scaleUpCoordinate, scaleDownCoordinate } = useCoordinates();
 
     watch([isanX, isanY, isanZ, mode], () => {

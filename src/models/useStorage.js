@@ -6,8 +6,6 @@ import { ISAN_ORIGIN_POINT, ORIGIN_POINT, useCoordinates } from './useCoordinate
 import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetMapData/eos';
 import { ELYSIUM_WARP_GATE } from './presetMapData/elysium';
 
-const remote = require('electron').remote;
-
 export const DEFAULT_DATA = [ORIGIN_POINT, ELYSIUM_WARP_GATE, ISAN_ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
 
 export function useStorage(isElectron) {
@@ -16,12 +14,13 @@ export function useStorage(isElectron) {
     if (process.env.NODE_ENV === 'development') {
       dataStoragePath.value = 'waypoint_data.json';
     } else {
+      const remote = require('electron').remote;
       dataStoragePath.value = `${remote.process.env.PORTABLE_EXECUTABLE_DIR}/waypoint_data.json`;
     }
   }
 
   const init = async (storageContainer) => {
-    if (fs.existsSync(dataStoragePath.value)) {
+    if (fs.existsSync && fs.existsSync(dataStoragePath.value)) {
       const result = await readFromJSON(storageContainer, dataStoragePath.value);
     } else {
       console.log('No storage. Initing json file with default data.');

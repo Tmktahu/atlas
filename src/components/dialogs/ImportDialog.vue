@@ -93,13 +93,17 @@ import { ICON_MAP } from '@/models/useIcons.js';
 export default {
   name: 'ImportWaypointsModalVue',
   setup() {
-    const filePath = ref('');
-    const dataContainer = ref([]);
+    const masterMapData = inject('masterMapData');
+    const showDialog = inject('showImportDialog');
+
+    const uploadedFile = ref(null);
     const loadedData = ref([]);
     const allChecked = ref(true);
 
     const { readFromJSON } = useStorage();
-    const { scaleUpCoordinate, scaleDownCoordinate } = useCoordinates();
+    const { mergePoints } = useMap(masterMapData);
+
+    const { scaleDownCoordinate } = useCoordinates();
 
     const tableHeaders = [
       {
