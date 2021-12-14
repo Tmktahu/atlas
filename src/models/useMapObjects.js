@@ -19,6 +19,7 @@ export async function createPointMesh(data) {
   const mesh = new THREE.Points(geometry, material);
 
   mesh.name = data.name;
+  mesh.pointId = data.id;
 
   return mesh;
 }
