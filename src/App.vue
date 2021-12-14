@@ -71,7 +71,7 @@ export default {
     useToasts();
 
     const { init: initCoordinates } = useCoordinates();
-    const { masterPointsArray } = initCoordinates();
+    const { masterPointsArray } = initCoordinates(isElectron);
 
     const { initMasterMapData, getPointData } = useMap();
     const masterMapData = initMasterMapData();

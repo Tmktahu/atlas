@@ -30,13 +30,18 @@ export const ISAN_ORIGIN_POINT = {
 };
 
 export function useCoordinates() {
-  const init = () => {
-    const { readFromLocalStorage } = useStorage();
+  const init = (isElectron) => {
     const masterPointsArray = ref([]);
 
-    let localStorageData = readFromLocalStorage();
-    if (localStorageData) {
-      masterPointsArray.value = localStorageData;
+    if (!isElectron) {
+      const { readFromLocalStorage } = useStorage();
+
+      let localStorageData = readFromLocalStorage();
+      if (localStorageData) {
+        masterPointsArray.value = localStorageData;
+      } else {
+        masterPointsArray.value = setupInitialPoints();
+      }
     } else {
       masterPointsArray.value = setupInitialPoints();
     }
