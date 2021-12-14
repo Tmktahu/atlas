@@ -89,12 +89,7 @@ export default {
       initStorage(masterPointsArray);
     }
 
-    watch(masterPointsArray, () => {
-      masterMapData.pointsArray = masterPointsArray.value;
-    });
-
     provide('masterMapData', masterMapData);
-    provide('masterPointsArray', masterPointsArray);
     provide('showControls', showControls);
     provide('leftNavCondensed', leftNavCondensed);
 
