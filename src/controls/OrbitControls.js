@@ -891,6 +891,10 @@ class OrbitControls extends EventDispatcher {
         return;
       }
 
+      if (scope.hoveredElement !== domElement) {
+        return;
+      }
+
       handleKeyDown(event);
     }
 
@@ -1075,6 +1079,10 @@ class OrbitControls extends EventDispatcher {
     scope.domElement.addEventListener('pointerdown', onPointerDown);
     scope.domElement.addEventListener('pointercancel', onPointerCancel);
     scope.domElement.addEventListener('wheel', onMouseWheel, { passive: false });
+
+    document.addEventListener('mousemove', () => {
+      scope.hoveredElement = document.elementFromPoint(event.clientX, event.clientY);
+    });
 
     // force an update at start
 
