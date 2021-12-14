@@ -17,13 +17,6 @@ export default [
     },
   },
   {
-    path: '/manage',
-    name: MANAGE_WAYPOINT_ROUTE,
-    components: {
-      default: () => lazyLoadView(import('@/components/dialogs/ManageDialog.vue')),
-    },
-  },
-  {
     path: '/import',
     name: IMPORT_WAYPOINTS_ROUTE,
     components: {

@@ -5,6 +5,7 @@ import { OrbitControls } from '@/controls/OrbitControls.js';
 
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
 import {
+  createPointMesh,
   createRing,
   createSphere,
   createTorus,
@@ -13,8 +14,6 @@ import {
   createPointIntersectionObjects,
 } from '@/models/useMapObjects.js';
 import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
-
-import { ICON_MAP } from '@/models/useIcons.js';
 
 import { ASTROID_BELTS, MOONS, ORBIT_RINGS, EOS_BELT_ZONES } from './presetMapData/celestialBodies';
 
@@ -39,6 +38,18 @@ export const masterMapData = reactive({
   pointsArray: ref([]),
   pointIntersectionObjects: [],
   warpGatePointMeshes: [],
+
+  points: [],
+  /*
+  point = {
+    data,
+    mesh,
+    intersectionMeshes: [
+      ring,
+      line,
+    ]
+  }
+  */
 
   belts: {
     eos: {
@@ -91,9 +102,13 @@ export const masterMapData = reactive({
 });
 
 export function useMap(mapData, pointArray = ref(null)) {
-  const masterPointsArray = pointArray;
+  const masterPointDataArray = pointArray;
 
-  const init = async (inContainerElement, initialPoints) => {
+  const initMasterMapData = () => {
+    return masterMapData;
+  };
+
+  const init = async (inContainerElement) => {
     mapData.containerElement = inContainerElement;
 
     mapData.scene = new THREE.Scene();
@@ -136,7 +151,7 @@ export function useMap(mapData, pointArray = ref(null)) {
     addLight(4, 2, 4, mapData);
     addLight(-4, -1, -2, mapData);
 
-    addPoints(initialPoints);
+    resetPoints(masterPointDataArray);
 
     mapData.controls.update();
     animate(mapData);
@@ -158,8 +173,12 @@ export function useMap(mapData, pointArray = ref(null)) {
     mapData.raycaster.setFromCamera(mapData.mapMouse, mapData.camera);
 
     if (Date.now() - mapData.lastRaycast > mapData.raycastInterval) {
-      let points = mapData.pointMeshes.filter((point) => point.visible);
-      let intersectableObjects = [...mapData.warpGatePointMeshes, ...points, ...mapData.moons];
+      let pointMeshes = mapData.points.map((point) => {
+        return point.mesh;
+      });
+
+      let filteredPointMeshes = pointMeshes.filter((mesh) => mesh.visible);
+      let intersectableObjects = [...mapData.warpGatePointMeshes, ...filteredPointMeshes, ...mapData.moons];
 
       mapData.intersects = mapData.raycaster.intersectObjects(intersectableObjects);
       mapData.lastRaycast = Date.now();
@@ -168,43 +187,38 @@ export function useMap(mapData, pointArray = ref(null)) {
     }
 
     if (mapData.pointMeshes) {
-      for (let i = 0; i < mapData.pointMeshes.length; i++) {
-        let hovered = mapData.intersects[0]?.object.id === mapData.pointMeshes[i].id;
+      for (let i in mapData.points) {
+        let point = mapData.points[i];
+        let hovered = mapData.intersects[0]?.object.id === point.mesh.id;
         if (hovered) {
-          mapData.pointMeshes[i].material.size = mapData.pointSize;
-        }
-
-        if (mapData.pointMeshes[i].selected) {
-          mapData.pointMeshes[i].material.color = new THREE.Color(1, 1, 1);
+          point.mesh.material.size = mapData.pointSize;
+          point.mesh.material.color = new THREE.Color(1, 1, 1);
         } else {
-          let index = masterPointsArray.value.findIndex((obj) => obj.id === mapData.pointMeshes[i].pointId);
-          mapData.pointMeshes[i].material.color = new THREE.Color(masterPointsArray.value[index].color);
+          point.mesh.material.color = new THREE.Color(point.data.color);
         }
 
-        let intersectionObjectIndex = mapData.pointIntersectionObjects.findIndex((obj) => obj.pointId === mapData.pointMeshes[i].pointId);
-        mapData.pointIntersectionObjects[intersectionObjectIndex].line.visible = !!mapData.pointMeshes[i].selected || hovered;
-        mapData.pointIntersectionObjects[intersectionObjectIndex].ring.visible = !!mapData.pointMeshes[i].selected || hovered;
+        point.intersectionMeshes.line.visible = hovered;
+        point.intersectionMeshes.ring.visible = hovered;
+
+        // Scale warpgate points so they are always visible
+        if (point.data.type === 'gate') {
+          let distance = calcDistance(mapData.camera.position, {
+            x: point.mesh.geometry.attributes.position.array[0],
+            y: -point.mesh.geometry.attributes.position.array[1],
+            // eslint-disable-next-line id-length
+            z: point.mesh.geometry.attributes.position.array[2],
+          });
+
+          point.mesh.material.size = distance / 10;
+        }
       }
     }
 
+    // Scale the grid based on how high we are from the plane
     let cameraPosition = mapData.camera.position;
-
     mapData.gridScale = Math.pow(2, Math.round(Math.log(cameraPosition.y)));
     mapData.grid.scale.x = mapData.gridScale;
     mapData.grid.scale.z = mapData.gridScale;
-
-    for (let index in mapData.warpGatePointMeshes) {
-      let point = mapData.warpGatePointMeshes[index];
-
-      let distance = calcDistance(mapData.camera.position, {
-        x: point.geometry.attributes.position.array[0],
-        y: -point.geometry.attributes.position.array[1],
-        // eslint-disable-next-line id-length
-        z: point.geometry.attributes.position.array[2],
-      });
-
-      point.material.size = distance / 10;
-    }
 
     for (let index in mapData.belts) {
       if (mapData.belts[index]?.zones !== undefined) {
@@ -319,7 +333,6 @@ export function useMap(mapData, pointArray = ref(null)) {
 
       const grid = new THREE.PolarGridHelper(500, 4, 100, 200, '#000000', '#000000');
       //grid.material = gridMaterial;
-      console.log(grid);
       //grid.material.linewidth = 3;
       // grid.material.color = new THREE.Color(0.5, 0.5, 0.5);
       grid.material.opacity = 0.5;
@@ -334,52 +347,50 @@ export function useMap(mapData, pointArray = ref(null)) {
     }
   };
 
-  const addPoints = async (points) => {
-    for (const index in mapData.pointMeshes) {
-      mapData.scene.remove(mapData.pointMeshes[index]);
+  const resetPoints = async (pointsData) => {
+    for (const index in masterMapData.points) {
+      removePointFromScene(masterMapData.points[index]);
     }
-    mapData.pointMeshes = [];
+    masterMapData.points = [];
 
-    if (points.length === 0) {
+    if (pointsData.length === 0) {
       return;
     }
 
-    mapData.pointsArray = points;
+    for (const index in pointsData.value) {
+      let pointData = pointsData.value[index];
+      let newPoint = await createPoint(pointData);
 
-    for (const index in points) {
-      let point = points[index];
+      masterMapData.points.push(newPoint);
 
-      const sprite = await new THREE.TextureLoader().load(ICON_MAP[point.icon].workingFilePath);
-      let color = new THREE.Color(point.color);
-
-      const pointMaterial = new THREE.PointsMaterial({
-        color: color,
-        size: mapData.pointSize,
-        map: sprite,
-        sizeAttenuation: true,
-        alphaTest: 0.5,
-      });
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute([point.position.x, point.position.z, -point.position.y], 3));
-      //geometry.setAttribute('offsets', new THREE.Float32BufferAttribute([1000, 1000], 2));
-      const pointMesh = new THREE.Points(geometry, pointMaterial);
-      pointMesh.name = point.name;
-      pointMesh.pointId = point.id;
-      if (point.type === 'gate') {
-        mapData.warpGatePointMeshes.push(pointMesh);
-      } else {
-        mapData.pointMeshes.push(pointMesh);
-      }
-
-      mapData.scene.add(pointMesh);
-
-      // Set up the intersection object for storage
-      let { line, ring } = createPointIntersectionObjects(point);
-      let pointIntersectionObject = { pointId: point.id, line, ring };
-      mapData.scene.add(pointIntersectionObject.line);
-      mapData.scene.add(pointIntersectionObject.ring);
-      mapData.pointIntersectionObjects.push(pointIntersectionObject);
+      addPointToScene(newPoint);
     }
+  };
+
+  const createPoint = async (data) => {
+    let pointMesh = await createPointMesh(data);
+    let intersectionMeshes = createPointIntersectionObjects(data);
+
+    let point = {
+      id: data.id,
+      data: data,
+      mesh: pointMesh,
+      intersectionMeshes: intersectionMeshes,
+    };
+
+    return point;
+  };
+
+  const addPointToScene = (point) => {
+    masterMapData.scene.add(point.mesh);
+    masterMapData.scene.add(point.intersectionMeshes.line);
+    masterMapData.scene.add(point.intersectionMeshes.ring);
+  };
+
+  const removePointFromScene = (point) => {
+    masterMapData.scene.remove(point.mesh);
+    masterMapData.scene.remove(point.intersectionMeshes.line);
+    masterMapData.scene.remove(point.intersectionMeshes.ring);
   };
 
   const addLight = (xCoord, yCoord, zCoord, mapData) => {
@@ -462,64 +473,60 @@ export function useMap(mapData, pointArray = ref(null)) {
   };
 
   const selectPoint = (id) => {
-    let index = masterPointsArray.value.findIndex((obj) => obj.id === id);
-    masterPointsArray.value[index].selected = !masterPointsArray.value[index].selected;
-
-    let meshIndex = masterMapData.pointMeshes.findIndex((obj) => obj.pointId === id);
-    masterMapData.pointMeshes[meshIndex].selected = masterPointsArray.value[index].selected;
+    // let index = masterPointDataArray.value.findIndex((obj) => obj.id === id);
+    // masterPointDataArray.value[index].selected = !masterPointDataArray.value[index].selected;
+    // let meshIndex = masterMapData.pointMeshes.findIndex((obj) => obj.pointId === id);
+    // masterMapData.pointMeshes[meshIndex].selected = masterPointDataArray.value[index].selected;
   };
 
   const showHidePoint = (id) => {
-    let index = masterPointsArray.value.findIndex((obj) => obj.id === id);
-    masterPointsArray.value[index].hide = !masterPointsArray.value[index].hide;
-
-    let meshIndex = masterMapData.pointMeshes.findIndex((obj) => obj.pointId === id);
-    masterMapData.pointMeshes[meshIndex].visible = !masterPointsArray.value[index].hide;
+    let index = mapData.points.findIndex((point) => point.id === id);
+    mapData.points[index].data.hide = !mapData.points[index].data.hide;
+    mapData.points[index].mesh.visible = !mapData.points[index].data.hide;
   };
 
   const showAllPoints = () => {
-    for (let index in masterPointsArray.value) {
-      masterPointsArray.value[index].hide = false;
-    }
-
-    for (let index in masterMapData.pointMeshes) {
-      masterMapData.pointMeshes[index].visible = true;
+    for (let index in mapData.points) {
+      mapData.points[index].data.hide = false;
+      mapData.points[index].mesh.visible = true;
     }
   };
 
-  const addPoint = (point) => {
-    const { scaleDownCoordinate } = useCoordinates();
-    let newPoint = scaleDownCoordinate(point);
-    mapData.pointsArray.push(newPoint);
-    addPoints(mapData.pointsArray, mapData);
+  const createNewPoint = async (data) => {
+    let newPoint = await createPoint(data);
+    masterMapData.points.push(newPoint);
+    addPointToScene(newPoint);
   };
 
-  const deletePoint = (point, mapData) => {
-    mapData.pointsArray = mapData.pointsArray.filter((obj) => {
-      return obj.id !== point.id;
-    });
-    addPoints(mapData.pointsArray, mapData);
+  const savePoint = async (data) => {
+    deletePoint(data);
+
+    let newPoint = await createPoint(data);
+    masterMapData.points.push(newPoint);
+    addPointToScene(newPoint);
   };
 
-  const mergePoints = (points) => {
-    let existingIDs = mapData.pointsArray.map((obj) => {
+  const deletePoint = (point) => {
+    let index = mapData.points.findIndex((obj) => obj.id === point.id);
+    removePointFromScene(mapData.points[index]);
+    mapData.points.splice(index, 1);
+  };
+
+  const mergePoints = async (incomingPointData) => {
+    let existingIDs = mapData.points.map((obj) => {
       return obj.id;
     });
     let skippedPoints = [];
 
-    for (const index in points) {
-      let point = points[index];
+    for (const index in incomingPointData) {
+      let pointData = incomingPointData[index];
 
-      if (existingIDs.includes(point.id)) {
-        skippedPoints.push(point);
+      if (existingIDs.includes(pointData.id)) {
+        skippedPoints.push(pointData);
         continue;
       } else {
-        mapData.pointsArray.push(point);
+        await createNewPoint(pointData);
       }
-    }
-
-    if (mapData.scene) {
-      addPoints(mapData.pointsArray, mapData);
     }
 
     if (skippedPoints.length > 0) {
@@ -535,7 +542,15 @@ export function useMap(mapData, pointArray = ref(null)) {
     return Math.sqrt(Math.pow(positionA.x - positionB.x, 2) + Math.pow(positionA.y - positionB.y, 2) + Math.pow(positionA.z - positionB.z, 2));
   };
 
+  const getPointData = (inMapData) => {
+    let data = inMapData.points.map((point) => {
+      return point.data;
+    });
+    return data;
+  };
+
   return {
+    initMasterMapData,
     init,
     resizeMap,
     panForward,
@@ -544,9 +559,11 @@ export function useMap(mapData, pointArray = ref(null)) {
     selectPoint,
     showHidePoint,
     showAllPoints,
-    addPoint,
+    createNewPoint,
+    savePoint,
     deletePoint,
     mergePoints,
     updateGrid,
+    getPointData,
   };
 }

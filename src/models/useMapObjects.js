@@ -1,8 +1,27 @@
 import * as THREE from 'three';
 import { useCoordinates } from '@/models/useCoordinates.js';
 
+import { ICON_MAP } from '@/models/useIcons.js';
+
+const POINT_SIZE = 0.5;
+
 export function useMapObjects() {
   return {};
+}
+
+export async function createPointMesh(data) {
+  let sprite = await new THREE.TextureLoader().load(ICON_MAP[data.icon].workingFilePath);
+  let color = new THREE.Color(data.color);
+
+  let material = new THREE.PointsMaterial({ color: color, size: POINT_SIZE, map: sprite, sizeAttenuation: true, alphaTest: 0.5 });
+  let geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute([data.position.x, data.position.z, -data.position.y], 3));
+  const mesh = new THREE.Points(geometry, material);
+
+  mesh.name = data.name;
+  mesh.pointId = data.id;
+
+  return mesh;
 }
 
 export function createRing(options) {
