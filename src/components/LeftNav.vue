@@ -78,6 +78,7 @@
         </v-tooltip>
       </v-list>
     </v-layout>
+    <SaveDialog ref="saveDialog" />
     <ImportDialog ref="importDialog" />
   </v-navigation-drawer>
 </template>
@@ -87,18 +88,20 @@ import { ref, watch, inject, toRefs } from '@vue/composition-api';
 import { MANAGE_WAYPOINT_ROUTE, IMPORT_WAYPOINTS_ROUTE } from '@/router/routes';
 
 import ImportDialog from '@/components/dialogs/ImportDialog.vue';
+import SaveDialog from '@/components/dialogs/SaveDialog.vue';
 
 import { useCoordinates } from '@/models/useCoordinates.js';
 
 export default {
   name: 'LeftNav',
 
-  components: { ImportDialog },
+  components: { ImportDialog, SaveDialog },
 
   setup() {
     const isElectron = inject('isElectron');
     const leftNav = ref(true);
     const leftNavCondensed = inject('leftNavCondensed');
+
     const showConversionWidget = inject('showConversionWidget');
     const masterPointsArray = inject('masterPointsArray');
 
@@ -106,9 +109,6 @@ export default {
     const masterMapData = inject('masterMapData');
 
     const showWaypointWidget = inject('showWaypointWidget');
-
-    let manageWaypointsWindow = null;
-    let importWaypointsWindow = null;
 
     const { scaleUpCoordinate } = useCoordinates();
 
@@ -118,8 +118,6 @@ export default {
       leftNavCondensed,
       showConversionWidget,
       masterMapData,
-      manageWaypointsWindow,
-      importWaypointsWindow,
       showControls,
       masterPointsArray,
       scaleUpCoordinate,
@@ -142,14 +140,6 @@ export default {
           <div>Coded by <strong>Fryke#0746</strong> on Discord</div>
           <div>Atlas Version: ${process.env.VUE_APP_VERSION}</div>
         `;
-      }
-    },
-  },
-
-  watch: {
-    masterPointsArray() {
-      if (this.manageWaypointsWindow) {
-        this.manageWaypointsWindow.postMessage({ points: this.masterPointsArray }, '*');
       }
     },
   },
@@ -191,12 +181,6 @@ export default {
     },
 
     onReload() {
-      if (this.manageWaypointsWindow) {
-        this.manageWaypointsWindow.close();
-      }
-      if (this.importWaypointsWindow) {
-        this.importWaypointsWindow.close();
-      }
       window.location.reload(false);
     },
 
