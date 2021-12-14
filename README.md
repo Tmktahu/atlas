@@ -22,7 +22,7 @@ Atlas is an interactive 3D mapping tool for the game Starbase. This README will 
 
 You have 2 options.
 
-1. Use the online website version found at https://tmktahu.github.io/atlas/. Uses LocalStorage to persist waypoint information in combination with uploading/exporting JSON files for sharing data.
+1. Use the online website version found at <https://tmktahu.github.io/atlas/>. Uses LocalStorage to persist waypoint information in combination with uploading/exporting JSON files for sharing data.
 2. Download the standalone application built on Electron from the [releases section](https://github.com/Tmktahu/atlas/releases) and run it wherever you want. It is a portable application, so it requires no installation. Operates on locally stored JSON files.
 
 For information on how the coordinate grid is set up, check out the [Independant Positioning System](https://github.com/Tmktahu/IPS) repository and the wiki page I've written about [The Sacred Grid](https://github.com/Tmktahu/IPS/wiki/The-Sacred-Grid).
@@ -35,7 +35,7 @@ For the website version, it loads default waypoint data on initial load and save
 
 ## Demo Video (Youtube)
 
-https://youtu.be/slYclXJ__5U
+<https://youtu.be/slYclXJ__5U>
 <br>
 <a href="https://youtu.be/slYclXJ__5U" target="_blank"><img src="https://i.imgur.com/odpcdZ0.png" width="50%"></a>
 
@@ -46,14 +46,13 @@ Atlas allows users to select icons for their custom waypoints. If you are intere
 ## Is this a virus?
 
 No. You can read through the code yourself and [build it yourself](https://github.com/Tmktahu/atlas/wiki/How-To-Build) if you want. If you aren't familiar with coding shenanigans, then grab the EXE and run it through any virus scanning tool online or offline that you see fit. The executable won't do anything unless you run it, so it is 100% safe to download and analyze as you wish.
-
 I've also taken the liberty to upload the current Atlas version executable to several different online virus scanning utilities:
 
-- Virus Total: https://www.virustotal.com/gui/file/75171d2a6bb0db461a222bc2dbfd55a923d4dbdecfe65fb0e150fd14cfe9bcee
-- Jotti: https://virusscan.jotti.org/en-US/filescanjob/7vga5rrbh3
-- Kaspersky: https://opentip.kaspersky.com/75171D2A6BB0DB461A222BC2DBFD55A923D4DBDECFE65FB0E150FD14CFE9BCEE/
+- Virus Total: <https://www.virustotal.com/gui/file/75171d2a6bb0db461a222bc2dbfd55a923d4dbdecfe65fb0e150fd14cfe9bcee>
+- Jotti: <https://virusscan.jotti.org/en-US/filescanjob/7vga5rrbh3>
+- Kaspersky: <https://opentip.kaspersky.com/75171D2A6BB0DB461A222BC2DBFD55A923D4DBDECFE65FB0E150FD14CFE9BCEE/>
 
-If this still doesn't convince you, feel free to try out the website version found at https://tmktahu.github.io/atlas/
+If this still doesn't convince you, feel free to try out the website version found at <https://tmktahu.github.io/atlas/>
 
 ## Want to help?
 
