@@ -2,24 +2,26 @@
   <v-app>
     <LeftNav v-if="showLeftNav" />
     <ConversionWidget ref="conversionWidget" />
+    <WaypointManagementWidget ref="waypointManagementWidget" />
     <v-main>
-      <div class="draggable-area-bar" />
+      <div v-if="isElectron" class="draggable-area-bar" />
       <router-view />
     </v-main>
   </v-app>
 </template>
 
 <script>
-import { onMounted, ref, watch, provide, computed, inject } from '@vue/composition-api';
+import { onMounted, ref, watch, provide, computed, inject, toRefs } from '@vue/composition-api';
 import { LANDING_ROUTE } from '@/router/routes';
 
-import { masterMapData } from '@/models/useMap.js';
+import { useMap } from '@/models/useMap.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
 import { useStorage } from '@/models/useStorage.js';
 import { useToasts } from '@/models/useToasts.js';
 
 import LeftNav from '@/components/LeftNav.vue';
 import ConversionWidget from '@/components/widgets/ConversionWidget.vue';
+import WaypointManagementWidget from '@/components/widgets/WaypointManagementWidget.vue';
 
 export default {
   metaInfo: {
@@ -29,52 +31,82 @@ export default {
     },
   },
 
-  components: { LeftNav, ConversionWidget },
+  components: { LeftNav, ConversionWidget, WaypointManagementWidget },
 
   setup() {
+    let userAgent = navigator.userAgent.toLowerCase();
+    const isElectron = userAgent.indexOf(' electron/') > -1;
+    provide('isElectron', isElectron);
+
     const showLeftNav = ref(true);
     const showControls = ref(false);
     const leftNavCondensed = ref(false);
 
-    const showManageDialog = ref(false);
     const showSaveDialog = ref(false);
     const showImportDialog = ref(false);
 
-    const conversionWidgetOpen = ref(false);
+    const showConversionWidget = ref(false);
+    const showWaypointWidget = ref(false);
+    const showWaypointCRUDWidget = ref(false);
 
     onMounted(() => {
+      if (isElectron) {
+        console.log(
+          '%cAtlas Electron Version Started',
+          'border: 2px solid white; background-color: #527cbf; border-radius: 5px; color: #cbdaf2; font-size: 2rem; font-weight: 800; padding: 4px; margin: 5px 0;'
+        );
+      } else {
+        console.log(
+          '%cAtlas Web Version Started',
+          'border: 2px solid white; background-color: #527cbf; border-radius: 5px; color: #cbdaf2; font-size: 2rem; font-weight: 800; padding: 4px; margin: 5px 0;'
+        );
+      }
       console.log(
-        '%cAtlas Started',
-        'border: 2px solid white; background-color: #527cbf; border-radius: 5px; color: #cbdaf2; font-size: 2rem; font-weight: 800; padding: 4px; margin: 5px 0;'
+        // eslint-disable-next-line quotes
+        "%cIf you're reading this, then I may be able to use your help! Come check out the Discord server and say hi: https://discord.gg/Vafdx5JWBh",
+        'font-size: 0.7rem; font-weight: 500;'
       );
     });
 
     useToasts();
 
-    const { init: initStorage, pointStorage } = useStorage();
-
     const { init: initCoordinates } = useCoordinates();
     const { masterPointsArray } = initCoordinates();
 
-    provide('masterPointsArray', masterPointsArray);
+    const { initMasterMapData, getPointData } = useMap();
+    const masterMapData = initMasterMapData();
 
-    initStorage(masterPointsArray);
+    if (!isElectron) {
+      const { saveToLocalStorage } = useStorage();
+
+      let points = toRefs(masterMapData).points;
+      watch(points, () => {
+        let pointData = getPointData(masterMapData);
+        saveToLocalStorage(pointData);
+      });
+    } else {
+      const { init: initStorage } = useStorage();
+      initStorage(masterPointsArray);
+    }
 
     watch(masterPointsArray, () => {
       masterMapData.pointsArray = masterPointsArray.value;
     });
 
     provide('masterMapData', masterMapData);
+    provide('masterPointsArray', masterPointsArray);
     provide('showControls', showControls);
     provide('leftNavCondensed', leftNavCondensed);
 
-    provide('showManageDialog', showManageDialog);
     provide('showSaveDialog', showSaveDialog);
     provide('showImportDialog', showImportDialog);
 
-    provide('conversionWidgetOpen', conversionWidgetOpen);
+    provide('showConversionWidget', showConversionWidget);
+    provide('showWaypointWidget', showWaypointWidget);
+    provide('showWaypointCRUDWidget', showWaypointCRUDWidget);
 
     return {
+      isElectron,
       showLeftNav,
     };
   },
@@ -91,6 +123,10 @@ export default {
 </script>
 
 <style lang="scss">
+@use 'sass:color';
+
+@import '@/design/variables/_colors';
+
 html {
   overflow: hidden;
 }
@@ -107,5 +143,27 @@ html {
   -webkit-user-select: none;
   -webkit-app-region: drag;
   background: #333;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #444;
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: $primary-blue;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: white;
 }
 </style>

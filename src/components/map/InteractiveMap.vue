@@ -73,7 +73,7 @@ export default {
     const masterPointsArray = inject('masterPointsArray');
     const showControls = inject('showControls');
     const leftNavCondensed = inject('leftNavCondensed');
-    const conversionWidgetOpen = inject('conversionWidgetOpen');
+    const showConversionWidget = inject('showConversionWidget');
     let stats = null;
 
     const {
@@ -133,7 +133,7 @@ export default {
     const focusedObject = ref(null);
     const mouseMoved = false;
 
-    const { selectPoint } = useMap(masterMapData, masterPointsArray);
+    const hoveredElement = ref(null);
 
     return {
       stats,
@@ -145,7 +145,7 @@ export default {
       masterPointsArray,
       showControls,
       leftNavCondensed,
-      conversionWidgetOpen,
+      showConversionWidget,
       MIN_PAN_SPEED,
       MAX_PAN_SPEED,
       intersects,
@@ -155,7 +155,8 @@ export default {
       showEosZones,
       updateGrid,
       mouseMoved,
-      selectPoint,
+      viewObject,
+      hoveredElement,
     };
   },
 
@@ -226,6 +227,10 @@ export default {
   mounted() {
     this.$nextTick(() => {
       window.addEventListener('keydown', (event) => {
+        if (this.hoveredElement.tagName.toLowerCase() !== 'canvas') {
+          return;
+        }
+
         if (event.keyCode === 87) {
           this.onWDown();
         }
@@ -246,9 +251,15 @@ export default {
         this.masterMapData.mapMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
         this.mouseMoved = true;
+
+        this.hoveredElement = document.elementFromPoint(event.clientX, event.clientY);
       });
 
       window.addEventListener('wheel', (event) => {
+        if (this.hoveredElement.tagName.toLowerCase() !== 'canvas') {
+          return;
+        }
+
         if (event.deltaY > 0) {
           this.onSDown();
         } else {
@@ -257,20 +268,30 @@ export default {
       });
 
       window.addEventListener('mousedown', () => {
-        if (event.target.className === 'mapCanvas') {
-          this.$refs.contextMenu.close();
+        if (this.hoveredElement.tagName.toLowerCase() !== 'canvas') {
+          return;
         }
+
+        this.$refs.contextMenu.close();
         this.mouseMoved = false;
       });
 
       window.addEventListener('mouseup', (event) => {
-        if (event.button === 2 && !this.mouseMoved && event.target.className === 'mapCanvas') {
+        if (this.hoveredElement.tagName.toLowerCase() !== 'canvas') {
+          return;
+        }
+
+        if (event.button === 2 && !this.mouseMoved) {
           this.handleRightClick();
         }
 
-        if (event.button === 0 && !this.mouseMoved && event.target.className === 'mapCanvas') {
+        if (event.button === 0 && !this.mouseMoved) {
           this.handleMouseClick();
         }
+      });
+
+      window.addEventListener('dblclick', () => {
+        this.handleDoubleClick();
       });
 
       this.createStats();
@@ -305,9 +326,9 @@ export default {
 
     // Click action and context menu handlers
     handleMouseClick() {
-      if (this.focusedObject?.type === 'Points') {
-        this.selectPoint(this.focusedObject.pointId);
-      }
+      // if (this.focusedObject?.type === 'Points') {
+      //   this.selectPoint(this.focusedObject.pointId);
+      // }
     },
 
     handleRightClick() {
@@ -315,6 +336,12 @@ export default {
         this.$refs.contextMenu.open(this.focusedObject);
       } else {
         this.$refs.contextMenu.open(null);
+      }
+    },
+
+    handleDoubleClick() {
+      if (this.focusedObject) {
+        this.viewObject(this.focusedObject);
       }
     },
   },
