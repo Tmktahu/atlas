@@ -87,9 +87,6 @@
 import { ref, watch, inject, toRefs } from '@vue/composition-api';
 import { MANAGE_WAYPOINT_ROUTE, IMPORT_WAYPOINTS_ROUTE } from '@/router/routes';
 
-import electron from 'electron';
-const { BrowserWindow } = require('@electron/remote');
-
 import ImportDialog from '@/components/dialogs/ImportDialog.vue';
 import SaveDialog from '@/components/dialogs/SaveDialog.vue';
 
@@ -112,8 +109,6 @@ export default {
 
     const showWaypointWidget = inject('showWaypointWidget');
 
-    let importWaypointsWindow = null;
-
     const { scaleUpCoordinate } = useCoordinates();
 
     return {
@@ -122,7 +117,6 @@ export default {
       leftNavCondensed,
       showConversionWidget,
       masterMapData,
-      importWaypointsWindow,
       showControls,
       masterPointsArray,
       scaleUpCoordinate,
@@ -186,12 +180,6 @@ export default {
     },
 
     onReload() {
-      if (this.manageWaypointsWindow) {
-        this.manageWaypointsWindow.close();
-      }
-      if (this.importWaypointsWindow) {
-        this.importWaypointsWindow.close();
-      }
       window.location.reload(false);
     },
 
