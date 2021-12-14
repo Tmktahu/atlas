@@ -129,6 +129,7 @@ html {
   -webkit-user-select: none;
   -webkit-app-region: drag;
   background: #333;
+}
 
 /* width */
 ::-webkit-scrollbar {

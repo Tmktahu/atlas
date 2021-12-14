@@ -133,8 +133,6 @@ export default {
     const focusedObject = ref(null);
     const mouseMoved = false;
 
-    const { viewObject } = useMap(masterMapData, masterPointsArray);
-
     const hoveredElement = ref(null);
 
     return {
