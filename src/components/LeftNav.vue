@@ -32,7 +32,7 @@
           <span class="left-nav-label pl-5">Import Waypoints</span>
         </v-list-item>
 
-        <v-list-item link :class="{ selected: conversionWidgetOpen }" @click="onCoordinateConversion">
+        <v-list-item link :class="{ selected: showConversionWidget }" @click="onCoordinateConversion">
           <div class="left-nav-icon">
             <v-icon>mdi-swap-horizontal</v-icon>
           </div>
@@ -100,11 +100,13 @@ export default {
   setup() {
     const leftNav = ref(true);
     const leftNavCondensed = inject('leftNavCondensed');
-    const conversionWidgetOpen = inject('conversionWidgetOpen');
+    const showConversionWidget = inject('showConversionWidget');
     const masterPointsArray = inject('masterPointsArray');
 
     const showControls = inject('showControls');
     const masterMapData = inject('masterMapData');
+
+    const showWaypointWidget = inject('showWaypointWidget');
 
     let manageWaypointsWindow = null;
     let importWaypointsWindow = null;
@@ -114,13 +116,14 @@ export default {
     return {
       leftNav,
       leftNavCondensed,
-      conversionWidgetOpen,
+      showConversionWidget,
       masterMapData,
       manageWaypointsWindow,
       importWaypointsWindow,
       showControls,
       masterPointsArray,
       scaleUpCoordinate,
+      showWaypointWidget,
     };
   },
 
@@ -147,7 +150,7 @@ export default {
     },
 
     onManageWaypoint() {
-      this.$refs.manageDialog.open();
+      this.showWaypointWidget = true;
     },
 
     onSave() {
@@ -172,7 +175,7 @@ export default {
     },
 
     onCoordinateConversion() {
-      this.conversionWidgetOpen = !this.conversionWidgetOpen;
+      this.showConversionWidget = !this.showConversionWidget;
     },
 
     onReload() {
