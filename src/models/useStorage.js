@@ -11,8 +11,8 @@ const remote = require('electron').remote;
 export const DEFAULT_DATA = [ORIGIN_POINT, ELYSIUM_WARP_GATE, ISAN_ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
 
 export function useStorage(isElectron) {
+  let dataStoragePath = ref('');
   if (isElectron) {
-    let dataStoragePath = ref('');
     if (process.env.NODE_ENV === 'development') {
       dataStoragePath.value = 'waypoint_data.json';
     } else {
@@ -152,6 +152,7 @@ export function useStorage(isElectron) {
     init,
     readFromJSON,
     saveToJSON,
+    dataStoragePath,
     readFromLocalStorage,
     saveToLocalStorage,
   };
