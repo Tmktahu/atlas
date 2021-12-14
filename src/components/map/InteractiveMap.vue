@@ -78,7 +78,7 @@ export default {
     let stats = null;
 
     const { dataStoragePath } = useStorage(isElectron);
-    const { init: initMap, resizeMap, panForward, panBackward, updateGrid } = useMap(masterMapData, masterPointsArray);
+    const { init: initMap, resizeMap, panForward, panBackward, viewObject, updateGrid } = useMap(masterMapData, masterPointsArray);
 
     const intersects = toRefs(masterMapData).intersects;
     const showGrid = toRefs(masterMapData).showGrid;
@@ -91,8 +91,6 @@ export default {
 
     const focusedObject = ref(null);
     const mouseMoved = false;
-
-    const { viewObject } = useMap(masterMapData, masterPointsArray);
 
     const hoveredElement = ref(null);
 
