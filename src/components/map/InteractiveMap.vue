@@ -133,7 +133,7 @@ export default {
     const focusedObject = ref(null);
     const mouseMoved = false;
 
-    const { selectPoint } = useMap(masterMapData, masterPointsArray);
+    const { viewObject } = useMap(masterMapData, masterPointsArray);
 
     const hoveredElement = ref(null);
 
@@ -157,7 +157,7 @@ export default {
       showEosZones,
       updateGrid,
       mouseMoved,
-      selectPoint,
+      viewObject,
       hoveredElement,
     };
   },
@@ -292,6 +292,10 @@ export default {
         }
       });
 
+      window.addEventListener('dblclick', () => {
+        this.handleDoubleClick();
+      });
+
       this.createStats();
     });
   },
@@ -324,9 +328,9 @@ export default {
 
     // Click action and context menu handlers
     handleMouseClick() {
-      if (this.focusedObject?.type === 'Points') {
-        this.selectPoint(this.focusedObject.pointId);
-      }
+      // if (this.focusedObject?.type === 'Points') {
+      //   this.selectPoint(this.focusedObject.pointId);
+      // }
     },
 
     handleRightClick() {
@@ -334,6 +338,12 @@ export default {
         this.$refs.contextMenu.open(this.focusedObject);
       } else {
         this.$refs.contextMenu.open(null);
+      }
+    },
+
+    handleDoubleClick() {
+      if (this.focusedObject) {
+        this.viewObject(this.focusedObject);
       }
     },
   },
