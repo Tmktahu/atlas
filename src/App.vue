@@ -73,13 +73,12 @@ export default {
     const { init: initCoordinates } = useCoordinates();
     const { masterPointsArray } = initCoordinates();
 
-    const { saveToLocalStorage } = useStorage();
-
     const { initMasterMapData, getPointData } = useMap();
     const masterMapData = initMasterMapData();
 
     if (!isElectron) {
       const { saveToLocalStorage } = useStorage();
+
       let points = toRefs(masterMapData).points;
       watch(points, () => {
         let pointData = getPointData(masterMapData);
@@ -94,7 +93,6 @@ export default {
     provide('showControls', showControls);
     provide('leftNavCondensed', leftNavCondensed);
 
-    provide('showManageDialog', showManageDialog);
     provide('showSaveDialog', showSaveDialog);
     provide('showImportDialog', showImportDialog);
 
