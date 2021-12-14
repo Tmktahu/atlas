@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import { ref } from '@vue/composition-api';
 const fs = require('fs');
-const fsPromises = fs.promises;
 
 import { ISAN_ORIGIN_POINT, ORIGIN_POINT, useCoordinates } from './useCoordinates';
 import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetMapData/eos';
@@ -11,12 +10,14 @@ const remote = require('electron').remote;
 
 export const DEFAULT_DATA = [ORIGIN_POINT, ELYSIUM_WARP_GATE, ISAN_ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
 
-export function useStorage() {
+export function useStorage(isElectron) {
   let dataStoragePath = ref('');
-  if (process.env.NODE_ENV === 'development') {
-    dataStoragePath.value = 'waypoint_data.json';
-  } else {
-    dataStoragePath.value = `${remote.process.env.PORTABLE_EXECUTABLE_DIR}/waypoint_data.json`;
+  if (isElectron) {
+    if (process.env.NODE_ENV === 'development') {
+      dataStoragePath.value = 'waypoint_data.json';
+    } else {
+      dataStoragePath.value = `${remote.process.env.PORTABLE_EXECUTABLE_DIR}/waypoint_data.json`;
+    }
   }
 
   const init = async (storageContainer) => {
@@ -28,57 +29,122 @@ export function useStorage() {
     }
   };
 
-  const readFromJSON = async (container, filePath) => {
-    try {
-      const data = await fsPromises.readFile(filePath, 'utf-8');
-      let rawData = JSON.parse(data);
-      const { scaleDownCoordinate } = useCoordinates();
-      let scaledDownData = rawData.map((item) => {
-        return scaleDownCoordinate(item);
-      });
+  const readFromJSON = async (container, filePath, file) => {
+    if (isElectron) {
+      try {
+        const data = await fsPromises.readFile(filePath, 'utf-8');
+        let rawData = JSON.parse(data);
+        const { scaleDownCoordinate } = useCoordinates();
+        let scaledDownData = rawData.map((item) => {
+          return scaleDownCoordinate(item);
+        });
 
-      if (container) {
-        container.value = scaledDownData;
-        return;
-      } else {
-        return scaledDownData;
+        if (container) {
+          container.value = scaledDownData;
+          return;
+        } else {
+          return scaledDownData;
+        }
+      } catch (error) {
+        console.log('Error reading file: ', error);
+        Vue.toasted.global.alertError({ message: 'Error reading JSON file', description: error });
       }
-    } catch (error) {
-      console.log('Error reading file: ', error);
-      Vue.toasted.global.alertError({ message: 'Error reading JSON file', description: error });
+    } else {
+      return new Promise((resolve, reject) => {
+        let data = '';
+        const fileReader = new FileReader();
+
+        fileReader.onloadend = function (event) {
+          data = JSON.parse(event.target.result);
+          resolve(data);
+        };
+
+        fileReader.onerror = function (error) {
+          console.log('Error reading file: ', error);
+          Vue.toasted.global.alertError({ message: 'Error reading JSON file', description: error });
+          reject(error);
+        };
+
+        fileReader.readAsText(file);
+      });
     }
   };
 
   const saveToJSON = async (inData, filePath, container = null, defaultData = false) => {
-    const { scaleDownCoordinate, scaleUpCoordinate } = useCoordinates();
-    let stringifiedData = null;
-    let scaledData = null;
-    if (defaultData) {
-      scaledData = inData.map((item) => {
-        return scaleDownCoordinate(item);
-      });
-      stringifiedData = JSON.stringify(inData, null, 2);
-    } else {
-      scaledData = inData.map((item) => {
-        return scaleUpCoordinate(item);
-      });
-      stringifiedData = JSON.stringify(scaledData, null, 2);
-    }
+    if (isElectron) {
+      const { scaleDownCoordinate, scaleUpCoordinate } = useCoordinates();
+      let stringifiedData = null;
+      let scaledData = null;
+      if (defaultData) {
+        scaledData = inData.map((item) => {
+          return scaleDownCoordinate(item);
+        });
+        stringifiedData = JSON.stringify(inData, null, 2);
+      } else {
+        scaledData = inData.map((item) => {
+          return scaleUpCoordinate(item);
+        });
+        stringifiedData = JSON.stringify(scaledData, null, 2);
+      }
 
+      try {
+        fs.writeFile(filePath, stringifiedData, 'utf-8', () => {
+          if (container) {
+            container.value = scaledData;
+            Vue.toasted.global.alertInfo({
+              message: 'Initialized default JSON storage',
+              description: `No standard JSON file was found, so one was created at ${dataStoragePath.value}`,
+            });
+          }
+        });
+        return null;
+      } catch (error) {
+        console.log('There was a problem saving data: ', error);
+        return error;
+      }
+    } else {
+      let stringifiedData = JSON.stringify(inData, null, 2);
+      try {
+        fs.writeFile(filePath, stringifiedData, 'utf-8', () => {
+          if (container) {
+            container.value = inData;
+            Vue.toasted.global.alertInfo({
+              message: 'Initialized default JSON storage',
+              description: `No standard JSON file was found, so one was created at ${dataStoragePath.value}`,
+            });
+          }
+        });
+        return null;
+      } catch (error) {
+        console.log('There was a problem saving data: ', error);
+        return error;
+      }
+    }
+  };
+
+  const readFromLocalStorage = () => {
     try {
-      fs.writeFile(filePath, stringifiedData, 'utf-8', () => {
-        if (container) {
-          container.value = scaledData;
-          Vue.toasted.global.alertInfo({
-            message: 'Initialized default JSON storage',
-            description: `No standard JSON file was found, so one was created at ${dataStoragePath.value}`,
-          });
-        }
-      });
-      return null;
+      let rawData = window.localStorage.getItem('atlasWaypoints');
+      if (rawData) {
+        let parsedData = JSON.parse(rawData);
+        return parsedData;
+      } else {
+        return null;
+      }
     } catch (error) {
-      console.log('There was a problem saving data: ', error);
-      return error;
+      console.log('Error reading local storage: ', error);
+      Vue.toasted.global.alertError({ message: 'Error reading localstorage', description: error });
+      return null;
+    }
+  };
+
+  const saveToLocalStorage = async (inData) => {
+    try {
+      let stringifiedData = JSON.stringify(inData, null, 2);
+      window.localStorage.setItem('atlasWaypoints', stringifiedData);
+    } catch (error) {
+      console.log('Error writing to local storage: ', error);
+      Vue.toasted.global.alertError({ message: 'Error saving to localstorage', description: error });
     }
   };
 
@@ -87,5 +153,7 @@ export function useStorage() {
     readFromJSON,
     saveToJSON,
     dataStoragePath,
+    readFromLocalStorage,
+    saveToLocalStorage,
   };
 }
