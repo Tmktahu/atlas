@@ -34,9 +34,11 @@ export function useCoordinates() {
     const masterPointsArray = ref([]);
 
     if (!isElectron) {
+      console.log('we are not electron');
       const { readFromLocalStorage } = useStorage();
 
       let localStorageData = readFromLocalStorage();
+      console.log(localStorageData);
       if (localStorageData) {
         masterPointsArray.value = localStorageData;
       } else {
@@ -45,6 +47,8 @@ export function useCoordinates() {
     } else {
       masterPointsArray.value = setupInitialPoints();
     }
+
+    console.log('masterPointsArray', masterPointsArray);
 
     return {
       masterPointsArray,

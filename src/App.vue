@@ -13,6 +13,7 @@
 <script>
 import { onMounted, ref, watch, provide, computed, inject, toRefs } from '@vue/composition-api';
 import { LANDING_ROUTE } from '@/router/routes';
+import { debounce } from 'lodash';
 
 import { useMap } from '@/models/useMap.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
@@ -74,16 +75,19 @@ export default {
     const { masterPointsArray } = initCoordinates(isElectron);
 
     const { initMasterMapData, getPointData } = useMap();
-    const masterMapData = initMasterMapData();
+    const masterMapData = initMasterMapData(masterPointsArray);
 
     if (!isElectron) {
       const { saveToLocalStorage } = useStorage();
 
       let points = toRefs(masterMapData).points;
-      watch(points, () => {
-        let pointData = getPointData(masterMapData);
-        saveToLocalStorage(pointData);
-      });
+      watch(
+        points,
+        debounce(() => {
+          let pointData = getPointData(masterMapData);
+          saveToLocalStorage(pointData);
+        }, 1000)
+      );
     } else {
       const { init: initStorage } = useStorage();
       initStorage(masterPointsArray);

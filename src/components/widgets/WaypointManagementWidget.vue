@@ -90,7 +90,6 @@ export default {
   setup() {
     const showWaypointWidget = inject('showWaypointWidget');
     const masterMapData = inject('masterMapData');
-    const masterPointsArray = inject('masterPointsArray');
 
     const { scaleUpCoordinate, setupInitialPoints } = useCoordinates();
 
@@ -115,11 +114,10 @@ export default {
       },
     ];
 
-    const { viewObject, showHidePoint, addPoint, deletePoint, mergePoints } = useMap(masterMapData, masterPointsArray);
+    const { viewObject, showHidePoint, addPoint, deletePoint, mergePoints } = useMap(masterMapData);
 
     return {
       showWaypointWidget,
-      masterPointsArray,
       masterMapData,
       tableHeaders,
       viewObject,

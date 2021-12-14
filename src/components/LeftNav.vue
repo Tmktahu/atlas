@@ -58,6 +58,13 @@
 
       <v-divider />
       <v-list class="pa-0">
+        <v-list-item link style="margin-top: auto; margin-bottom: 0" @click="onDiscord">
+          <div class="left-nav-icon">
+            <v-icon>mdi-discord</v-icon>
+          </div>
+          <span class="left-nav-label pl-5">Discord</span>
+        </v-list-item>
+
         <v-list-item link style="margin-top: auto; margin-bottom: 0" @click="onGithub">
           <div class="left-nav-icon">
             <v-icon>mdi-github</v-icon>
@@ -102,7 +109,6 @@ export default {
     const leftNavCondensed = inject('leftNavCondensed');
 
     const showConversionWidget = inject('showConversionWidget');
-    const masterPointsArray = inject('masterPointsArray');
 
     const showControls = inject('showControls');
     const masterMapData = inject('masterMapData');
@@ -118,7 +124,6 @@ export default {
       showConversionWidget,
       masterMapData,
       showControls,
-      masterPointsArray,
       scaleUpCoordinate,
       showWaypointWidget,
     };
@@ -156,8 +161,8 @@ export default {
       if (this.isElectron) {
         this.$refs.saveDialog.open();
       } else {
-        let points = this.masterPointsArray.map((point) => {
-          return this.scaleUpCoordinate(point);
+        let points = this.masterMapData.points.map((point) => {
+          return point.data;
         });
 
         let data = JSON.stringify(points, null, 2);
@@ -192,6 +197,14 @@ export default {
         require('electron').shell.openExternal('https://github.com/Tmktahu/atlas');
       } else {
         window.open('https://github.com/Tmktahu/atlas', '_blank').focus();
+      }
+    },
+
+    onDiscord() {
+      if (this.isElectron) {
+        require('electron').shell.openExternal('https://discord.gg/Vafdx5JWBh');
+      } else {
+        window.open('https://discord.gg/Vafdx5JWBh', '_blank').focus();
       }
     },
   },
