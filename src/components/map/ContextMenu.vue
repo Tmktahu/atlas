@@ -23,11 +23,10 @@ export default {
     const object = ref(null);
 
     const masterMapData = inject('masterMapData');
-    const masterPointsArray = inject('masterPointsArray');
 
     const { scaleUpCoordinate, setupInitialPoints } = useCoordinates();
 
-    const { viewObject, showHidePoint, showAllPoints, mergePoints } = useMap(masterMapData, masterPointsArray);
+    const { viewObject, showHidePoint, showAllPoints, mergePoints } = useMap(masterMapData);
 
     return {
       showMenu,

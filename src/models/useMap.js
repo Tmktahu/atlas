@@ -101,14 +101,14 @@ export const masterMapData = reactive({
   showGrid: ref(true),
 });
 
-export function useMap(mapData, pointArray = ref(null)) {
-  const masterPointDataArray = pointArray;
-
-  const initMasterMapData = () => {
+export function useMap(mapData) {
+  const initMasterMapData = (initialPointData) => {
+    masterMapData.initialPointData = initialPointData;
     return masterMapData;
   };
 
   const init = async (inContainerElement) => {
+    console.log(mapData);
     mapData.containerElement = inContainerElement;
 
     mapData.scene = new THREE.Scene();
@@ -151,7 +151,7 @@ export function useMap(mapData, pointArray = ref(null)) {
     addLight(4, 2, 4, mapData);
     addLight(-4, -1, -2, mapData);
 
-    resetPoints(masterPointDataArray);
+    resetPoints(mapData.initialPointData);
 
     mapData.controls.update();
     animate(mapData);
