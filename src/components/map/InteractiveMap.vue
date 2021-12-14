@@ -77,7 +77,7 @@ export default {
     const showConversionWidget = inject('showConversionWidget');
     let stats = null;
 
-    const { dataStoragePath } = useStorage();
+    const { dataStoragePath } = useStorage(isElectron);
     const { init: initMap, resizeMap, panForward, panBackward, viewObject, updateGrid } = useMap(masterMapData, masterPointsArray);
 
     const intersects = toRefs(masterMapData).intersects;
@@ -385,7 +385,7 @@ export default {
 .controls-info {
   position: absolute;
   top: 36px;
-  left: 15px;
+  left: 16px;
   width: 100%;
   pointer-events: none;
   background: transparent;
