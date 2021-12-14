@@ -108,7 +108,7 @@ export function useMap(mapData, pointArray = ref(null)) {
     return masterMapData;
   };
 
-  const init = async (inContainerElement, initialPoints) => {
+  const init = async (inContainerElement) => {
     mapData.containerElement = inContainerElement;
 
     mapData.scene = new THREE.Scene();
