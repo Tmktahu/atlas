@@ -22,14 +22,16 @@
 <script>
 import { ref, watch, inject } from '@vue/composition-api';
 
+const { dialog } = require('electron').remote;
+
 import { useStorage } from '@/models/useStorage.js';
 
 export default {
   name: 'SaveDialog',
   setup() {
     const masterMapData = inject('masterMapData');
-    const showDialog = inject('showSaveDialog');
 
+    const showDialog = inject('showSaveDialog');
     const storageOption = ref('storage');
     const filePath = ref('');
 
