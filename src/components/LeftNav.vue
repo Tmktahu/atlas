@@ -86,7 +86,6 @@
       </v-list>
     </v-layout>
     <SaveDialog ref="saveDialog" />
-    <ImportDialog ref="importDialog" />
   </v-navigation-drawer>
 </template>
 
@@ -94,14 +93,13 @@
 import { ref, watch, inject, toRefs } from '@vue/composition-api';
 import { MANAGE_WAYPOINT_ROUTE, IMPORT_WAYPOINTS_ROUTE } from '@/router/routes';
 
-import ImportDialog from '@/components/dialogs/ImportDialog.vue';
 import SaveDialog from '@/components/dialogs/SaveDialog.vue';
 
 import { useCoordinates } from '@/models/useCoordinates.js';
 
 export default {
   name: 'LeftNav',
-  components: { ImportDialog, SaveDialog },
+  components: { SaveDialog },
 
   setup() {
     const isElectron = inject('isElectron');
@@ -114,6 +112,7 @@ export default {
     const masterMapData = inject('masterMapData');
 
     const showWaypointWidget = inject('showWaypointWidget');
+    const showImportWidget = inject('showImportWidget');
 
     const { scaleUpCoordinate } = useCoordinates();
 
@@ -126,6 +125,7 @@ export default {
       showControls,
       scaleUpCoordinate,
       showWaypointWidget,
+      showImportWidget,
     };
   },
 
@@ -155,6 +155,7 @@ export default {
 
     onManageWaypoint() {
       this.showWaypointWidget = true;
+      this.showImportWidget = false;
     },
 
     onSave() {
@@ -177,7 +178,8 @@ export default {
     },
 
     onImportWaypoints() {
-      this.$refs.importDialog.open();
+      this.showImportWidget = true;
+      this.showWaypointWidget = false;
     },
 
     onCoordinateConversion() {
