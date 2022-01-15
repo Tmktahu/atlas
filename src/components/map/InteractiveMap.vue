@@ -84,7 +84,6 @@ export default {
     const showEosZones = toRefs(masterMapData.belts['eos']).showZones;
 
     const showSaveDialog = inject('showSaveDialog');
-    const showImportDialog = inject('showImportDialog');
 
     const { scaleUpCoordinate } = useCoordinates();
 
@@ -109,7 +108,6 @@ export default {
       intersects,
       dataStoragePath,
       showSaveDialog,
-      showImportDialog,
       scaleUpCoordinate,
       showGrid,
       showEosZones,
@@ -382,7 +380,7 @@ export default {
 
 .controls-info {
   position: absolute;
-  top: 36px;
+  top: 16px;
   left: 16px;
   width: 100%;
   pointer-events: none;

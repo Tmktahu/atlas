@@ -198,7 +198,7 @@ export default {
   right: -400px;
   transition: right 0.1s ease;
   border-bottom-left-radius: 16px;
-  max-height: 80vh;
+  max-height: 635px;
 
   &.open {
     right: 0px;
@@ -231,6 +231,8 @@ export default {
 .waypoint-list::v-deep {
   width: 100%;
   background-color: transparent !important;
+  height: calc(100vh - 277px);
+  max-height: 500px;
 
   .v-data-table__wrapper {
     height: 100%;
