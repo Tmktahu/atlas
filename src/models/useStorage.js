@@ -31,7 +31,7 @@ export function useStorage(isElectron) {
   const readFromJSON = async (container, filePath, file) => {
     if (isElectron) {
       try {
-        const data = await fsPromises.readFile(filePath, 'utf-8');
+        const data = await fs.promises.readFile(filePath, 'utf-8');
         let rawData = JSON.parse(data);
         const { scaleDownCoordinate } = useCoordinates();
         let scaledDownData = rawData.map((item) => {

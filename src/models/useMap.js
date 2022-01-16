@@ -359,11 +359,13 @@ export function useMap(mapData) {
 
     for (const index in pointsData.value) {
       let pointData = pointsData.value[index];
-      let newPoint = await createPoint(pointData);
+      if (pointData) {
+        let newPoint = await createPoint(pointData);
 
-      masterMapData.points.push(newPoint);
+        masterMapData.points.push(newPoint);
 
-      addPointToScene(newPoint);
+        addPointToScene(newPoint);
+      }
     }
   };
 
