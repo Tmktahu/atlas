@@ -181,7 +181,7 @@ export default {
   mounted() {
     this.$nextTick(() => {
       window.addEventListener('keydown', (event) => {
-        if (this.hoveredElement.tagName.toLowerCase() !== 'canvas') {
+        if (this.hoveredElement?.tagName.toLowerCase() !== 'canvas') {
           return;
         }
 
@@ -210,7 +210,7 @@ export default {
       });
 
       window.addEventListener('wheel', (event) => {
-        if (this.hoveredElement.tagName.toLowerCase() !== 'canvas') {
+        if (this.hoveredElement?.tagName.toLowerCase() !== 'canvas') {
           return;
         }
 
@@ -222,7 +222,7 @@ export default {
       });
 
       window.addEventListener('mousedown', () => {
-        if (this.hoveredElement.tagName.toLowerCase() !== 'canvas') {
+        if (this.hoveredElement?.tagName.toLowerCase() !== 'canvas') {
           return;
         }
 
@@ -231,7 +231,7 @@ export default {
       });
 
       window.addEventListener('mouseup', (event) => {
-        if (this.hoveredElement.tagName.toLowerCase() !== 'canvas') {
+        if (this.hoveredElement?.tagName.toLowerCase() !== 'canvas') {
           return;
         }
 

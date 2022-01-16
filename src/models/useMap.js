@@ -13,7 +13,7 @@ import {
   createTorusIntersectionRings,
   createPointIntersectionObjects,
 } from '@/models/useMapObjects.js';
-import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
+import { ORIGIN_POINT } from '@/models/useCoordinates.js';
 
 import { ASTROID_BELTS, MOONS, ORBIT_RINGS, EOS_BELT_ZONES } from './presetMapData/celestialBodies';
 
@@ -108,7 +108,7 @@ export function useMap(mapData) {
   };
 
   const init = async (inContainerElement) => {
-    console.log(mapData);
+    console.log('MapData, in case you were interested:', mapData);
     mapData.containerElement = inContainerElement;
 
     mapData.scene = new THREE.Scene();
