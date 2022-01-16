@@ -76,9 +76,6 @@ export default {
     const { init: initCoordinates } = useCoordinates();
     const { masterPointsArray } = initCoordinates(isElectron);
 
-    const { initMasterMapData, getPointData } = useMap();
-    const masterMapData = initMasterMapData(masterPointsArray);
-
     if (!isElectron) {
       const { saveToLocalStorage } = useStorage(isElectron);
 
@@ -94,6 +91,9 @@ export default {
       const { init: initStorage } = useStorage(isElectron);
       initStorage(masterPointsArray);
     }
+
+    const { initMasterMapData, getPointData } = useMap();
+    const masterMapData = initMasterMapData(masterPointsArray);
 
     provide('masterMapData', masterMapData);
     provide('showControls', showControls);
@@ -144,6 +144,10 @@ html {
   -webkit-user-select: none;
   -webkit-app-region: drag;
   background: #333;
+}
+
+.with-draggable-bar {
+  margin-top: 30px;
 }
 
 /* width */

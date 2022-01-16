@@ -189,27 +189,29 @@ export function useMap(mapData) {
     if (mapData.pointMeshes) {
       for (let i in mapData.points) {
         let point = mapData.points[i];
-        let hovered = mapData.intersects[0]?.object.id === point.mesh.id;
-        if (hovered) {
-          point.mesh.material.size = mapData.pointSize;
-          point.mesh.material.color = new THREE.Color(1, 1, 1);
-        } else {
-          point.mesh.material.color = new THREE.Color(point.data.color);
-        }
+        if (point && point.mesh) {
+          let hovered = mapData.intersects[0]?.object?.id === point?.mesh?.id;
+          if (hovered) {
+            point.mesh.material.size = mapData.pointSize;
+            point.mesh.material.color = new THREE.Color(1, 1, 1);
+          } else {
+            point.mesh.material.color = new THREE.Color(point.data.color);
+          }
 
-        point.intersectionMeshes.line.visible = hovered;
-        point.intersectionMeshes.ring.visible = hovered;
+          point.intersectionMeshes.line.visible = hovered;
+          point.intersectionMeshes.ring.visible = hovered;
 
-        // Scale warpgate points so they are always visible
-        if (point.data.type === 'gate') {
-          let distance = calcDistance(mapData.camera.position, {
-            x: point.mesh.geometry.attributes.position.array[0],
-            y: -point.mesh.geometry.attributes.position.array[1],
-            // eslint-disable-next-line id-length
-            z: point.mesh.geometry.attributes.position.array[2],
-          });
+          // Scale warpgate points so they are always visible
+          if (point.data.type === 'gate') {
+            let distance = calcDistance(mapData.camera.position, {
+              x: point.mesh.geometry.attributes.position.array[0],
+              y: -point.mesh.geometry.attributes.position.array[1],
+              // eslint-disable-next-line id-length
+              z: point.mesh.geometry.attributes.position.array[2],
+            });
 
-          point.mesh.material.size = distance / 10;
+            point.mesh.material.size = distance / 10;
+          }
         }
       }
     }
