@@ -516,28 +516,37 @@ export function useMap(mapData) {
     mapData.points.splice(index, 1);
   };
 
-  const mergePoints = async (incomingPointData) => {
+  const mergePoints = async (incomingPointData, shouldReplace = false) => {
     let existingIDs = mapData.points.map((obj) => {
       return obj.id;
     });
-    let skippedPoints = [];
+    let conflictingPoints = [];
 
     for (const index in incomingPointData) {
       let pointData = incomingPointData[index];
 
       if (existingIDs.includes(pointData.id)) {
-        skippedPoints.push(pointData);
-        continue;
+        if (shouldReplace) {
+          deletePoint(pointData);
+          await createNewPoint(pointData);
+        } else {
+          conflictingPoints.push(pointData);
+        }
       } else {
         await createNewPoint(pointData);
       }
     }
 
-    if (skippedPoints.length > 0) {
-      let names = skippedPoints.map((obj) => {
+    if (conflictingPoints.length > 0) {
+      let names = conflictingPoints.map((obj) => {
         return obj.name;
       });
-      Vue.toasted.global.alertError({ message: `${skippedPoints.length} Points were skipped due to duplicate IDs`, description: names.join(', ') });
+
+      if (shouldReplace) {
+        Vue.toasted.global.alertError({ message: `${conflictingPoints.length} Points were replaced due to duplicate IDs` });
+      } else {
+        Vue.toasted.global.alertError({ message: `${conflictingPoints.length} Points were skipped due to duplicate IDs`, description: names.join(', ') });
+      }
     }
   };
 
