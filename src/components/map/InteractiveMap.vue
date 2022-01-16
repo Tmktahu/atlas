@@ -83,8 +83,6 @@ export default {
     const showGrid = toRefs(masterMapData).showGrid;
     const showEosZones = toRefs(masterMapData.belts['eos']).showZones;
 
-    const showSaveDialog = inject('showSaveDialog');
-
     const { scaleUpCoordinate } = useCoordinates();
 
     const focusedObject = ref(null);
@@ -107,7 +105,6 @@ export default {
       MAX_PAN_SPEED,
       intersects,
       dataStoragePath,
-      showSaveDialog,
       scaleUpCoordinate,
       showGrid,
       showEosZones,
