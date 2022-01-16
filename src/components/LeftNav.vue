@@ -85,21 +85,15 @@
         </v-tooltip>
       </v-list>
     </v-layout>
-    <SaveDialog ref="saveDialog" />
   </v-navigation-drawer>
 </template>
 
 <script>
 import { ref, watch, inject, toRefs } from '@vue/composition-api';
-import { MANAGE_WAYPOINT_ROUTE, IMPORT_WAYPOINTS_ROUTE } from '@/router/routes';
-
-import SaveDialog from '@/components/dialogs/SaveDialog.vue';
-
 import { useCoordinates } from '@/models/useCoordinates.js';
 
 export default {
   name: 'LeftNav',
-  components: { SaveDialog },
 
   setup() {
     const isElectron = inject('isElectron');
@@ -113,6 +107,7 @@ export default {
 
     const showWaypointWidget = inject('showWaypointWidget');
     const showImportWidget = inject('showImportWidget');
+    const showSaveWidget = inject('showSaveWidget');
 
     const { scaleUpCoordinate } = useCoordinates();
 
@@ -125,6 +120,7 @@ export default {
       showControls,
       scaleUpCoordinate,
       showWaypointWidget,
+      showSaveWidget,
       showImportWidget,
     };
   },
@@ -155,12 +151,15 @@ export default {
 
     onManageWaypoint() {
       this.showWaypointWidget = !this.showWaypointWidget;
+      this.showSaveWidget = false;
       this.showImportWidget = false;
     },
 
     onSave() {
       if (this.isElectron) {
-        this.$refs.saveDialog.open();
+        this.showWaypointWidget = false;
+        this.showSaveWidget = !this.showSaveWidget;
+        this.showImportWidget = false;
       } else {
         let points = this.masterMapData.points.map((point) => {
           return point.data;
@@ -178,8 +177,9 @@ export default {
     },
 
     onImportWaypoints() {
-      this.showImportWidget = !this.showImportWidget;
       this.showWaypointWidget = false;
+      this.showSaveWidget = false;
+      this.showImportWidget = !this.showImportWidget;
     },
 
     onCoordinateConversion() {

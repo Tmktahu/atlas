@@ -3,6 +3,7 @@
     <LeftNav v-if="showLeftNav" />
     <ConversionWidget ref="conversionWidget" />
     <WaypointManagementWidget ref="waypointManagementWidget" />
+    <SaveWidget ref="saveWidget" />
     <ImportWidget ref="importWidget" />
     <v-main>
       <div v-if="isElectron" class="draggable-area-bar" />
@@ -24,6 +25,7 @@ import { useToasts } from '@/models/useToasts.js';
 import LeftNav from '@/components/LeftNav.vue';
 import ConversionWidget from '@/components/widgets/ConversionWidget.vue';
 import WaypointManagementWidget from '@/components/widgets/WaypointManagementWidget.vue';
+import SaveWidget from '@/components/widgets/SaveWidget.vue';
 import ImportWidget from '@/components/widgets/ImportWidget.vue';
 
 export default {
@@ -34,7 +36,7 @@ export default {
     },
   },
 
-  components: { LeftNav, ConversionWidget, WaypointManagementWidget, ImportWidget },
+  components: { LeftNav, ConversionWidget, WaypointManagementWidget, SaveWidget, ImportWidget },
 
   setup() {
     let userAgent = navigator.userAgent.toLowerCase();
@@ -45,11 +47,10 @@ export default {
     const showControls = ref(false);
     const leftNavCondensed = ref(false);
 
-    const showSaveDialog = ref(false);
-
     const showConversionWidget = ref(false);
     const showWaypointWidget = ref(false);
     const showWaypointCRUDWidget = ref(false);
+    const showSaveWidget = ref(false);
     const showImportWidget = ref(false);
 
     onMounted(() => {
@@ -101,11 +102,10 @@ export default {
     provide('showControls', showControls);
     provide('leftNavCondensed', leftNavCondensed);
 
-    provide('showSaveDialog', showSaveDialog);
-
     provide('showConversionWidget', showConversionWidget);
     provide('showWaypointWidget', showWaypointWidget);
     provide('showWaypointCRUDWidget', showWaypointCRUDWidget);
+    provide('showSaveWidget', showSaveWidget);
     provide('showImportWidget', showImportWidget);
 
     return {
