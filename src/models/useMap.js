@@ -13,7 +13,7 @@ import {
   createTorusIntersectionRings,
   createPointIntersectionObjects,
 } from '@/models/useMapObjects.js';
-import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
+import { ORIGIN_POINT } from '@/models/useCoordinates.js';
 
 import { ASTROID_BELTS, MOONS, ORBIT_RINGS, EOS_BELT_ZONES } from './presetMapData/celestialBodies';
 
@@ -108,7 +108,7 @@ export function useMap(mapData) {
   };
 
   const init = async (inContainerElement) => {
-    console.log(mapData);
+    console.log('MapData, in case you were interested:', mapData);
     mapData.containerElement = inContainerElement;
 
     mapData.scene = new THREE.Scene();
@@ -189,27 +189,29 @@ export function useMap(mapData) {
     if (mapData.pointMeshes) {
       for (let i in mapData.points) {
         let point = mapData.points[i];
-        let hovered = mapData.intersects[0]?.object.id === point.mesh.id;
-        if (hovered) {
-          point.mesh.material.size = mapData.pointSize;
-          point.mesh.material.color = new THREE.Color(1, 1, 1);
-        } else {
-          point.mesh.material.color = new THREE.Color(point.data.color);
-        }
+        if (point && point.mesh) {
+          let hovered = mapData.intersects[0]?.object?.id === point?.mesh?.id;
+          if (hovered) {
+            point.mesh.material.size = mapData.pointSize;
+            point.mesh.material.color = new THREE.Color(1, 1, 1);
+          } else {
+            point.mesh.material.color = new THREE.Color(point.data.color);
+          }
 
-        point.intersectionMeshes.line.visible = hovered;
-        point.intersectionMeshes.ring.visible = hovered;
+          point.intersectionMeshes.line.visible = hovered;
+          point.intersectionMeshes.ring.visible = hovered;
 
-        // Scale warpgate points so they are always visible
-        if (point.data.type === 'gate') {
-          let distance = calcDistance(mapData.camera.position, {
-            x: point.mesh.geometry.attributes.position.array[0],
-            y: -point.mesh.geometry.attributes.position.array[1],
-            // eslint-disable-next-line id-length
-            z: point.mesh.geometry.attributes.position.array[2],
-          });
+          // Scale warpgate points so they are always visible
+          if (point.data.type === 'gate') {
+            let distance = calcDistance(mapData.camera.position, {
+              x: point.mesh.geometry.attributes.position.array[0],
+              y: -point.mesh.geometry.attributes.position.array[1],
+              // eslint-disable-next-line id-length
+              z: point.mesh.geometry.attributes.position.array[2],
+            });
 
-          point.mesh.material.size = distance / 10;
+            point.mesh.material.size = distance / 10;
+          }
         }
       }
     }
@@ -359,11 +361,13 @@ export function useMap(mapData) {
 
     for (const index in pointsData.value) {
       let pointData = pointsData.value[index];
-      let newPoint = await createPoint(pointData);
+      if (pointData) {
+        let newPoint = await createPoint(pointData);
 
-      masterMapData.points.push(newPoint);
+        masterMapData.points.push(newPoint);
 
-      addPointToScene(newPoint);
+        addPointToScene(newPoint);
+      }
     }
   };
 
@@ -512,28 +516,37 @@ export function useMap(mapData) {
     mapData.points.splice(index, 1);
   };
 
-  const mergePoints = async (incomingPointData) => {
+  const mergePoints = async (incomingPointData, shouldReplace = false) => {
     let existingIDs = mapData.points.map((obj) => {
       return obj.id;
     });
-    let skippedPoints = [];
+    let conflictingPoints = [];
 
     for (const index in incomingPointData) {
       let pointData = incomingPointData[index];
 
       if (existingIDs.includes(pointData.id)) {
-        skippedPoints.push(pointData);
-        continue;
+        if (shouldReplace) {
+          deletePoint(pointData);
+          await createNewPoint(pointData);
+        } else {
+          conflictingPoints.push(pointData);
+        }
       } else {
         await createNewPoint(pointData);
       }
     }
 
-    if (skippedPoints.length > 0) {
-      let names = skippedPoints.map((obj) => {
+    if (conflictingPoints.length > 0) {
+      let names = conflictingPoints.map((obj) => {
         return obj.name;
       });
-      Vue.toasted.global.alertError({ message: `${skippedPoints.length} Points were skipped due to duplicate IDs`, description: names.join(', ') });
+
+      if (shouldReplace) {
+        Vue.toasted.global.alertError({ message: `${conflictingPoints.length} Points were replaced due to duplicate IDs` });
+      } else {
+        Vue.toasted.global.alertError({ message: `${conflictingPoints.length} Points were skipped due to duplicate IDs`, description: names.join(', ') });
+      }
     }
   };
 

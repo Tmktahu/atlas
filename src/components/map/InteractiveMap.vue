@@ -84,7 +84,6 @@ export default {
     const showEosZones = toRefs(masterMapData.belts['eos']).showZones;
 
     const showSaveDialog = inject('showSaveDialog');
-    const showImportDialog = inject('showImportDialog');
 
     const { scaleUpCoordinate } = useCoordinates();
 
@@ -109,7 +108,6 @@ export default {
       intersects,
       dataStoragePath,
       showSaveDialog,
-      showImportDialog,
       scaleUpCoordinate,
       showGrid,
       showEosZones,
@@ -183,7 +181,7 @@ export default {
   mounted() {
     this.$nextTick(() => {
       window.addEventListener('keydown', (event) => {
-        if (this.hoveredElement.tagName.toLowerCase() !== 'canvas') {
+        if (this.hoveredElement?.tagName.toLowerCase() !== 'canvas') {
           return;
         }
 
@@ -212,7 +210,7 @@ export default {
       });
 
       window.addEventListener('wheel', (event) => {
-        if (this.hoveredElement.tagName.toLowerCase() !== 'canvas') {
+        if (this.hoveredElement?.tagName.toLowerCase() !== 'canvas') {
           return;
         }
 
@@ -224,7 +222,7 @@ export default {
       });
 
       window.addEventListener('mousedown', () => {
-        if (this.hoveredElement.tagName.toLowerCase() !== 'canvas') {
+        if (this.hoveredElement?.tagName.toLowerCase() !== 'canvas') {
           return;
         }
 
@@ -233,7 +231,7 @@ export default {
       });
 
       window.addEventListener('mouseup', (event) => {
-        if (this.hoveredElement.tagName.toLowerCase() !== 'canvas') {
+        if (this.hoveredElement?.tagName.toLowerCase() !== 'canvas') {
           return;
         }
 
@@ -253,9 +251,11 @@ export default {
       this.createStats();
       this.initMap(this.$refs.mapContainer);
 
-      this.$toasted.global.alertWarning({
-        message: 'You must have Hardware Acceleration enabled in your browser,<br>or else this website will max out your CPU trying to render.',
-      });
+      if (!this.isElectron) {
+        this.$toasted.global.alertWarning({
+          message: 'You must have Hardware Acceleration enabled in your browser,<br>or else this website will max out your CPU trying to render.',
+        });
+      }
     });
   },
 
@@ -382,7 +382,7 @@ export default {
 
 .controls-info {
   position: absolute;
-  top: 36px;
+  top: 16px;
   left: 16px;
   width: 100%;
   pointer-events: none;

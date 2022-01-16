@@ -1,7 +1,6 @@
 export const INDEX_ROUTE = 'index';
 export const LANDING_ROUTE = 'landing';
-export const MANAGE_WAYPOINT_ROUTE = 'manage-waypoints';
-export const IMPORT_WAYPOINTS_ROUTE = 'import-waypoints';
+export const ATLAS_ROUTE = 'atlas';
 
 export default [
   {
@@ -17,10 +16,10 @@ export default [
     },
   },
   {
-    path: '/import',
-    name: IMPORT_WAYPOINTS_ROUTE,
+    path: '/atlas',
+    name: ATLAS_ROUTE,
     components: {
-      default: () => lazyLoadView(import('@/components/dialogs/ImportDialog.vue')),
+      default: () => lazyLoadView(import('@/components/map/InteractiveMap.vue')),
     },
   },
 ];
