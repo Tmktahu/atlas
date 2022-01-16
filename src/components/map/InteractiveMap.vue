@@ -251,9 +251,11 @@ export default {
       this.createStats();
       this.initMap(this.$refs.mapContainer);
 
-      this.$toasted.global.alertWarning({
-        message: 'You must have Hardware Acceleration enabled in your browser,<br>or else this website will max out your CPU trying to render.',
-      });
+      if (!this.isElectron) {
+        this.$toasted.global.alertWarning({
+          message: 'You must have Hardware Acceleration enabled in your browser,<br>or else this website will max out your CPU trying to render.',
+        });
+      }
     });
   },
 

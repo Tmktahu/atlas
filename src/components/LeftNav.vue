@@ -11,7 +11,7 @@
 
         <v-divider />
 
-        <v-list-item link @click="onManageWaypoint">
+        <v-list-item link :class="{ selected: showWaypointWidget }" @click="onManageWaypoint">
           <div class="left-nav-icon">
             <v-icon>mdi-map-marker</v-icon>
           </div>
@@ -25,7 +25,7 @@
           <span class="left-nav-label pl-5">Save Waypoints</span>
         </v-list-item>
 
-        <v-list-item link @click="onImportWaypoints">
+        <v-list-item link :class="{ selected: showImportWidget }" @click="onImportWaypoints">
           <div class="left-nav-icon">
             <v-icon>mdi-import</v-icon>
           </div>
@@ -154,7 +154,7 @@ export default {
     },
 
     onManageWaypoint() {
-      this.showWaypointWidget = true;
+      this.showWaypointWidget = !this.showWaypointWidget;
       this.showImportWidget = false;
     },
 
@@ -178,7 +178,7 @@ export default {
     },
 
     onImportWaypoints() {
-      this.showImportWidget = true;
+      this.showImportWidget = !this.showImportWidget;
       this.showWaypointWidget = false;
     },
 

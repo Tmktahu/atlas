@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/valid-v-slot */ -->
 <template>
-  <div class="import-widget py-3 pl-3" :class="{ open: showImportWidget }">
+  <div class="import-widget py-3 pl-3" :class="{ open: showImportWidget, 'with-drag-bar': isElectron }">
     <v-row no-gutters>
       <div class="page-title">Import Waypoints</div>
       <v-spacer />
@@ -139,6 +139,7 @@ export default {
     ];
 
     return {
+      isElectron,
       showImportWidget,
       uploadedFile,
       loadedData,
@@ -206,6 +207,10 @@ export default {
   &.open {
     right: 0px;
   }
+}
+
+.with-drag-bar {
+  margin-top: 30px;
 }
 
 .page-title {

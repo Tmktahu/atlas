@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/valid-v-slot */ -->
 <template>
   <div>
-    <div class="waypoint-widget py-3 pl-3" :class="{ open: showWaypointWidget }">
+    <div class="waypoint-widget py-3 pl-3" :class="{ open: showWaypointWidget, 'with-drag-bar': isElectron }">
       <v-row no-gutters>
         <div class="page-title">Waypoint Management</div>
         <v-spacer />
@@ -88,6 +88,7 @@ export default {
   components: { WaypointCRUDWidget },
 
   setup() {
+    const isElectron = inject('isElectron');
     const showWaypointWidget = inject('showWaypointWidget');
     const masterMapData = inject('masterMapData');
 
@@ -117,6 +118,7 @@ export default {
     const { viewObject, showHidePoint, addPoint, deletePoint, mergePoints } = useMap(masterMapData);
 
     return {
+      isElectron,
       showWaypointWidget,
       masterMapData,
       tableHeaders,
@@ -203,6 +205,10 @@ export default {
   &.open {
     right: 0px;
   }
+}
+
+.with-drag-bar {
+  margin-top: 30px;
 }
 
 .page-title {
