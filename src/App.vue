@@ -80,7 +80,7 @@ export default {
     const masterMapData = initMasterMapData(masterPointsArray);
 
     if (!isElectron) {
-      const { saveToLocalStorage } = useStorage();
+      const { saveToLocalStorage } = useStorage(isElectron);
 
       let points = toRefs(masterMapData).points;
       watch(
@@ -91,7 +91,7 @@ export default {
         }, 1000)
       );
     } else {
-      const { init: initStorage } = useStorage();
+      const { init: initStorage } = useStorage(isElectron);
       initStorage(masterPointsArray);
     }
 

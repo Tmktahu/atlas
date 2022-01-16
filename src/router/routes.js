@@ -16,13 +16,6 @@ export default [
       default: () => lazyLoadView(import('@/components/map/InteractiveMap.vue')),
     },
   },
-  {
-    path: '/import',
-    name: IMPORT_WAYPOINTS_ROUTE,
-    components: {
-      default: () => lazyLoadView(import('@/components/dialogs/ImportDialog.vue')),
-    },
-  },
 ];
 
 // Lazy-loads view components, but with better UX. A loading view
