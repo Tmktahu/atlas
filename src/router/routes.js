@@ -1,7 +1,13 @@
+export const INDEX_ROUTE = 'index';
 export const LANDING_ROUTE = 'landing';
 export const ATLAS_ROUTE = 'atlas';
 
 export default [
+  {
+    path: '/index.html',
+    name: INDEX_ROUTE,
+    redirect: '/',
+  },
   {
     path: '/',
     name: LANDING_ROUTE,
