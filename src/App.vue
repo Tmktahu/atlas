@@ -76,6 +76,14 @@ export default {
     const { init: initCoordinates } = useCoordinates();
     const { masterPointsArray } = initCoordinates(isElectron);
 
+    if (isElectron) {
+      const { init: initStorage } = useStorage(isElectron);
+      initStorage(masterPointsArray);
+    }
+
+    const { initMasterMapData, getPointData } = useMap();
+    const masterMapData = initMasterMapData(masterPointsArray);
+
     if (!isElectron) {
       const { saveToLocalStorage } = useStorage(isElectron);
 
@@ -87,13 +95,7 @@ export default {
           saveToLocalStorage(pointData);
         }, 1000)
       );
-    } else {
-      const { init: initStorage } = useStorage(isElectron);
-      initStorage(masterPointsArray);
     }
-
-    const { initMasterMapData, getPointData } = useMap();
-    const masterMapData = initMasterMapData(masterPointsArray);
 
     provide('masterMapData', masterMapData);
     provide('showControls', showControls);
