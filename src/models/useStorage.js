@@ -2,11 +2,7 @@ import Vue from 'vue';
 import { ref } from '@vue/composition-api';
 const fs = require('fs');
 
-import { ISAN_ORIGIN_POINT, ORIGIN_POINT, useCoordinates } from './useCoordinates';
-import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetMapData/eos';
-import { ELYSIUM_WARP_GATE } from './presetMapData/elysium';
-
-export const DEFAULT_DATA = [ORIGIN_POINT, ELYSIUM_WARP_GATE, ISAN_ORIGIN_POINT, ...ORIGIN_STATIONS, ...TRANSMITTER_STATIONS];
+import { useCoordinates } from './useCoordinates';
 
 export function useStorage(isElectron) {
   let dataStoragePath = ref('');
@@ -21,17 +17,18 @@ export function useStorage(isElectron) {
 
   const init = async (storageContainer) => {
     if (fs.existsSync && fs.existsSync(dataStoragePath.value)) {
-      const result = await readFromJSON(storageContainer, dataStoragePath.value);
+      const result = await readFromJSON(null, dataStoragePath.value);
+      storageContainer.value = result;
     } else {
       console.log('No storage. Initing json file with default data.');
-      const result = await saveToJSON(DEFAULT_DATA, dataStoragePath.value, storageContainer, true);
+      const result = await saveToJSON(null, dataStoragePath.value, storageContainer, true);
     }
   };
 
   const readFromJSON = async (container, filePath, file) => {
     if (isElectron) {
       try {
-        const data = await fsPromises.readFile(filePath, 'utf-8');
+        const data = await fs.promises.readFile(filePath, 'utf-8');
         let rawData = JSON.parse(data);
         const { scaleDownCoordinate } = useCoordinates();
         let scaledDownData = rawData.map((item) => {
@@ -69,16 +66,26 @@ export function useStorage(isElectron) {
     }
   };
 
-  const saveToJSON = async (inData, filePath, container = null, defaultData = false) => {
+  const saveToJSON = async (inData, filePath, container = null, useDefaultData = false) => {
     if (isElectron) {
-      const { scaleDownCoordinate, scaleUpCoordinate } = useCoordinates();
+      const { scaleUpCoordinate } = useCoordinates();
       let stringifiedData = null;
       let scaledData = null;
-      if (defaultData) {
-        scaledData = inData.map((item) => {
-          return scaleDownCoordinate(item);
-        });
-        stringifiedData = JSON.stringify(inData, null, 2);
+
+      if (useDefaultData) {
+        let useCoordinates = await import('./useCoordinates');
+        let eosData = await import('./presetMapData/eos');
+        let elysiumData = await import('./presetMapData/elysium');
+
+        let defaultData = [
+          useCoordinates.ORIGIN_POINT,
+          elysiumData.ELYSIUM_WARP_GATE,
+          useCoordinates.ISAN_ORIGIN_POINT,
+          ...eosData.ORIGIN_STATIONS,
+          ...eosData.TRANSMITTER_STATIONS,
+        ];
+
+        stringifiedData = JSON.stringify(defaultData, null, 2);
       } else {
         scaledData = inData.map((item) => {
           return scaleUpCoordinate(item);

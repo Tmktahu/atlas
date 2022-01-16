@@ -3,6 +3,7 @@
     <LeftNav v-if="showLeftNav" />
     <ConversionWidget ref="conversionWidget" />
     <WaypointManagementWidget ref="waypointManagementWidget" />
+    <ImportWidget ref="importWidget" />
     <v-main>
       <div v-if="isElectron" class="draggable-area-bar" />
       <router-view />
@@ -23,6 +24,7 @@ import { useToasts } from '@/models/useToasts.js';
 import LeftNav from '@/components/LeftNav.vue';
 import ConversionWidget from '@/components/widgets/ConversionWidget.vue';
 import WaypointManagementWidget from '@/components/widgets/WaypointManagementWidget.vue';
+import ImportWidget from '@/components/widgets/ImportWidget.vue';
 
 export default {
   metaInfo: {
@@ -32,7 +34,7 @@ export default {
     },
   },
 
-  components: { LeftNav, ConversionWidget, WaypointManagementWidget },
+  components: { LeftNav, ConversionWidget, WaypointManagementWidget, ImportWidget },
 
   setup() {
     let userAgent = navigator.userAgent.toLowerCase();
@@ -44,11 +46,11 @@ export default {
     const leftNavCondensed = ref(false);
 
     const showSaveDialog = ref(false);
-    const showImportDialog = ref(false);
 
     const showConversionWidget = ref(false);
     const showWaypointWidget = ref(false);
     const showWaypointCRUDWidget = ref(false);
+    const showImportWidget = ref(false);
 
     onMounted(() => {
       if (isElectron) {
@@ -74,11 +76,16 @@ export default {
     const { init: initCoordinates } = useCoordinates();
     const { masterPointsArray } = initCoordinates(isElectron);
 
+    if (isElectron) {
+      const { init: initStorage } = useStorage(isElectron);
+      initStorage(masterPointsArray);
+    }
+
     const { initMasterMapData, getPointData } = useMap();
     const masterMapData = initMasterMapData(masterPointsArray);
 
     if (!isElectron) {
-      const { saveToLocalStorage } = useStorage();
+      const { saveToLocalStorage } = useStorage(isElectron);
 
       let points = toRefs(masterMapData).points;
       watch(
@@ -88,9 +95,6 @@ export default {
           saveToLocalStorage(pointData);
         }, 1000)
       );
-    } else {
-      const { init: initStorage } = useStorage();
-      initStorage(masterPointsArray);
     }
 
     provide('masterMapData', masterMapData);
@@ -98,11 +102,11 @@ export default {
     provide('leftNavCondensed', leftNavCondensed);
 
     provide('showSaveDialog', showSaveDialog);
-    provide('showImportDialog', showImportDialog);
 
     provide('showConversionWidget', showConversionWidget);
     provide('showWaypointWidget', showWaypointWidget);
     provide('showWaypointCRUDWidget', showWaypointCRUDWidget);
+    provide('showImportWidget', showImportWidget);
 
     return {
       isElectron,
@@ -142,6 +146,10 @@ html {
   -webkit-user-select: none;
   -webkit-app-region: drag;
   background: #333;
+}
+
+.with-draggable-bar {
+  margin-top: 30px;
 }
 
 /* width */
