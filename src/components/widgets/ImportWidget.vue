@@ -84,7 +84,7 @@
       </v-tooltip>
 
       <v-spacer />
-      <v-btn dense class="action-button" small outlined @click="onLoadData">Import</v-btn>
+      <v-btn dense class="action-button" small outlined @click="onImport">Import</v-btn>
     </v-row>
   </div>
 </template>
@@ -93,6 +93,8 @@
 import { ref, inject } from '@vue/composition-api';
 
 import { useStorage } from '@/models/useStorage.js';
+import { useMap } from '@/models/useMap.js';
+import { useCoordinates } from '@/models/useCoordinates';
 
 import { ICON_MAP } from '@/models/useIcons.js';
 
@@ -101,6 +103,7 @@ export default {
 
   setup() {
     const isElectron = inject('isElectron');
+    const masterMapData = inject('masterMapData');
     const showImportWidget = inject('showImportWidget');
 
     const uploadedFile = ref(null);
@@ -110,6 +113,8 @@ export default {
     const mode = ref('skip');
 
     const { readFromJSON } = useStorage(isElectron);
+    const { scaleDownCoordinate } = useCoordinates();
+    const { mergePoints } = useMap(masterMapData);
 
     const tableHeaders = [
       {
@@ -149,6 +154,8 @@ export default {
       readFromJSON,
       tableHeaders,
       ICON_MAP,
+      scaleDownCoordinate,
+      mergePoints,
     };
   },
 
@@ -173,6 +180,19 @@ export default {
       this.checkedWaypoints = this.loadedData.map((obj) => {
         return obj.id;
       });
+    },
+
+    async onImport() {
+      let selectedPoints = this.loadedData.filter((obj) => {
+        return this.checkedWaypoints.includes(obj.id);
+      });
+
+      let scaledDownPoints = selectedPoints.map((obj) => {
+        return this.scaleDownCoordinate(obj);
+      });
+
+      this.mergePoints(scaledDownPoints, this.mode === 'replace');
+      this.close();
     },
 
     flipAllChecked() {
