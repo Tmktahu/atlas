@@ -67,8 +67,8 @@ export default {
       }
       console.log(
         // eslint-disable-next-line quotes
-        "%cIf you're reading this, then I may be able to use your help! Come check out the Discord server and say hi: https://discord.gg/Vafdx5JWBh",
-        'font-size: 0.7rem; font-weight: 500;'
+        "%cIf you're reading this, then I may be able to use your help!\nCome check out the Discord server: https://discord.gg/Vafdx5JWBh",
+        'font-size: 1rem'
       );
     });
 
