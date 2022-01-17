@@ -36,8 +36,6 @@ export const masterMapData = reactive({
 
   pointMeshes: [],
   pointsArray: ref([]),
-  pointIntersectionObjects: [],
-  warpGatePointMeshes: [],
 
   points: [],
   /*
@@ -108,7 +106,7 @@ export function useMap(mapData) {
   };
 
   const init = async (inContainerElement) => {
-    console.log('MapData, in case you were interested:', mapData);
+    console.log('Background Map Data, in case you were interested:', mapData);
     mapData.containerElement = inContainerElement;
 
     mapData.scene = new THREE.Scene();
@@ -178,7 +176,7 @@ export function useMap(mapData) {
       });
 
       let filteredPointMeshes = pointMeshes.filter((mesh) => mesh.visible);
-      let intersectableObjects = [...mapData.warpGatePointMeshes, ...filteredPointMeshes, ...mapData.moons];
+      let intersectableObjects = [...filteredPointMeshes, ...mapData.moons];
 
       mapData.intersects = mapData.raycaster.intersectObjects(intersectableObjects);
       mapData.lastRaycast = Date.now();
