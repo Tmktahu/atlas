@@ -88,7 +88,7 @@ export function useStorage(isElectron) {
         stringifiedData = JSON.stringify(defaultData, null, 2);
       } else {
         scaledData = inData.map((item) => {
-          return scaleUpCoordinate(item);
+          return scaleUpCoordinate(item.data);
         });
         stringifiedData = JSON.stringify(scaledData, null, 2);
       }

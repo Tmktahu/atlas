@@ -106,7 +106,7 @@ export function useMap(mapData) {
   };
 
   const init = async (inContainerElement) => {
-    console.log('MapData, in case you were interested:', mapData);
+    console.log('Background Map Data, in case you were interested:', mapData);
     mapData.containerElement = inContainerElement;
 
     mapData.scene = new THREE.Scene();

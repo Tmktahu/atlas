@@ -42,7 +42,7 @@ export default {
     const storageOption = ref('storage');
     const filePath = ref('');
 
-    const { saveToJSON, dataStoragePath } = useStorage();
+    const { saveToJSON, dataStoragePath } = useStorage(isElectron);
 
     return {
       isElectron,
@@ -82,7 +82,7 @@ export default {
 
     async onSave() {
       if (this.storageOption === 'storage') {
-        const errors = await this.saveToJSON(this.masterMapData.pointsArray, this.dataStoragePath);
+        const errors = await this.saveToJSON(this.masterMapData.points, this.dataStoragePath);
         if (errors) {
           console.log('File Save Error: ', errors);
           this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });
@@ -90,7 +90,7 @@ export default {
           this.close();
         }
       } else {
-        const errors = await this.saveToJSON(this.masterMapData.pointsArray, this.filePath);
+        const errors = await this.saveToJSON(this.masterMapData.points, this.filePath);
         if (errors) {
           console.log('File Save Error: ', errors);
           this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });

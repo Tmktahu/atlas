@@ -18,7 +18,7 @@
           <span class="left-nav-label pl-5">Waypoints</span>
         </v-list-item>
 
-        <v-list-item link @click="onSave">
+        <v-list-item link :class="{ selected: showSaveWidget }" @click="onSave">
           <div class="left-nav-icon">
             <v-icon>mdi-content-save-outline</v-icon>
           </div>
