@@ -232,7 +232,7 @@ export default {
     },
 
     onDelete() {
-      if (confirm('are you sure?')) {
+      if (confirm('Are you sure you want to delete this waypoint?')) {
         this.deletePoint(this.currentObject);
         this.currentObject = null;
         this.showInfoWidget = false;
