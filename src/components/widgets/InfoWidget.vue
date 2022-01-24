@@ -13,13 +13,24 @@
 
     <v-row v-if="currentObject && currentObject.data" class="flex-column px-3 pt-5 pb-2">
       <div class="d-flex align-center">
-        <div class="image-wrapper mr-2" :style="{ 'background-color': currentObject.data.color }">
+        <div v-if="currentObject.data.icon" class="image-wrapper mr-2" :style="{ 'background-color': currentObject.data.color }">
           <img :src="ICON_MAP[currentObject.data.icon].workingFilePath" contain width="30px" height="30px" style="filter: invert(1)" />
+        </div>
+        <div v-else-if="currentObject.data.type === 'moon'" class="image-wrapper mr-2" :style="{ 'background-color': currentObject.data.color }">
+          <v-icon color="white" width="30px" height="30px">mdi-moon-waning-crescent</v-icon>
+        </div>
+        <div v-else-if="currentObject.data.type === 'planet'" class="image-wrapper mr-2" :style="{ 'background-color': currentObject.data.color }">
+          <v-icon color="white" width="30px" height="30px">mdi-earth</v-icon>
         </div>
         <span class="info-name">{{ nameText }}</span>
       </div>
 
       <span class="info-type">{{ typeText }}</span>
+
+      <div v-if="currentObject.data && currentObject.data.type === 'moon'" class="info-named-by">
+        <span v-if="currentObject.data.namedBy">Named by {{ currentObject.data.namedBy }}</span>
+        <span v-if="currentObject.data.namedAt"> on {{ currentObject.data.namedAt }}</span>
+      </div>
 
       <div class="d-flex mt-3">
         <v-btn dense small outlined class="action-button" @click="onView">View</v-btn>
@@ -30,6 +41,7 @@
         </v-btn>
       </div>
 
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <div class="description mt-5 pr-3" v-html="compiledDescription" />
     </v-row>
 
@@ -116,6 +128,9 @@ export default {
       if (object.type === 'Points') {
         let pointObject = this.masterMapData.points.find((point) => point.id === object.pointId);
         this.currentObject = pointObject;
+      } else if (object.celestialType === 'moon' || object.celestialType === 'planet') {
+        let moonObject = this.masterMapData.moons.find((moon) => moon.id === object.objectId);
+        this.currentObject = moonObject;
       } else {
         this.currentObject = object;
       }
@@ -251,6 +266,11 @@ export default {
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 0.04em;
+}
+
+.info-named-by {
+  color: black;
+  font-size: 14px;
 }
 
 .description {
