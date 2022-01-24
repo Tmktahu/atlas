@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import { ref } from '@vue/composition-api';
 const fs = require('fs');
+import { EventBus } from '@/eventBus';
 
 import { useCoordinates } from './useCoordinates';
 
@@ -18,7 +19,17 @@ export function useStorage(isElectron) {
   const init = async (storageContainer) => {
     if (fs.existsSync && fs.existsSync(dataStoragePath.value)) {
       const result = await readFromJSON(null, dataStoragePath.value);
-      storageContainer.value = result;
+
+      const { scaleDownCoordinate } = useCoordinates();
+      let scaledDownData = result.map((item) => {
+        return scaleDownCoordinate(item);
+      });
+
+      storageContainer.value = scaledDownData;
+
+      setTimeout(() => {
+        EventBus.$emit('initMap');
+      }, 1000);
     } else {
       console.log('No storage. Initing json file with default data.');
       const result = await saveToJSON(null, dataStoragePath.value, storageContainer, true);
@@ -39,7 +50,7 @@ export function useStorage(isElectron) {
           container.value = scaledDownData;
           return;
         } else {
-          return scaledDownData;
+          return rawData;
         }
       } catch (error) {
         console.log('Error reading file: ', error);

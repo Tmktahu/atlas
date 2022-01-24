@@ -1,7 +1,8 @@
 <!-- eslint-disable id-length -->
 <template>
-  <div>
-    <div ref="mapContainer" v-resize="onResize" class="mapContainer" @keypress="onWDown" />
+  <div style="height: 100%; display: flex; align-items: center">
+    <v-progress-circular v-show="mapLoading" size="100" indeterminate style="margin: auto" />
+    <div v-show="!mapLoading" ref="mapContainer" v-resize="onResize" class="mapContainer" @keypress="onWDown" />
     <v-row no-gutters class="bottom-controls">
       <v-checkbox v-model="showEosZones" hide-details reverse class="hide-grid-checkbox mr-2" label="Eos Zones" />
       <v-checkbox v-model="showGrid" hide-details reverse class="hide-grid-checkbox mr-2" label="Grid" />
@@ -92,6 +93,8 @@ export default {
 
     const hoveredElement = ref(null);
 
+    const mapLoading = ref(true);
+
     return {
       isElectron,
       stats,
@@ -115,6 +118,7 @@ export default {
       mouseMoved,
       viewObject,
       hoveredElement,
+      mapLoading,
     };
   },
 
@@ -179,6 +183,11 @@ export default {
   },
 
   mounted() {
+    EventBus.$on('initMap', () => {
+      this.initMap(this.$refs.mapContainer);
+      this.mapLoading = false;
+    });
+
     this.$nextTick(() => {
       window.addEventListener('keydown', (event) => {
         if (this.hoveredElement?.tagName.toLowerCase() !== 'canvas') {
@@ -249,7 +258,11 @@ export default {
       });
 
       this.createStats();
-      this.initMap(this.$refs.mapContainer);
+
+      if (!this.isElectron) {
+        this.initMap(this.$refs.mapContainer);
+        this.mapLoading = false;
+      }
 
       if (!this.isElectron) {
         this.$toasted.global.alertWarning({
@@ -287,8 +300,10 @@ export default {
 
     // Click action and context menu handlers
     handleMouseClick() {
-      EventBus.$emit('setInfoWidgetData', this.focusedObject);
-      this.showInfoWidget = true;
+      if (this.focusedObject !== undefined) {
+        EventBus.$emit('setInfoWidgetData', this.focusedObject);
+        this.showInfoWidget = true;
+      }
     },
 
     handleRightClick() {
