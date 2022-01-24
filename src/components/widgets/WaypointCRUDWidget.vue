@@ -211,12 +211,25 @@
       <v-btn v-if="type === 'edit'" class="form-button mr-2 px-1" dense small outlined :disabled="$v.$invalid" @click="onSave">Save</v-btn>
       <v-btn class="form-button px-1" dense small outlined @click="close">Cancel</v-btn>
     </v-row>
+
+    <v-expansion-panels class="description-panel mt-2" accordion flat>
+      <v-expansion-panel>
+        <v-expansion-panel-header class="form-button px-1"> Description (Uses Markdown) </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <v-textarea v-model="formInfo.description" rows="3" hide-details solo dense auto-grow flat class="description-input mt-2" @input="updateMarkdown" />
+          <v-divider class="mt-2" color="black" />
+          <div class="compiled-markdown px-3 mt-2" v-html="compiledDescription" />
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </div>
 </template>
 
 <script>
 import { ref, inject, watch, reactive } from '@vue/composition-api';
 import { v4 as uuidv4 } from 'uuid';
+import { marked } from 'marked';
+import { EventBus } from '@/eventBus';
 
 import { required } from 'vuelidate/lib/validators';
 
@@ -241,6 +254,7 @@ export default {
   setup(_, context) {
     const showWaypointCRUDWidget = inject('showWaypointCRUDWidget');
     const masterMapData = inject('masterMapData');
+    const showInfoWidget = inject('showInfoWidget');
 
     const type = ref('create');
     const mode = ref('ips');
@@ -260,7 +274,11 @@ export default {
         // eslint-disable-next-line id-length
         z: null,
       },
+      description: '',
     });
+
+    const descriptionPanel = ref(null);
+    const compiledDescription = ref('');
 
     const colorPickerMenu = ref(false);
 
@@ -279,10 +297,13 @@ export default {
     });
 
     return {
+      masterMapData,
       showWaypointCRUDWidget,
+      showInfoWidget,
       type,
       mode,
       formInfo,
+      compiledDescription,
       colorPickerMenu,
       icons,
       createNewPoint,
@@ -311,6 +332,12 @@ export default {
     },
   },
 
+  mounted() {
+    EventBus.$on('openEditWidget', (data) => {
+      this.open('edit', data);
+    });
+  },
+
   methods: {
     open(type, point = null) {
       this.type = type;
@@ -318,6 +345,7 @@ export default {
       if (point) {
         let scaledUpPoint = this.scaleUpCoordinate(point.data);
         this.formInfo = scaledUpPoint;
+        this.updateMarkdown();
       }
 
       this.showWaypointCRUDWidget = true;
@@ -387,6 +415,7 @@ export default {
         hide: false,
         icon: this.formInfo.icon,
         group: this.formInfo.group,
+        description: this.formInfo.description,
       };
 
       let scaledDownPoint = this.scaleDownCoordinate(newPointData);
@@ -415,12 +444,18 @@ export default {
         color: color,
         icon: this.formInfo.icon,
         group: this.formInfo.group,
+        description: this.formInfo.description,
       };
 
       let scaledDownPoint = this.scaleDownCoordinate(pointData);
       this.savePoint(scaledDownPoint);
+
       this.close();
     },
+
+    updateMarkdown: _.debounce(function (event) {
+      this.compiledDescription = marked(this.formInfo.description || '');
+    }, 300),
   },
 };
 </script>
@@ -586,5 +621,43 @@ export default {
   letter-spacing: 0.02em;
   height: 28px !important;
   min-height: 0 !important;
+}
+
+.description-panel::v-deep {
+  .v-expansion-panel {
+    background: transparent !important;
+  }
+
+  .v-expansion-panel-header {
+    border: 1px solid black;
+    border-radius: 4px;
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .v-expansion-panel-content__wrap {
+    padding: 0 !important;
+  }
+
+  .description-input {
+    .v-input__slot {
+      background-color: color.change($primary-blue, $lightness: 80%, $saturation: 40%) !important;
+    }
+
+    textarea {
+      max-height: 200px;
+      min-height: 100px;
+      overflow-y: auto;
+      margin: 0 !important;
+    }
+  }
+
+  .compiled-markdown {
+    border-radius: 4px;
+    background: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+    max-height: 200px;
+    min-height: 100px;
+  }
 }
 </style>

@@ -37,7 +37,7 @@ export function createRing(options) {
   return ring;
 }
 
-export async function createSphere(options) {
+export async function createSphereMesh(options) {
   let texture = null;
   if (options.texture) {
     let textureLoader = new THREE.TextureLoader();
@@ -62,8 +62,12 @@ export async function createSphere(options) {
     sphere.name = options.name;
   }
 
-  if (options.celestialType) {
-    sphere.celestialType = options.celestialType;
+  if (options.type) {
+    sphere.celestialType = options.type;
+  }
+
+  if (options.id) {
+    sphere.objectId = options.id;
   }
 
   sphere.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
