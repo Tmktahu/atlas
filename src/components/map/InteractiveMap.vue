@@ -151,7 +151,7 @@ export default {
         this.$refs.pointInfoContainer.style.display = 'block';
 
         this.$refs.mapContainer.style.cursor = 'pointer';
-      } else if (this.focusedObject.type === 'Mesh' && this.focusedObject.celestialType === 'moon') {
+      } else if (this.focusedObject.type === 'Mesh' && (this.focusedObject.celestialType === 'moon' || this.focusedObject.celestialType === 'planet')) {
         let coordinate = {
           position: {
             x: this.focusedObject.position.x,

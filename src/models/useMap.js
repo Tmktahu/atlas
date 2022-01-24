@@ -7,7 +7,7 @@ import { ref, watch, reactive, toRefs } from '@vue/composition-api';
 import {
   createPointMesh,
   createRing,
-  createSphere,
+  createSphereMesh,
   createTorus,
   createSphereIntersectionRing,
   createTorusIntersectionRings,
@@ -79,7 +79,6 @@ export const masterMapData = reactive({
   otherBelts: [],
 
   moons: [],
-  moonIntersectionRings: [],
 
   lookAtVector: new THREE.Vector3(),
 
@@ -175,8 +174,12 @@ export function useMap(mapData) {
         return point.mesh;
       });
 
+      let moonMeshes = mapData.moons.map((moon) => {
+        return moon.mesh;
+      });
+
       let filteredPointMeshes = pointMeshes.filter((mesh) => mesh.visible);
-      let intersectableObjects = [...filteredPointMeshes, ...mapData.moons];
+      let intersectableObjects = [...filteredPointMeshes, ...moonMeshes];
 
       mapData.intersects = mapData.raycaster.intersectObjects(intersectableObjects);
       mapData.lastRaycast = Date.now();
@@ -293,13 +296,19 @@ export function useMap(mapData) {
     }
 
     for (let index in MOONS) {
-      let moon = await createSphere(MOONS[index]);
-      mapData.moons.push(moon);
-      mapData.scene.add(moon);
-
+      let moonMesh = await createSphereMesh(MOONS[index]);
       let intersectionRing = createSphereIntersectionRing(MOONS[index]);
-      mapData.moonIntersectionRings.push(intersectionRing);
-      mapData.scene.add(intersectionRing);
+
+      let moon = {
+        id: MOONS[index].id,
+        data: MOONS[index],
+        mesh: moonMesh,
+        intersectionRing: intersectionRing,
+      };
+
+      mapData.moons.push(moon);
+      mapData.scene.add(moon.mesh);
+      mapData.scene.add(moon.intersectionRing);
     }
   };
 
