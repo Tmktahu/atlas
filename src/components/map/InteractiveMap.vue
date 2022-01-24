@@ -226,7 +226,7 @@ export default {
           return;
         }
 
-        this.$refs.contextMenu.close();
+        this.$refs.contextMenu?.close();
         this.mouseMoved = false;
       });
 
