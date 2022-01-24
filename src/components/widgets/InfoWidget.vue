@@ -39,10 +39,65 @@
         <v-btn v-if="currentObject.mesh && currentObject.mesh.type === 'Points'" dense small outlined class="action-button ml-2" @click="onDelete">
           Delete
         </v-btn>
+        <v-btn v-if="beltObject" dense small outlined class="action-button ml-2" @click="onToggleBeltInfo">
+          {{ showBeltInfo ? 'View Description' : 'View Belt Info' }}
+        </v-btn>
       </div>
 
-      <!-- eslint-disable-next-line vue/no-v-html -->
-      <div class="description mt-5 pr-3" v-html="compiledDescription" />
+      <div v-if="showBeltInfo" class="pr-3 mt-2">
+        <div class="belt-zone-info zone-1 px-1">
+          <span class="zone-name">Zone 1</span>
+          <div class="ore-info d-flex justify-space-between pb-1">
+            <div class="shell-wrapper valkite"><span class="ore-type bastium">Bastium</span>Valkite</div>
+            <div class="shell-wrapper ice"><span class="ore-type vokarium">Vokarium</span>Ice</div>
+            <div class="shell-wrapper ice"><span class="ore-type nhurgite">Nhurgite</span>Ice</div>
+            <div class="shell-wrapper ajatite"><span class="ore-type charodium">Charodium</span>Ajatite</div>
+          </div>
+        </div>
+
+        <div class="belt-zone-info zone-2 px-1 mt-1">
+          <span class="zone-name">Zone 2</span>
+          <div class="ore-info d-flex justify-space-between pb-1">
+            <div class="shell-wrapper valkite"><span class="ore-type bastium">Bastium</span>Valkite</div>
+            <div class="shell-wrapper valkite"><span class="ore-type vokarium">Vokarium</span>Valk/Aja</div>
+            <div class="shell-wrapper ajatite"><span class="ore-type nhurgite">Nhurgite</span>Ajatite</div>
+            <div class="shell-wrapper valkite"><span class="ore-type exorium">Exorium</span>Valk/Aja</div>
+            <div class="shell-wrapper valkite"><span class="ore-type aegisium">Aegisium</span>Valkite</div>
+          </div>
+        </div>
+
+        <div class="belt-zone-info zone-3 px-1 mt-1">
+          <span class="zone-name">Zone 3</span>
+          <div class="ore-info d-flex justify-space-between pb-1">
+            <div class="shell-wrapper ice"><span class="ore-type nhurgite">Nhurgite</span>Ice</div>
+            <div class="shell-wrapper ice"><span class="ore-type exorium">Exorium</span>Ice</div>
+            <div class="shell-wrapper ice"><span class="ore-type aegisium">Aegisium</span>Ice</div>
+            <div class="shell-wrapper ice"><span class="ore-type arkanium">Arkanium</span>Ice</div>
+          </div>
+        </div>
+
+        <div class="belt-zone-info zone-4 px-1 mt-1">
+          <span class="zone-name">Zone 4</span>
+          <div class="ore-info d-flex justify-space-between pb-1">
+            <div class="shell-wrapper ajatite"><span class="ore-type bastium">Bastium</span>Ajatite</div>
+            <div class="shell-wrapper ajatite"><span class="ore-type arkanium">Arkanium</span>Ajatite</div>
+            <div class="shell-wrapper ajatite"><span class="ore-type karnite">Karnite</span>Ajatite</div>
+            <div class="shell-wrapper ajatite"><span class="ore-type kutonium">Kutonium</span>Ajatite</div>
+          </div>
+        </div>
+
+        <div class="belt-zone-info zone-5 px-1 mt-1">
+          <span class="zone-name">Zone 5</span>
+          <div class="ore-info d-flex justify-space-between pb-1">
+            <div class="shell-wrapper valkite"><span class="ore-type charodium">Charodium</span>Valkite</div>
+            <div class="shell-wrapper valkite"><span class="ore-type karnite">Karnite</span>Valkite</div>
+            <div class="shell-wrapper valkite"><span class="ore-type kutonium">Kutonium</span>Valkite</div>
+            <div class="shell-wrapper valkite"><span class="ore-type corazium">Corazium</span>Valkite</div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="description mt-5 pr-3" v-html="compiledDescription" />
     </v-row>
 
     <span v-else style="color: black">No data found. Click an object to load information.</span>
@@ -67,6 +122,8 @@ export default {
     const showInfoWidget = inject('showInfoWidget');
 
     const currentObject = ref(null);
+    const beltObject = ref(null);
+    const showBeltInfo = ref(false);
 
     const { scaleUpCoordinate, scaleDownCoordinate } = useCoordinates();
     const { viewObject, deletePoint } = useMap(masterMapData);
@@ -78,6 +135,8 @@ export default {
       masterMapData,
       showInfoWidget,
       currentObject,
+      beltObject,
+      showBeltInfo,
       ICON_MAP,
       scaleUpCoordinate,
       viewObject,
@@ -125,12 +184,15 @@ export default {
 
   mounted() {
     EventBus.$on('setInfoWidgetData', (object) => {
+      this.showBeltInfo = false;
+      this.beltObject = null;
       if (object.type === 'Points') {
         let pointObject = this.masterMapData.points.find((point) => point.id === object.pointId);
         this.currentObject = pointObject;
       } else if (object.celestialType === 'moon' || object.celestialType === 'planet') {
         let moonObject = this.masterMapData.moons.find((moon) => moon.id === object.objectId);
         this.currentObject = moonObject;
+        this.beltObject = this.masterMapData.belts[this.currentObject.data.id];
       } else {
         this.currentObject = object;
       }
@@ -169,6 +231,10 @@ export default {
         this.showInfoWidget = false;
       }
     },
+
+    onToggleBeltInfo() {
+      this.showBeltInfo = !this.showBeltInfo;
+    },
   },
 };
 </script>
@@ -187,7 +253,6 @@ export default {
   right: -400px;
   transition: right 0.1s ease;
   border-bottom-left-radius: 16px;
-  max-height: 635px;
 
   &.open {
     right: 0px;
@@ -275,5 +340,114 @@ export default {
 
 .description {
   color: black;
+}
+
+.belt-zone-info {
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  border: 1px solid black;
+
+  .zone-name {
+    color: black;
+    font-size: 20px;
+    font-weight: 600;
+    width: 100%;
+    text-align: center;
+  }
+
+  .ore-info {
+    color: black;
+    font-size: 14px;
+
+    .shell-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2px 2px 0px 2px;
+      border-radius: 4px;
+      font-weight: 600;
+      border: 1px solid black;
+    }
+
+    .valkite {
+      background-color: #b67b41;
+    }
+
+    .ice {
+      background-color: #4bd8ff;
+    }
+
+    .ajatite {
+      background-color: #b3accc;
+    }
+
+    .ore-type {
+      font-weight: 600;
+      border: 1px solid black;
+      border-radius: 4px;
+      padding: 0 4px;
+
+      &.bastium {
+        background-color: #8a8616;
+      }
+
+      &.vokarium {
+        background-color: #7a98b9;
+      }
+
+      &.nhurgite {
+        background-color: #0d9275;
+      }
+
+      &.charodium {
+        background-color: #da3820;
+      }
+
+      &.exorium {
+        background-color: #e06411;
+      }
+
+      &.aegisium {
+        background-color: #90a35f;
+      }
+
+      &.arkanium {
+        background-color: #03b864;
+      }
+
+      &.karnite {
+        background-color: #6a8bec;
+      }
+
+      &.kutonium {
+        background-color: #f5b732;
+      }
+
+      &.corazium {
+        background-color: #a0bd14;
+      }
+    }
+  }
+
+  &.zone-1 {
+    background-color: color.change(#2eff66, $alpha: 0.7);
+  }
+
+  &.zone-2 {
+    background-color: color.change(#2e74ff, $alpha: 0.7);
+  }
+
+  &.zone-3 {
+    background-color: color.change(#ff902e, $alpha: 0.7);
+  }
+
+  &.zone-4 {
+    background-color: color.change(#ff2121, $alpha: 0.6);
+  }
+
+  &.zone-5 {
+    background-color: color.change(#931fff, $alpha: 0.6);
+  }
 }
 </style>
