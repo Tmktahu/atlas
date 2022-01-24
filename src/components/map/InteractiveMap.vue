@@ -83,7 +83,7 @@ export default {
 
     const intersects = toRefs(masterMapData).intersects;
     const showGrid = toRefs(masterMapData).showGrid;
-    const showEosZones = toRefs(masterMapData.belts['eos']).showZones;
+    const showEosZones = toRefs(masterMapData.belts['p0']).showZones;
 
     const { scaleUpCoordinate } = useCoordinates();
 

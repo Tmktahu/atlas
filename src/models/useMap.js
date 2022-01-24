@@ -50,27 +50,27 @@ export const masterMapData = reactive({
   */
 
   belts: {
-    eos: {
+    p0: {
       zones: [],
       showZones: ref(false),
     },
-    elysium: {
+    m0: {
       zones: [],
       showZones: ref(false),
     },
-    chemosh: {
+    m1: {
       zones: [],
       showZones: ref(false),
     },
-    kumi: {
+    m2: {
       zones: [],
       showZones: ref(false),
     },
-    szellem: {
+    m3: {
       zones: [],
       showZones: ref(false),
     },
-    alstel: {
+    m6: {
       zones: [],
       showZones: ref(false),
     },
@@ -274,7 +274,7 @@ export function useMap(mapData) {
 
       let newBelt = { name: ASTROID_BELTS[index].name, moon: ASTROID_BELTS[index].moon, mesh: torusMesh, intersectionRings: { innerRing, outerRing } };
 
-      mapData.belts[ASTROID_BELTS[index].moon].belt = newBelt;
+      mapData.belts[ASTROID_BELTS[index].moonId].belt = newBelt;
     }
 
     for (let index in EOS_BELT_ZONES) {
@@ -292,7 +292,7 @@ export function useMap(mapData) {
         intersectionRings: { innerRing, outerRing },
       };
 
-      mapData.belts[EOS_BELT_ZONES[index].moon].zones.push(newZone);
+      mapData.belts[EOS_BELT_ZONES[index].moonId].zones.push(newZone);
     }
 
     for (let index in MOONS) {
