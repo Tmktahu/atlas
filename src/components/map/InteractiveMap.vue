@@ -50,6 +50,7 @@ import Stats from 'stats.js';
 import ContextMenu from './ContextMenu.vue';
 
 import { ref, inject, watch, toRefs } from '@vue/composition-api';
+import { EventBus } from '@/eventBus';
 
 import { useMap, MIN_PAN_SPEED, MAX_PAN_SPEED } from '@/models/useMap.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
@@ -74,6 +75,7 @@ export default {
     const showControls = inject('showControls');
     const leftNavCondensed = inject('leftNavCondensed');
     const showConversionWidget = inject('showConversionWidget');
+    const showInfoWidget = inject('showInfoWidget');
     let stats = null;
 
     const { dataStoragePath } = useStorage(isElectron);
@@ -81,7 +83,7 @@ export default {
 
     const intersects = toRefs(masterMapData).intersects;
     const showGrid = toRefs(masterMapData).showGrid;
-    const showEosZones = toRefs(masterMapData.belts['eos']).showZones;
+    const showEosZones = toRefs(masterMapData.belts['p0']).showZones;
 
     const { scaleUpCoordinate } = useCoordinates();
 
@@ -101,6 +103,7 @@ export default {
       showControls,
       leftNavCondensed,
       showConversionWidget,
+      showInfoWidget,
       MIN_PAN_SPEED,
       MAX_PAN_SPEED,
       intersects,
@@ -148,7 +151,7 @@ export default {
         this.$refs.pointInfoContainer.style.display = 'block';
 
         this.$refs.mapContainer.style.cursor = 'pointer';
-      } else if (this.focusedObject.type === 'Mesh' && this.focusedObject.celestialType === 'moon') {
+      } else if (this.focusedObject.type === 'Mesh' && (this.focusedObject.celestialType === 'moon' || this.focusedObject.celestialType === 'planet')) {
         let coordinate = {
           position: {
             x: this.focusedObject.position.x,
@@ -223,7 +226,7 @@ export default {
           return;
         }
 
-        this.$refs.contextMenu.close();
+        this.$refs.contextMenu?.close();
         this.mouseMoved = false;
       });
 
@@ -284,9 +287,8 @@ export default {
 
     // Click action and context menu handlers
     handleMouseClick() {
-      // if (this.focusedObject?.type === 'Points') {
-      //   this.selectPoint(this.focusedObject.pointId);
-      // }
+      EventBus.$emit('setInfoWidgetData', this.focusedObject);
+      this.showInfoWidget = true;
     },
 
     handleRightClick() {

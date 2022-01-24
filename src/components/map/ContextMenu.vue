@@ -112,7 +112,7 @@ export default {
 
     onResetDefaults() {
       let defaultPoints = this.setupInitialPoints();
-      this.mergePoints(defaultPoints);
+      this.mergePoints(defaultPoints, true);
       this.close();
     },
   },
