@@ -5,6 +5,7 @@
     <WaypointManagementWidget ref="waypointManagementWidget" />
     <SaveWidget ref="saveWidget" />
     <ImportWidget ref="importWidget" />
+    <InfoWidget ref="infoWidget" />
     <v-main>
       <div v-if="isElectron" class="draggable-area-bar" />
       <router-view />
@@ -27,6 +28,7 @@ import ConversionWidget from '@/components/widgets/ConversionWidget.vue';
 import WaypointManagementWidget from '@/components/widgets/WaypointManagementWidget.vue';
 import SaveWidget from '@/components/widgets/SaveWidget.vue';
 import ImportWidget from '@/components/widgets/ImportWidget.vue';
+import InfoWidget from '@/components/widgets/InfoWidget.vue';
 
 export default {
   metaInfo: {
@@ -36,11 +38,11 @@ export default {
     },
   },
 
-  components: { LeftNav, ConversionWidget, WaypointManagementWidget, SaveWidget, ImportWidget },
+  components: { LeftNav, ConversionWidget, WaypointManagementWidget, SaveWidget, ImportWidget, InfoWidget },
 
   setup() {
     let userAgent = navigator.userAgent.toLowerCase();
-    const isElectron = userAgent.indexOf(' electron/') > -1;
+    const isElectron = userAgent.indexOf('electron/') > -1;
     provide('isElectron', isElectron);
 
     const showLeftNav = ref(true);
@@ -52,6 +54,39 @@ export default {
     const showWaypointCRUDWidget = ref(false);
     const showSaveWidget = ref(false);
     const showImportWidget = ref(false);
+    const showInfoWidget = ref(false);
+
+    watch(showWaypointWidget, () => {
+      if (showWaypointWidget.value) {
+        showSaveWidget.value = false;
+        showImportWidget.value = false;
+        showInfoWidget.value = false;
+      }
+    });
+
+    watch(showSaveWidget, () => {
+      if (showSaveWidget.value) {
+        showWaypointWidget.value = false;
+        showImportWidget.value = false;
+        showInfoWidget.value = false;
+      }
+    });
+
+    watch(showImportWidget, () => {
+      if (showImportWidget.value) {
+        showWaypointWidget.value = false;
+        showSaveWidget.value = false;
+        showInfoWidget.value = false;
+      }
+    });
+
+    watch(showInfoWidget, () => {
+      if (showInfoWidget.value) {
+        showWaypointWidget.value = false;
+        showSaveWidget.value = false;
+        showImportWidget.value = false;
+      }
+    });
 
     onMounted(() => {
       if (isElectron) {
@@ -107,6 +142,7 @@ export default {
     provide('showWaypointCRUDWidget', showWaypointCRUDWidget);
     provide('showSaveWidget', showSaveWidget);
     provide('showImportWidget', showImportWidget);
+    provide('showInfoWidget', showInfoWidget);
 
     return {
       isElectron,
