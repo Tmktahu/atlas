@@ -44,7 +44,7 @@
         </v-btn>
       </div>
 
-      <div v-if="showBeltInfo" class="pr-3 mt-2">
+      <div v-if="showBeltInfo && currentObject.id === 'p0'" class="pr-3 mt-2">
         <div class="belt-zone-info zone-1 px-1">
           <span class="zone-name">Zone 1</span>
           <div class="ore-info d-flex justify-space-between pb-1">
@@ -97,7 +97,12 @@
         </div>
       </div>
 
-      <div v-else class="description mt-5 pr-3" v-html="compiledDescription" />
+      <div v-else-if="showBeltInfo" class="pt-3 pr-3" style="color: black">
+        No belt data prepared for this moon.<br /><br />
+        Check back later or contact <strong>Fryke#0746</strong> on Discord if you have information to contribute.
+      </div>
+
+      <div v-else class="description mt-3 pr-3" v-html="compiledDescription" />
     </v-row>
 
     <span v-else style="color: black">No data found. Click an object to load information.</span>
@@ -166,7 +171,7 @@ export default {
     },
 
     compiledDescription() {
-      return marked(this.currentObject.data.description || '');
+      return marked(this.currentObject.data.description || 'No description set.');
     },
   },
 
@@ -184,17 +189,19 @@ export default {
 
   mounted() {
     EventBus.$on('setInfoWidgetData', (object) => {
-      this.showBeltInfo = false;
-      this.beltObject = null;
-      if (object.type === 'Points') {
-        let pointObject = this.masterMapData.points.find((point) => point.id === object.pointId);
-        this.currentObject = pointObject;
-      } else if (object.celestialType === 'moon' || object.celestialType === 'planet') {
-        let moonObject = this.masterMapData.moons.find((moon) => moon.id === object.objectId);
-        this.currentObject = moonObject;
-        this.beltObject = this.masterMapData.belts[this.currentObject.data.id];
-      } else {
-        this.currentObject = object;
+      if (object) {
+        this.showBeltInfo = false;
+        this.beltObject = null;
+        if (object.type === 'Points') {
+          let pointObject = this.masterMapData.points.find((point) => point.id === object.pointId);
+          this.currentObject = pointObject;
+        } else if (object.celestialType === 'moon' || object.celestialType === 'planet') {
+          let moonObject = this.masterMapData.moons.find((moon) => moon.id === object.objectId);
+          this.currentObject = moonObject;
+          this.beltObject = this.masterMapData.belts[this.currentObject.data.id];
+        } else {
+          this.currentObject = object;
+        }
       }
     });
   },
