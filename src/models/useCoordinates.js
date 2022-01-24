@@ -16,6 +16,8 @@ export const ORIGIN_POINT = {
   hide: false,
   icon: 'stargate',
   group: 'Origins',
+  description:
+    'This is the Eos Warp Gate. It allows fast travel to the Elysium Warp Gate provided the ship has a functioning fast travel core.\nIt is also the origin point of the IPS coordinate system and this mapping tool.',
 };
 
 export const ISAN_ORIGIN_POINT = {
@@ -27,6 +29,7 @@ export const ISAN_ORIGIN_POINT = {
   hide: false,
   icon: 'isan',
   group: 'Origins',
+  description: 'This is the origin point of the ISAN coordinate grid. It represents a point equidistant to the four transmitter stations.',
 };
 
 export function useCoordinates() {

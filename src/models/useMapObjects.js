@@ -62,8 +62,8 @@ export async function createSphere(options) {
     sphere.name = options.name;
   }
 
-  if (options.celestialType) {
-    sphere.celestialType = options.celestialType;
+  if (options.type) {
+    sphere.celestialType = options.type;
   }
 
   sphere.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);

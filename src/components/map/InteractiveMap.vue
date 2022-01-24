@@ -50,6 +50,7 @@ import Stats from 'stats.js';
 import ContextMenu from './ContextMenu.vue';
 
 import { ref, inject, watch, toRefs } from '@vue/composition-api';
+import { EventBus } from '@/eventBus';
 
 import { useMap, MIN_PAN_SPEED, MAX_PAN_SPEED } from '@/models/useMap.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
@@ -74,6 +75,7 @@ export default {
     const showControls = inject('showControls');
     const leftNavCondensed = inject('leftNavCondensed');
     const showConversionWidget = inject('showConversionWidget');
+    const showInfoWidget = inject('showInfoWidget');
     let stats = null;
 
     const { dataStoragePath } = useStorage(isElectron);
@@ -101,6 +103,7 @@ export default {
       showControls,
       leftNavCondensed,
       showConversionWidget,
+      showInfoWidget,
       MIN_PAN_SPEED,
       MAX_PAN_SPEED,
       intersects,
@@ -284,9 +287,8 @@ export default {
 
     // Click action and context menu handlers
     handleMouseClick() {
-      // if (this.focusedObject?.type === 'Points') {
-      //   this.selectPoint(this.focusedObject.pointId);
-      // }
+      EventBus.$emit('setInfoWidgetData', this.focusedObject);
+      this.showInfoWidget = true;
     },
 
     handleRightClick() {

@@ -151,15 +151,11 @@ export default {
 
     onManageWaypoint() {
       this.showWaypointWidget = !this.showWaypointWidget;
-      this.showSaveWidget = false;
-      this.showImportWidget = false;
     },
 
     onSave() {
       if (this.isElectron) {
-        this.showWaypointWidget = false;
         this.showSaveWidget = !this.showSaveWidget;
-        this.showImportWidget = false;
       } else {
         let points = this.masterMapData.points.map((point) => {
           return point.data;
@@ -177,8 +173,6 @@ export default {
     },
 
     onImportWaypoints() {
-      this.showWaypointWidget = false;
-      this.showSaveWidget = false;
       this.showImportWidget = !this.showImportWidget;
     },
 
