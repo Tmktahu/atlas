@@ -1,5 +1,5 @@
 <template>
-  <div v-if="showConversionWidget" class="conversion-widget py-3 px-2">
+  <div class="conversion-widget py-3 px-2" :class="{ open: showConversionWidget, 'with-drag-bar': isElectron }">
     <v-row no-gutters>
       <v-col>
         <div style="color: black; font-size: 16px">
@@ -127,6 +127,7 @@ import { useCoordinates, ISAN_ORIGIN_POINT } from '@/models/useCoordinates.js';
 
 export default {
   setup() {
+    const isElectron = inject('isElectron');
     const showConversionWidget = inject('showConversionWidget');
     const leftNavCondensed = inject('leftNavCondensed');
 
@@ -152,6 +153,7 @@ export default {
     const { scaleUpCoordinate, scaleDownCoordinate } = useCoordinates();
 
     return {
+      isElectron,
       showConversionWidget,
       leftNavCondensed,
       conversionOptions,
@@ -549,10 +551,14 @@ export default {
   width: 590px;
   position: fixed;
   top: 0;
-  left: 0;
+  left: -1000px;
   transition: left 0.1s ease;
   border-bottom-right-radius: 16px;
   padding-left: 70px !important;
+
+  &.open {
+    left: 0px;
+  }
 }
 
 .close-button {
@@ -580,5 +586,9 @@ export default {
 
 .number-input {
   width: 120px;
+}
+
+.with-drag-bar {
+  margin-top: 30px;
 }
 </style>
