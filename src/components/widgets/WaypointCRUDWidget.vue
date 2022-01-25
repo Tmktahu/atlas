@@ -1,5 +1,5 @@
 <template>
-  <div class="waypoint-crud-widget pa-3 pr-4" :class="{ open: showWaypointCRUDWidget }">
+  <div class="waypoint-crud-widget pa-3 pr-4" :class="{ open: showWaypointCRUDWidget, 'with-drag-bar': isElectron }">
     <div v-if="type === 'create'" class="widget-title">Create Waypoint</div>
     <div v-if="type === 'edit'" class="widget-title">Edit Waypoint</div>
 
@@ -252,6 +252,7 @@ export default {
   },
 
   setup(_, context) {
+    const isElectron = inject('isElectron');
     const showWaypointCRUDWidget = inject('showWaypointCRUDWidget');
     const masterMapData = inject('masterMapData');
     const showInfoWidget = inject('showInfoWidget');
@@ -297,6 +298,7 @@ export default {
     });
 
     return {
+      isElectron,
       masterMapData,
       showWaypointCRUDWidget,
       showInfoWidget,
@@ -659,5 +661,9 @@ export default {
     max-height: 200px;
     min-height: 100px;
   }
+}
+
+.with-drag-bar {
+  margin-top: 30px;
 }
 </style>
