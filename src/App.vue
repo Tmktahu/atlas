@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <LeftNav v-if="showLeftNav" />
+    <LeftNav />
     <ConversionWidget ref="conversionWidget" />
     <WaypointManagementWidget ref="waypointManagementWidget" />
     <SaveWidget ref="saveWidget" />
@@ -45,7 +45,6 @@ export default {
     const isElectron = userAgent.indexOf('electron/') > -1;
     provide('isElectron', isElectron);
 
-    const showLeftNav = ref(true);
     const showControls = ref(false);
     const leftNavCondensed = ref(false);
 
@@ -146,17 +145,7 @@ export default {
 
     return {
       isElectron,
-      showLeftNav,
     };
-  },
-
-  watch: {
-    $route: {
-      handler() {
-        this.showLeftNav = this.$route.name === LANDING_ROUTE;
-      },
-      immediate: true,
-    },
   },
 };
 </script>
