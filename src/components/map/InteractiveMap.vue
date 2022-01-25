@@ -26,7 +26,11 @@
       <div ref="pointName" class="name">Point Name</div>
       <div ref="pointCoord" class="coord">[Coordinate]</div>
     </div>
-    <div v-if="showControls" class="controls-info" :class="{ out: leftNavCondensed, 'with-conversion-widget': showConversionWidget }">
+    <div
+      v-if="showControls"
+      class="controls-info"
+      :class="{ out: leftNavCondensed, 'with-conversion-widget': showConversionWidget, 'with-draggable-bar': isElectron }"
+    >
       <div v-if="isElectron">
         Local Storage File:
         <span>{{ localStorageText }}</span>
@@ -419,7 +423,11 @@ export default {
   }
 
   &.with-conversion-widget {
-    top: 170px !important;
+    margin-top: 190px !important;
+  }
+
+  &.with-draggable-bar {
+    margin-top: 30px;
   }
 }
 </style>
