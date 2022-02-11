@@ -52,6 +52,7 @@
 
 <script>
 import Stats from 'stats.js';
+import Mousetrap from 'mousetrap';
 import ContextMenu from './ContextMenu.vue';
 
 import { ref, inject, watch, toRefs } from '@vue/composition-api';
@@ -193,20 +194,38 @@ export default {
     });
 
     this.$nextTick(() => {
-      window.addEventListener('keydown', (event) => {
-        if (this.hoveredElement?.tagName.toLowerCase() !== 'canvas') {
-          return;
-        }
+      // if we are not electron init the map and pop the performance alert
+      if (!this.isElectron) {
+        this.initMap(this.$refs.mapContainer);
+        this.mapLoading = false;
+        this.$toasted.global.alertWarning({
+          message: 'You must have Hardware Acceleration enabled in your browser,<br>or else this website will max out your CPU trying to render.',
+        });
+      }
 
-        if (event.keyCode === 87) {
+      // init stats
+      this.createStats();
+
+      // set up keybinds
+      Mousetrap.bind('w', (event) => {
+        if (this.hoveredElement?.tagName.toLowerCase() === 'canvas') {
           this.onWDown();
         }
+      });
 
-        if (event.keyCode === 83) {
+      Mousetrap.bind('s', (event) => {
+        if (this.hoveredElement?.tagName.toLowerCase() === 'canvas') {
           this.onSDown();
         }
       });
 
+      Mousetrap.bind('s', (event) => {
+        if (this.hoveredElement?.tagName.toLowerCase() === 'canvas') {
+          this.onSDown();
+        }
+      });
+
+      // mouse events need to be handled vanilla
       window.addEventListener('mousemove', (event) => {
         if (this.$refs.pointInfoContainer) {
           this.$refs.pointInfoContainer.style.left = `${event.pageX - 30}px`;
@@ -260,19 +279,6 @@ export default {
       window.addEventListener('dblclick', () => {
         this.handleDoubleClick();
       });
-
-      this.createStats();
-
-      if (!this.isElectron) {
-        this.initMap(this.$refs.mapContainer);
-        this.mapLoading = false;
-      }
-
-      if (!this.isElectron) {
-        this.$toasted.global.alertWarning({
-          message: 'You must have Hardware Acceleration enabled in your browser,<br>or else this website will max out your CPU trying to render.',
-        });
-      }
     });
   },
 

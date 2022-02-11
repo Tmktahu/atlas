@@ -22,6 +22,7 @@
     "lodash": "4.17.21",
     "marked": "^4.0.10",
     "material-design-icons-iconfont": "6.1.0",
+    "mousetrap": "^1.6.5",
     "roboto-fontface": "*",
     "stats.js": "^0.17.0",
     "three": "^0.133.1",

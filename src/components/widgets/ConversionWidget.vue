@@ -201,18 +201,6 @@ export default {
 
   mounted() {
     this.onInputChange('left');
-
-    // this.$nextTick(() => {
-    //   window.addEventListener('keydown', (event) => {
-    //     if (event.keyCode === 87) {
-    //       this.onWDown();
-    //     }
-
-    //     if (event.keyCode === 83) {
-    //       this.onSDown();
-    //     }
-    //   });
-    // });
   },
 
   methods: {
