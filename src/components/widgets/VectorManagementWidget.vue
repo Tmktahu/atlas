@@ -32,17 +32,21 @@
           </template>
           <template v-slot:item.origin="{ item }">
             <div style="font-size: 10px">
-              {{ `[${scaleUpCoordinate(item.data.origin.x)}, ${scaleUpCoordinate(item.data.origin.y)}, ${scaleUpCoordinate(item.data.origin.z)}]` }}
+              {{
+                `[${Math.round(scaleUpCoordinate(item.data.origin.x))}, ` +
+                `${Math.round(scaleUpCoordinate(item.data.origin.y))}, ` +
+                `${Math.round(scaleUpCoordinate(item.data.origin.z))}]`
+              }}
             </div>
           </template>
           <template v-slot:item.direction="{ item }">
             <div style="font-size: 10px">
-              {{ `[${item.data.direction.x}, ${item.data.direction.y}, ${item.data.direction.z}]` }}
+              {{ `[${Math.round(item.data.direction.x)}, ${Math.round(item.data.direction.y)}, ${Math.round(item.data.direction.z)}]` }}
             </div>
           </template>
           <template v-slot:item.length="{ item }">
             <div style="font-size: 10px">
-              {{ item.data.length + 'm' }}
+              {{ Math.round(scaleUpCoordinate(item.data.length)) + 'm' }}
             </div>
           </template>
           <template v-slot:item.actions="{ item }">
@@ -108,6 +112,12 @@ export default {
         align: 'start',
         sortable: false,
         value: 'length',
+      },
+      {
+        text: 'Actions',
+        align: 'start',
+        sortable: false,
+        value: 'actions',
       },
     ];
 
@@ -226,7 +236,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
+    min-width: 24px;
     height: 24px;
     border-radius: 8px;
   }
@@ -235,8 +245,8 @@ export default {
     font-size: 12px;
     text-overflow: ellipsis;
     overflow: hidden;
-    white-space: nowrap;
-    max-width: 120px;
+    white-space: wrap;
+    max-width: 80px;
   }
 
   th {

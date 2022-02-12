@@ -80,7 +80,7 @@ export function useCoordinates() {
 
       return outCoord;
     } else {
-      return Math.round(inCoord / COORD_SCALAR);
+      return inCoord / COORD_SCALAR;
     }
   };
 
@@ -105,7 +105,7 @@ export function useCoordinates() {
 
       return outCoord;
     } else {
-      return Math.round(inCoord * COORD_SCALAR);
+      return inCoord * COORD_SCALAR;
     }
   };
 

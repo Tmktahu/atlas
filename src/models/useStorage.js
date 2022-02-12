@@ -202,20 +202,32 @@ export function useStorage(isElectron) {
   const saveToLocalStorage = async (inData, isStorageData = false) => {
     try {
       if (inData !== null) {
-        let storageData = null;
-        if (isStorageData) {
-          storageData = inData;
-        } else {
-          const { getPointData, getVectorData } = useMap();
+        let { data: currentData, errors } = readFromLocalStorage();
+        let newVersion,
+          newPoints,
+          newVectors = null;
 
-          storageData = {
-            version: process.env.VUE_APP_VERSION,
-            points: getPointData(inData),
-            vectors: getVectorData(inData),
-          };
+        if (isStorageData) {
+          // if we are dealing with storage-formatted data
+          newVersion = inData.version;
+          newPoints = inData.points;
+          newVectors = inData.vectors;
+        } else {
+          // otherwise we are dealing with map-formatted data
+          const { getPointData, getVectorData } = useMap();
+          newVersion = process.env.VUE_APP_VERSION;
+          newPoints = getPointData(inData);
+          newVectors = getVectorData(inData);
         }
 
-        let stringifiedData = JSON.stringify(storageData, null, 2);
+        // Now we check to see what needs to be updated and assemble the new data
+        let newStorageData = {};
+        newStorageData.version = newVersion;
+
+        newStorageData.points = newPoints.length > 0 ? newPoints : currentData.points;
+        newStorageData.vectors = newVectors.length > 0 ? newVectors : currentData.vectors;
+
+        let stringifiedData = JSON.stringify(newStorageData, null, 2);
         window.localStorage.setItem('atlasData', stringifiedData);
       }
     } catch (error) {

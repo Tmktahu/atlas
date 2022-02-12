@@ -114,15 +114,17 @@ export const masterMapData = reactive({
   pointSize: 0.5,
 
   showGrid: ref(true),
+  initialized: false,
 });
 
 export function useMap() {
   const initMasterMapData = (storageData) => {
     masterMapData.initialPointData = storageData.points;
+    masterMapData.initialVectorData = storageData.vectors;
   };
 
   const init = async (inContainerElement) => {
-    if (masterMapData === undefined) {
+    if (masterMapData === undefined && masterMapData.initialized) {
       return;
     }
 
@@ -170,23 +172,7 @@ export function useMap() {
     addLight(-4, -1, -2, masterMapData);
 
     resetPoints(masterMapData.initialPointData);
-
-    createNewVector({
-      id: 1337,
-      name: 'testing vector',
-      color: '#FF0000',
-      origin: {
-        x: 0,
-        y: 0,
-        z: 0,
-      },
-      direction: {
-        x: -20000,
-        y: -60000,
-        z: 0,
-      },
-      length: 100000,
-    });
+    resetVectors(masterMapData.initialVectorData);
 
     masterMapData.controls.update();
     animate();
@@ -197,6 +183,8 @@ export function useMap() {
       masterMapData.controls.keyPanSpeed = masterMapData.panSpeed * 50;
       masterMapData.controls.panSpeed = masterMapData.panSpeed;
     });
+
+    masterMapData.initialized = true;
   };
 
   const animate = () => {
@@ -401,6 +389,13 @@ export function useMap() {
   };
 
   // ============ Vector CRUD ============
+  const resetVectors = (inData) => {
+    masterMapData.vectors = [];
+    for (let index in inData) {
+      createNewVector(inData[index]);
+    }
+  };
+
   const createVector = async (data) => {
     let vectorMesh = await createVectorMesh(data);
 
@@ -435,9 +430,15 @@ export function useMap() {
   };
 
   const deleteVector = (vector) => {
-    let index = masterMapData.vectors.findIndex((obj) => obj.id === vector.id);
+    let index = masterMapData.vectors.findIndex((obj) => obj.data.id === vector.id);
     removeVectorFromScene(masterMapData.vectors[index]);
     masterMapData.vectors.splice(index, 1);
+  };
+
+  const showHideVector = (id) => {
+    let index = masterMapData.vectors.findIndex((vector) => vector.id === id);
+    masterMapData.vectors[index].data.hide = !masterMapData.vectors[index].data.hide;
+    masterMapData.vectors[index].mesh.visible = !masterMapData.vectors[index].data.hide;
   };
 
   // ============== Control Handlers =======================
@@ -654,6 +655,7 @@ export function useMap() {
   };
 
   const getVectorData = (inMapData) => {
+    console.log(inMapData.vectors);
     let data = inMapData.vectors.map((vector) => {
       return vector.data;
     });
@@ -680,5 +682,6 @@ export function useMap() {
     createNewVector,
     deleteVector,
     saveVector,
+    showHideVector,
   };
 }
