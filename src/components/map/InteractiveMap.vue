@@ -1,8 +1,8 @@
 <!-- eslint-disable id-length -->
 <template>
   <div style="height: 100%; display: flex; align-items: center">
-    <v-progress-circular v-show="mapLoading" size="100" indeterminate style="margin: auto" />
-    <div v-show="!mapLoading" ref="mapContainer" v-resize="onResize" class="mapContainer" @keypress="onWDown" />
+    <v-progress-circular v-show="mapLoading || !masterMapData.initialized" size="100" indeterminate style="margin: auto" />
+    <div v-show="!mapLoading || masterMapData.initialized" ref="mapContainer" v-resize="onResize" class="mapContainer" @keypress="onWDown" />
     <v-row no-gutters class="bottom-controls">
       <v-checkbox v-model="showEosZones" hide-details reverse class="hide-grid-checkbox mr-2" label="Eos Zones" />
       <v-checkbox v-model="showGrid" hide-details reverse class="hide-grid-checkbox mr-2" label="Grid" />

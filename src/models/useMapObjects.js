@@ -30,10 +30,7 @@ export async function createVectorMesh(data) {
   let direction = new THREE.Vector3(data.direction.x, data.direction.z, -data.direction.y);
   direction.normalize();
 
-  const { scaleDownCoordinate } = useCoordinates();
-  let scaledDownLength = scaleDownCoordinate(data.length);
-
-  let mesh = new THREE.ArrowHelper(direction, origin, scaledDownLength, color, 0.5, 0.5);
+  let mesh = new THREE.ArrowHelper(direction, origin, data.length, color, Math.min([0.1 * data.length], 0.5), Math.min([0.1 * data.length], 0.5));
 
   mesh.name = data.name;
   mesh.vectorId = data.id;

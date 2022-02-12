@@ -174,10 +174,20 @@ export default {
           return point.data;
         });
 
-        let data = JSON.stringify(points, null, 2);
+        let vectors = this.masterMapData.vectors.map((vector) => {
+          return vector.data;
+        });
+
+        let data = {
+          version: process.env.VUE_APP_VERSION,
+          points,
+          vectors,
+        };
+
+        let stringifiedData = JSON.stringify(data, null, 2);
 
         let elem = document.createElement('a');
-        let file = new Blob([data], { type: 'text/plain' });
+        let file = new Blob([stringifiedData], { type: 'text/plain' });
         elem.href = URL.createObjectURL(file);
         let today = new Date();
         elem.download = `atlas_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`;
