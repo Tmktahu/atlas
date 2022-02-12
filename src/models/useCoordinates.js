@@ -23,7 +23,7 @@ export const ISAN_ORIGIN_POINT = {
   name: 'ISAN Origin',
   type: 'misc',
   color: 'orange',
-  position: { x: 15313, y: -3476, z: -1535 },
+  position: { x: 15314, y: -3476, z: -1412 },
   id: uuidv4(),
   hide: false,
   icon: 'isan',
