@@ -1,9 +1,8 @@
 /* eslint-disable id-length */
-import { ref } from '@vue/composition-api';
+import { v4 as uuidv4 } from 'uuid';
+
 import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetMapData/eos';
 import { ELYSIUM_WARP_GATE } from './presetMapData/elysium';
-
-import { useStorage } from '@/models/useStorage.js';
 
 export const COORD_SCALAR = 10000;
 
@@ -12,7 +11,7 @@ export const ORIGIN_POINT = {
   type: 'gate',
   color: 'aqua',
   position: { x: 0, y: 0, z: 0 },
-  id: '0',
+  id: uuidv4(),
   hide: false,
   icon: 'stargate',
   group: 'Origins',
@@ -25,7 +24,7 @@ export const ISAN_ORIGIN_POINT = {
   type: 'misc',
   color: 'orange',
   position: { x: 15313, y: -3476, z: -1535 },
-  id: '1234',
+  id: uuidv4(),
   hide: false,
   icon: 'isan',
   group: 'Origins',

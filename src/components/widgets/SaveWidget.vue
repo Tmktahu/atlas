@@ -2,12 +2,12 @@
 <template>
   <div class="save-widget py-3 pl-3" :class="{ open: showSaveWidget, 'with-drag-bar': isElectron }">
     <v-row no-gutters>
-      <div class="page-title">Save Waypoints</div>
+      <div class="page-title">Save Data</div>
       <v-spacer />
       <v-btn text @click="close"><v-icon>mdi-close</v-icon></v-btn>
     </v-row>
 
-    <div class="page-title--sub"> Save waypoints to the standard storage JSON or to a specific JSON of your choice. </div>
+    <div class="page-title--sub"> Save Atlas data to the standard storage JSON or to a specific JSON of your choice. </div>
 
     <v-radio-group v-model="storageOption">
       <v-radio class="radio-option" value="storage" label="Standard Storage (atlas_data.json)" />
