@@ -10,7 +10,7 @@
     <div class="page-title--sub"> Save waypoints to the standard storage JSON or to a specific JSON of your choice. </div>
 
     <v-radio-group v-model="storageOption">
-      <v-radio class="radio-option" value="storage" label="Standard Storage (waypoint_data.json)" />
+      <v-radio class="radio-option" value="storage" label="Standard Storage (atlas_data.json)" />
       <v-radio class="radio-option" value="custom" label="">
         <template v-slot:label>
           Save To:
@@ -84,7 +84,7 @@ export default {
       if (this.storageOption === 'storage') {
         const errors = await this.saveToJSON(this.masterMapData.points, this.dataStoragePath);
         if (errors) {
-          console.log('File Save Error: ', errors);
+          console.error('File Save Error: ', errors);
           this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });
         } else {
           this.close();
@@ -92,7 +92,7 @@ export default {
       } else {
         const errors = await this.saveToJSON(this.masterMapData.points, this.filePath);
         if (errors) {
-          console.log('File Save Error: ', errors);
+          console.error('File Save Error: ', errors);
           this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });
         } else {
           this.close();

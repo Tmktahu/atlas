@@ -6,6 +6,7 @@ import { OrbitControls } from '@/controls/OrbitControls.js';
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
 import {
   createPointMesh,
+  createVectorMesh,
   createRing,
   createSphereMesh,
   createTorus,
@@ -46,6 +47,23 @@ export const masterMapData = reactive({
       ring,
       line,
     ]
+  }
+  */
+
+  vectors: [],
+  /*
+  vector = {
+    id,
+    data: {
+      id,
+      name,
+      hide,
+      direction,
+      origin,
+      length,
+      color,
+    },
+    mesh
   }
   */
 
@@ -98,102 +116,122 @@ export const masterMapData = reactive({
   showGrid: ref(true),
 });
 
-export function useMap(mapData) {
-  const initMasterMapData = (initialPointData) => {
-    masterMapData.initialPointData = initialPointData;
-    return masterMapData;
+export function useMap() {
+  const initMasterMapData = (storageData) => {
+    masterMapData.initialPointData = storageData.points;
   };
 
   const init = async (inContainerElement) => {
-    console.log('Background Map Data, in case you were interested:', mapData);
-    mapData.containerElement = inContainerElement;
+    if (masterMapData === undefined) {
+      return;
+    }
 
-    mapData.scene = new THREE.Scene();
+    console.log('Background Map Data, in case you were interested:', masterMapData);
+    masterMapData.containerElement = inContainerElement;
+
+    masterMapData.scene = new THREE.Scene();
 
     const startingCameraPosition = [ORIGIN_POINT.position.x + 10, ORIGIN_POINT.position.y + 10, ORIGIN_POINT.position.z + 10];
     const startingControlsPosition = [startingCameraPosition[0] - 0.1, startingCameraPosition[1] - 0.1, startingCameraPosition[2] - 0.1];
 
     // PerspectiveCamera(FOV, Aspect Ratio, Near Clipping Plane, Far Clipping Place)
-    mapData.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000000000);
-    mapData.camera.position.set(startingCameraPosition[0], startingCameraPosition[1], startingCameraPosition[2]);
+    masterMapData.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000000000);
+    masterMapData.camera.position.set(startingCameraPosition[0], startingCameraPosition[1], startingCameraPosition[2]);
 
-    mapData.renderer = new THREE.WebGLRenderer({ alpha: true });
-    mapData.renderer.setSize(window.innerWidth - 56, window.innerHeight);
-    mapData.renderer.domElement.classList = 'mapCanvas';
-    mapData.containerElement.appendChild(mapData.renderer.domElement);
+    masterMapData.renderer = new THREE.WebGLRenderer({ alpha: true });
+    masterMapData.renderer.setSize(window.innerWidth - 56, window.innerHeight);
+    masterMapData.renderer.domElement.classList = 'mapCanvas';
+    masterMapData.containerElement?.appendChild(masterMapData.renderer.domElement);
 
-    mapData.controls = new OrbitControls(mapData.camera, mapData.renderer.domElement);
-    mapData.controls.enableZoom = false;
-    mapData.controls.listenToKeyEvents(window);
-    mapData.controls.keyPanSpeed = mapData.panSpeed * 50;
-    mapData.controls.panSpeed = mapData.panSpeed;
-    mapData.controls.keys = {
+    masterMapData.controls = new OrbitControls(masterMapData.camera, masterMapData.renderer.domElement);
+    masterMapData.controls.enableZoom = false;
+    masterMapData.controls.listenToKeyEvents(window);
+    masterMapData.controls.keyPanSpeed = masterMapData.panSpeed * 50;
+    masterMapData.controls.panSpeed = masterMapData.panSpeed;
+    masterMapData.controls.keys = {
       LEFT: 'KeyA',
       UP: 'Space',
       RIGHT: 'KeyD',
       BOTTOM: 'ShiftLeft',
     };
-    mapData.controls.mouseButtons = {
+    masterMapData.controls.mouseButtons = {
       LEFT: null,
       MIDDLE: THREE.MOUSE.DOLLY,
       RIGHT: THREE.MOUSE.PAN,
     };
-    mapData.controls.target.set(startingControlsPosition[0], startingControlsPosition[1], startingControlsPosition[2]);
-    mapData.controls.update();
+    masterMapData.controls.target.set(startingControlsPosition[0], startingControlsPosition[1], startingControlsPosition[2]);
+    masterMapData.controls.update();
 
-    updateGrid(mapData);
+    updateGrid(masterMapData);
 
-    await setupObjects(mapData);
+    await setupObjects(masterMapData);
 
-    addLight(4, 2, 4, mapData);
-    addLight(-4, -1, -2, mapData);
+    addLight(4, 2, 4, masterMapData);
+    addLight(-4, -1, -2, masterMapData);
 
-    resetPoints(mapData.initialPointData);
+    resetPoints(masterMapData.initialPointData);
 
-    mapData.controls.update();
-    animate(mapData);
+    createNewVector({
+      id: 1337,
+      name: 'testing vector',
+      color: '#FF0000',
+      origin: {
+        x: 0,
+        y: 0,
+        z: 0,
+      },
+      direction: {
+        x: -20000,
+        y: -60000,
+        z: 0,
+      },
+      length: 100000,
+    });
 
-    const refs = toRefs(mapData);
+    masterMapData.controls.update();
+    animate();
+
+    const refs = toRefs(masterMapData);
 
     watch(refs.panSpeed, () => {
-      mapData.controls.keyPanSpeed = mapData.panSpeed * 50;
-      mapData.controls.panSpeed = mapData.panSpeed;
+      masterMapData.controls.keyPanSpeed = masterMapData.panSpeed * 50;
+      masterMapData.controls.panSpeed = masterMapData.panSpeed;
     });
   };
 
   const animate = () => {
     requestAnimationFrame(animate);
-    mapData.stats.begin();
+    masterMapData.stats?.begin();
 
     // update the picking ray with the camera and mouse position
-    mapData.raycaster.params.Points.threshold = 0.3;
-    mapData.raycaster.setFromCamera(mapData.mapMouse, mapData.camera);
+    masterMapData.raycaster.params.Points.threshold = 0.3;
+    masterMapData.raycaster.setFromCamera(masterMapData.mapMouse, masterMapData.camera);
 
-    if (Date.now() - mapData.lastRaycast > mapData.raycastInterval) {
-      let pointMeshes = mapData.points.map((point) => {
+    if (Date.now() - masterMapData.lastRaycast > masterMapData.raycastInterval) {
+      let pointMeshes = masterMapData.points.map((point) => {
         return point.mesh;
       });
 
-      let moonMeshes = mapData.moons.map((moon) => {
+      let moonMeshes = masterMapData.moons.map((moon) => {
         return moon.mesh;
       });
 
       let filteredPointMeshes = pointMeshes.filter((mesh) => mesh.visible);
       let intersectableObjects = [...filteredPointMeshes, ...moonMeshes];
 
-      mapData.intersects = mapData.raycaster.intersectObjects(intersectableObjects);
-      mapData.lastRaycast = Date.now();
-      mapData.qRaycast = false;
-      handleIntersects(mapData);
+      masterMapData.intersects = masterMapData.raycaster.intersectObjects(intersectableObjects);
+      masterMapData.lastRaycast = Date.now();
+      masterMapData.qRaycast = false;
+      handleIntersects();
     }
 
-    if (mapData.pointMeshes) {
-      for (let i in mapData.points) {
-        let point = mapData.points[i];
+    if (masterMapData.pointMeshes) {
+      for (let i in masterMapData.points) {
+        let point = masterMapData.points[i];
         if (point && point.mesh) {
-          let hovered = mapData.intersects[0]?.object?.id === point?.mesh?.id;
+          let hovered = masterMapData.intersects[0]?.object?.id === point?.mesh?.id;
           if (hovered) {
-            point.mesh.material.size = mapData.pointSize;
+            point.mesh.material.size = masterMapData.pointSize;
             point.mesh.material.color = new THREE.Color(1, 1, 1);
           } else {
             point.mesh.material.color = new THREE.Color(point.data.color);
@@ -204,7 +242,7 @@ export function useMap(mapData) {
 
           // Scale warpgate points so they are always visible
           if (point.data.type === 'gate') {
-            let distance = calcDistance(mapData.camera.position, {
+            let distance = calcDistance(masterMapData.camera.position, {
               x: point.mesh.geometry.attributes.position.array[0],
               y: -point.mesh.geometry.attributes.position.array[1],
               // eslint-disable-next-line id-length
@@ -218,72 +256,72 @@ export function useMap(mapData) {
     }
 
     // Scale the grid based on how high we are from the plane
-    let cameraPosition = mapData.camera.position;
-    mapData.gridScale = Math.pow(2, Math.round(Math.log(cameraPosition.y)));
-    mapData.grid.scale.x = mapData.gridScale;
-    mapData.grid.scale.z = mapData.gridScale;
+    let cameraPosition = masterMapData.camera.position;
+    masterMapData.gridScale = Math.pow(2, Math.round(Math.log(cameraPosition.y)));
+    masterMapData.grid.scale.x = masterMapData.gridScale;
+    masterMapData.grid.scale.z = masterMapData.gridScale;
 
-    for (let index in mapData.belts) {
-      if (mapData.belts[index]?.zones !== undefined) {
-        for (let zindex in mapData.belts[index].zones) {
-          mapData.belts[index].zones[zindex].mesh.visible = mapData.belts[index].showZones;
-          mapData.belts[index].zones[zindex].intersectionRings.innerRing.visible = mapData.belts[index].showZones;
-          mapData.belts[index].zones[zindex].intersectionRings.outerRing.visible = mapData.belts[index].showZones;
+    for (let index in masterMapData.belts) {
+      if (masterMapData.belts[index]?.zones !== undefined) {
+        for (let zindex in masterMapData.belts[index].zones) {
+          masterMapData.belts[index].zones[zindex].mesh.visible = masterMapData.belts[index].showZones;
+          masterMapData.belts[index].zones[zindex].intersectionRings.innerRing.visible = masterMapData.belts[index].showZones;
+          masterMapData.belts[index].zones[zindex].intersectionRings.outerRing.visible = masterMapData.belts[index].showZones;
         }
       }
-      mapData.belts[index].belt.mesh.visible = !mapData.belts[index].showZones;
-      mapData.belts[index].belt.intersectionRings.innerRing.visible = !mapData.belts[index].showZones;
-      mapData.belts[index].belt.intersectionRings.outerRing.visible = !mapData.belts[index].showZones;
+      masterMapData.belts[index].belt.mesh.visible = !masterMapData.belts[index].showZones;
+      masterMapData.belts[index].belt.intersectionRings.innerRing.visible = !masterMapData.belts[index].showZones;
+      masterMapData.belts[index].belt.intersectionRings.outerRing.visible = !masterMapData.belts[index].showZones;
     }
 
-    mapData.controls.update();
-    mapData.renderer.render(mapData.scene, mapData.camera);
-    mapData.stats.end();
+    masterMapData.controls.update();
+    masterMapData.renderer.render(masterMapData.scene, masterMapData.camera);
+    masterMapData.stats?.end();
   };
 
-  const handleIntersects = (mapData) => {
-    if (mapData.intersects[0]?.object.type === 'Points') {
-      let object = mapData.intersects[0].object;
-      object.material.size = mapData.pointSize * 1.25;
+  const handleIntersects = () => {
+    if (masterMapData.intersects[0]?.object.type === 'Points') {
+      let object = masterMapData.intersects[0].object;
+      object.material.size = masterMapData.pointSize * 1.25;
     }
   };
 
-  const resizeMap = (mapData) => {
-    if (mapData.camera) {
-      mapData.camera.aspect = window.innerWidth / window.innerHeight;
-      mapData.camera.updateProjectionMatrix();
+  const resizeMap = () => {
+    if (masterMapData.camera) {
+      masterMapData.camera.aspect = window.innerWidth / window.innerHeight;
+      masterMapData.camera.updateProjectionMatrix();
 
-      mapData.renderer.setSize(window.innerWidth, window.innerHeight);
+      masterMapData.renderer.setSize(window.innerWidth, window.innerHeight);
     }
   };
 
   // ============ Object Adding Methods ===============
-  const setupObjects = async (mapData) => {
+  const setupObjects = async () => {
     for (let index in ORBIT_RINGS) {
       let ring = createRing(ORBIT_RINGS[index]);
-      mapData.scene.add(ring);
+      masterMapData.scene.add(ring);
     }
 
     for (let index in ASTROID_BELTS) {
-      let torusMesh = createTorus(ASTROID_BELTS[index], mapData);
-      mapData.scene.add(torusMesh);
+      let torusMesh = createTorus(ASTROID_BELTS[index], masterMapData);
+      masterMapData.scene.add(torusMesh);
 
       let { innerRing, outerRing } = createTorusIntersectionRings(ASTROID_BELTS[index]);
-      mapData.scene.add(innerRing);
-      mapData.scene.add(outerRing);
+      masterMapData.scene.add(innerRing);
+      masterMapData.scene.add(outerRing);
 
       let newBelt = { name: ASTROID_BELTS[index].name, moon: ASTROID_BELTS[index].moon, mesh: torusMesh, intersectionRings: { innerRing, outerRing } };
 
-      mapData.belts[ASTROID_BELTS[index].moonId].belt = newBelt;
+      masterMapData.belts[ASTROID_BELTS[index].moonId].belt = newBelt;
     }
 
     for (let index in EOS_BELT_ZONES) {
-      let torusMesh = createTorus(EOS_BELT_ZONES[index], mapData);
-      mapData.scene.add(torusMesh);
+      let torusMesh = createTorus(EOS_BELT_ZONES[index], masterMapData);
+      masterMapData.scene.add(torusMesh);
 
       let { innerRing, outerRing } = createTorusIntersectionRings(EOS_BELT_ZONES[index]);
-      mapData.scene.add(innerRing);
-      mapData.scene.add(outerRing);
+      masterMapData.scene.add(innerRing);
+      masterMapData.scene.add(outerRing);
 
       let newZone = {
         name: EOS_BELT_ZONES[index].name,
@@ -292,7 +330,7 @@ export function useMap(mapData) {
         intersectionRings: { innerRing, outerRing },
       };
 
-      mapData.belts[EOS_BELT_ZONES[index].moonId].zones.push(newZone);
+      masterMapData.belts[EOS_BELT_ZONES[index].moonId].zones.push(newZone);
     }
 
     for (let index in MOONS) {
@@ -306,14 +344,14 @@ export function useMap(mapData) {
         intersectionRing: intersectionRing,
       };
 
-      mapData.moons.push(moon);
-      mapData.scene.add(moon.mesh);
-      mapData.scene.add(moon.intersectionRing);
+      masterMapData.moons.push(moon);
+      masterMapData.scene.add(moon.mesh);
+      masterMapData.scene.add(moon.intersectionRing);
     }
   };
 
-  const updateGrid = (mapData) => {
-    if (mapData.showGrid) {
+  const updateGrid = () => {
+    if (masterMapData.showGrid) {
       const planeMaterial = new THREE.MeshLambertMaterial({
         color: '#ffeda3',
         opacity: 0.1,
@@ -325,8 +363,8 @@ export function useMap(mapData) {
       const plainGeometry = new THREE.CircleGeometry(14000, 500);
       const plane = new THREE.Mesh(plainGeometry, planeMaterial);
       plane.rotateX(Math.PI / 2);
-      mapData.plane = plane;
-      mapData.scene.add(plane);
+      masterMapData.plane = plane;
+      masterMapData.scene.add(plane);
 
       const gridMaterial = new THREE.LineBasicMaterial({
         color: new THREE.Color(0.5, 0.5, 0.5),
@@ -348,26 +386,116 @@ export function useMap(mapData) {
       // grid.material.side = THREE.DoubleSide;
       //grid.position.set(-845, 0, 0);
 
-      mapData.grid = grid;
-      mapData.scene.add(mapData.grid);
+      masterMapData.grid = grid;
+      masterMapData.scene.add(masterMapData.grid);
     } else {
-      mapData.scene.remove(mapData.plane);
-      mapData.scene.remove(mapData.grid);
+      masterMapData.scene.remove(masterMapData.plane);
+      masterMapData.scene.remove(masterMapData.grid);
     }
   };
 
+  const addLight = (xCoord, yCoord, zCoord) => {
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(xCoord, yCoord, zCoord);
+    masterMapData.scene.add(light);
+  };
+
+  // ============ Vector CRUD ============
+  const createVector = async (data) => {
+    let vectorMesh = await createVectorMesh(data);
+
+    let vector = {
+      id: data.id,
+      data: data,
+      mesh: vectorMesh,
+    };
+
+    return vector;
+  };
+
+  const addVectorToScene = (vector) => {
+    // add the line to the scene
+    masterMapData.scene.add(vector.mesh);
+  };
+
+  const removeVectorFromScene = (vector) => {
+    // remove line from the scene
+    masterMapData.scene.remove(vector.mesh);
+  };
+
+  const createNewVector = async (data) => {
+    let newVector = await createVector(data);
+    masterMapData.vectors.push(newVector);
+    addVectorToScene(newVector);
+  };
+
+  const saveVector = async (data) => {
+    deleteVector(data);
+    await createNewVector(data);
+  };
+
+  const deleteVector = (vector) => {
+    let index = masterMapData.vectors.findIndex((obj) => obj.id === vector.id);
+    removeVectorFromScene(masterMapData.vectors[index]);
+    masterMapData.vectors.splice(index, 1);
+  };
+
+  // ============== Control Handlers =======================
+  const panForward = () => {
+    if (masterMapData.camera === null) {
+      return;
+    }
+
+    if (masterMapData.lookAtVector === null) {
+      masterMapData.lookAtVector = new THREE.Vector3();
+    }
+    masterMapData.camera.getWorldDirection(masterMapData.lookAtVector);
+
+    let dist = masterMapData.panSpeed / 100;
+
+    masterMapData.controls.target.set(
+      masterMapData.controls.target.x + masterMapData.lookAtVector.x * dist,
+      masterMapData.controls.target.y + masterMapData.lookAtVector.y * dist,
+      masterMapData.controls.target.z + masterMapData.lookAtVector.z * dist
+    );
+    masterMapData.controls.update();
+    masterMapData.camera.translateZ(-dist);
+  };
+
+  const panBackward = () => {
+    if (masterMapData.camera === null) {
+      return;
+    }
+
+    if (masterMapData.lookAtVector === null) {
+      masterMapData.lookAtVector = new THREE.Vector3();
+    }
+    masterMapData.camera.getWorldDirection(masterMapData.lookAtVector);
+
+    let dist = masterMapData.panSpeed / 100;
+
+    masterMapData.controls.target.set(
+      masterMapData.controls.target.x + masterMapData.lookAtVector.x * -dist,
+      masterMapData.controls.target.y + masterMapData.lookAtVector.y * -dist,
+      masterMapData.controls.target.z + masterMapData.lookAtVector.z * -dist
+    );
+    masterMapData.controls.update();
+    masterMapData.camera.translateZ(-dist);
+  };
+
+  // ============== Point CRUD =======================
   const resetPoints = async (pointsData) => {
     for (const index in masterMapData.points) {
       removePointFromScene(masterMapData.points[index]);
     }
-    masterMapData.points = [];
 
+    masterMapData.points = [];
     if (pointsData.length === 0) {
       return;
     }
 
-    for (const index in pointsData.value) {
-      let pointData = pointsData.value[index];
+    for (const index in pointsData) {
+      let pointData = pointsData[index];
       if (pointData) {
         let newPoint = await createPoint(pointData);
 
@@ -404,56 +532,6 @@ export function useMap(mapData) {
     masterMapData.scene.remove(point.intersectionMeshes.ring);
   };
 
-  const addLight = (xCoord, yCoord, zCoord, mapData) => {
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(xCoord, yCoord, zCoord);
-    mapData.scene.add(light);
-  };
-
-  // ============== Control Handlers =======================
-  const panForward = () => {
-    if (mapData.camera === null) {
-      return;
-    }
-
-    if (mapData.lookAtVector === null) {
-      mapData.lookAtVector = new THREE.Vector3();
-    }
-    mapData.camera.getWorldDirection(mapData.lookAtVector);
-
-    let dist = mapData.panSpeed / 100;
-
-    mapData.controls.target.set(
-      mapData.controls.target.x + mapData.lookAtVector.x * dist,
-      mapData.controls.target.y + mapData.lookAtVector.y * dist,
-      mapData.controls.target.z + mapData.lookAtVector.z * dist
-    );
-    mapData.controls.update();
-    mapData.camera.translateZ(-dist);
-  };
-
-  const panBackward = () => {
-    if (mapData.camera === null) {
-      return;
-    }
-
-    if (mapData.lookAtVector === null) {
-      mapData.lookAtVector = new THREE.Vector3();
-    }
-    mapData.camera.getWorldDirection(mapData.lookAtVector);
-
-    let dist = mapData.panSpeed / 100;
-
-    mapData.controls.target.set(
-      mapData.controls.target.x + mapData.lookAtVector.x * -dist,
-      mapData.controls.target.y + mapData.lookAtVector.y * -dist,
-      mapData.controls.target.z + mapData.lookAtVector.z * -dist
-    );
-    mapData.controls.update();
-    mapData.camera.translateZ(-dist);
-  };
-
-  // ============== Point CRUD =======================
   const viewObject = (object) => {
     if (object.type === 'Points') {
       let coord = {
@@ -483,23 +561,16 @@ export function useMap(mapData) {
     }
   };
 
-  const selectPoint = (id) => {
-    // let index = masterPointDataArray.value.findIndex((obj) => obj.id === id);
-    // masterPointDataArray.value[index].selected = !masterPointDataArray.value[index].selected;
-    // let meshIndex = masterMapData.pointMeshes.findIndex((obj) => obj.pointId === id);
-    // masterMapData.pointMeshes[meshIndex].selected = masterPointDataArray.value[index].selected;
-  };
-
   const showHidePoint = (id) => {
-    let index = mapData.points.findIndex((point) => point.id === id);
-    mapData.points[index].data.hide = !mapData.points[index].data.hide;
-    mapData.points[index].mesh.visible = !mapData.points[index].data.hide;
+    let index = masterMapData.points.findIndex((point) => point.id === id);
+    masterMapData.points[index].data.hide = !masterMapData.points[index].data.hide;
+    masterMapData.points[index].mesh.visible = !masterMapData.points[index].data.hide;
   };
 
   const showAllPoints = () => {
-    for (let index in mapData.points) {
-      mapData.points[index].data.hide = false;
-      mapData.points[index].mesh.visible = true;
+    for (let index in masterMapData.points) {
+      masterMapData.points[index].data.hide = false;
+      masterMapData.points[index].mesh.visible = true;
     }
   };
 
@@ -511,20 +582,17 @@ export function useMap(mapData) {
 
   const savePoint = async (data) => {
     deletePoint(data);
-
-    let newPoint = await createPoint(data);
-    masterMapData.points.push(newPoint);
-    addPointToScene(newPoint);
+    await createNewPoint(data);
   };
 
   const deletePoint = (point) => {
-    let index = mapData.points.findIndex((obj) => obj.id === point.id);
-    removePointFromScene(mapData.points[index]);
-    mapData.points.splice(index, 1);
+    let index = masterMapData.points.findIndex((obj) => obj.id === point.id);
+    removePointFromScene(masterMapData.points[index]);
+    masterMapData.points.splice(index, 1);
   };
 
   const mergePoints = async (incomingPointData, shouldReplace = false) => {
-    let existingIDs = mapData.points.map((obj) => {
+    let existingIDs = masterMapData.points.map((obj) => {
       return obj.id;
     });
     let conflictingPoints = [];
@@ -569,6 +637,13 @@ export function useMap(mapData) {
     return data;
   };
 
+  const getVectorData = (inMapData) => {
+    let data = inMapData.vectors.map((vector) => {
+      return vector.data;
+    });
+    return data;
+  };
+
   return {
     initMasterMapData,
     init,
@@ -576,7 +651,6 @@ export function useMap(mapData) {
     panForward,
     panBackward,
     viewObject,
-    selectPoint,
     showHidePoint,
     showAllPoints,
     createNewPoint,
@@ -585,5 +659,9 @@ export function useMap(mapData) {
     mergePoints,
     updateGrid,
     getPointData,
+    getVectorData,
+    createNewVector,
+    deleteVector,
+    saveVector,
   };
 }
