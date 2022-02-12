@@ -18,6 +18,13 @@
           <span class="left-nav-label pl-5">Waypoints</span>
         </v-list-item>
 
+        <v-list-item link :class="{ selected: showVectorWidget }" @click="onManageVectors">
+          <div class="left-nav-icon">
+            <v-icon style="transform: rotate(-45deg)">mdi-ray-start-arrow</v-icon>
+          </div>
+          <span class="left-nav-label pl-5">Vectors</span>
+        </v-list-item>
+
         <v-list-item link :class="{ selected: showSaveWidget }" @click="onSave">
           <div class="left-nav-icon">
             <v-icon>mdi-content-save-outline</v-icon>
@@ -108,6 +115,7 @@ export default {
     const showWaypointWidget = inject('showWaypointWidget');
     const showImportWidget = inject('showImportWidget');
     const showSaveWidget = inject('showSaveWidget');
+    const showVectorWidget = inject('showVectorWidget');
 
     const { scaleUpCoordinate } = useCoordinates();
 
@@ -122,6 +130,7 @@ export default {
       showWaypointWidget,
       showSaveWidget,
       showImportWidget,
+      showVectorWidget,
     };
   },
 
@@ -153,6 +162,10 @@ export default {
       this.showWaypointWidget = !this.showWaypointWidget;
     },
 
+    onManageVectors() {
+      this.showVectorWidget = !this.showVectorWidget;
+    },
+
     onSave() {
       if (this.isElectron) {
         this.showSaveWidget = !this.showSaveWidget;
@@ -167,7 +180,7 @@ export default {
         let file = new Blob([data], { type: 'text/plain' });
         elem.href = URL.createObjectURL(file);
         let today = new Date();
-        elem.download = `waypoint_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`;
+        elem.download = `atlas_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`;
         elem.click();
       }
     },

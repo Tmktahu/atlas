@@ -33,28 +33,13 @@ export const ISAN_ORIGIN_POINT = {
 };
 
 export function useCoordinates() {
-  const init = (isElectron) => {
-    const masterPointsArray = ref([]);
-
-    if (!isElectron) {
-      const { readFromLocalStorage } = useStorage();
-
-      let localStorageData = readFromLocalStorage();
-      if (localStorageData) {
-        masterPointsArray.value = localStorageData;
-      } else {
-        masterPointsArray.value = setupInitialPoints();
-      }
-    } else {
-      masterPointsArray.value = setupInitialPoints();
+  const init = (storageData) => {
+    if (storageData.points && storageData.points.length === 0) {
+      storageData.points = getInitialPoints();
     }
-
-    return {
-      masterPointsArray,
-    };
   };
 
-  const setupInitialPoints = () => {
+  const getInitialPoints = () => {
     let initialPoints = [];
 
     initialPoints.push(scaleDownCoordinate(ORIGIN_POINT));
@@ -96,7 +81,7 @@ export function useCoordinates() {
 
       return outCoord;
     } else {
-      return Math.round(inCoord * COORD_SCALAR);
+      return Math.round(inCoord / COORD_SCALAR);
     }
   };
 
@@ -127,7 +112,7 @@ export function useCoordinates() {
 
   return {
     init,
-    setupInitialPoints,
+    getInitialPoints,
     scaleDownCoordinate,
     scaleUpCoordinate,
   };

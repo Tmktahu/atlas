@@ -8,6 +8,7 @@ node_modules
 .env.*.local
 atlas.code-workspace
 waypoint_data.json
+atlas_data.json
 
 # Log files
 npm-debug.log*

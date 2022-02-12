@@ -92,7 +92,7 @@ export default {
     const showWaypointWidget = inject('showWaypointWidget');
     const masterMapData = inject('masterMapData');
 
-    const { scaleUpCoordinate, setupInitialPoints } = useCoordinates();
+    const { scaleUpCoordinate, getInitialPoints } = useCoordinates();
 
     const tableHeaders = [
       {
@@ -128,7 +128,7 @@ export default {
       mergePoints,
       ICON_MAP,
       scaleUpCoordinate,
-      setupInitialPoints,
+      getInitialPoints,
     };
   },
 
@@ -163,7 +163,7 @@ export default {
     },
 
     onResetDefaults() {
-      let defaultPoints = this.setupInitialPoints();
+      let defaultPoints = this.getInitialPoints();
       this.mergePoints(defaultPoints);
       this.close();
     },

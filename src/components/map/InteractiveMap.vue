@@ -189,23 +189,12 @@ export default {
 
   mounted() {
     EventBus.$on('initMap', () => {
+      this.createStats();
       this.initMap(this.$refs.mapContainer);
       this.mapLoading = false;
     });
 
     this.$nextTick(() => {
-      // if we are not electron init the map and pop the performance alert
-      if (!this.isElectron) {
-        this.initMap(this.$refs.mapContainer);
-        this.mapLoading = false;
-        this.$toasted.global.alertWarning({
-          message: 'You must have Hardware Acceleration enabled in your browser,<br>or else this website will max out your CPU trying to render.',
-        });
-      }
-
-      // init stats
-      this.createStats();
-
       // set up keybinds
       Mousetrap.bind('w', (event) => {
         if (this.hoveredElement?.tagName.toLowerCase() === 'canvas') {
@@ -233,8 +222,10 @@ export default {
         }
 
         // eslint-disable-next-line prettier/prettier
-        this.masterMapData.mapMouse.x = ((event.clientX - 56) / (window.innerWidth - 56))* 2 - 1;
-        this.masterMapData.mapMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        if(this.masterMapData?.mapMouse) {
+          this.masterMapData.mapMouse.x = ((event.clientX - 56) / (window.innerWidth - 56)) * 2 - 1;
+          this.masterMapData.mapMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
 
         this.mouseMoved = true;
 
@@ -287,7 +278,7 @@ export default {
       this.stats = new Stats();
       this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
       this.stats.domElement.classList = 'fps-tracker';
-      this.$refs.mapContainer.appendChild(this.stats.dom);
+      this.$refs.mapContainer?.appendChild(this.stats.dom);
       this.masterMapData.stats = this.stats;
     },
 
