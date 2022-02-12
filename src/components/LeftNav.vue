@@ -29,7 +29,7 @@
           <div class="left-nav-icon">
             <v-icon>mdi-content-save-outline</v-icon>
           </div>
-          <span class="left-nav-label pl-5">Save Waypoints</span>
+          <span class="left-nav-label pl-5">Save Data</span>
         </v-list-item>
 
         <v-list-item link :class="{ selected: showImportWidget }" @click="onImportWaypoints">

@@ -171,7 +171,8 @@ export default {
             saveToLocalStorage(masterMapData);
           }, 500);
 
-          watch([points, vectors], saveDebounce);
+          watch(points, saveDebounce);
+          watch(vectors, saveDebounce);
         }
 
         setTimeout(() => {

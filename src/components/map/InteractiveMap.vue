@@ -137,45 +137,50 @@ export default {
 
   watch: {
     intersects() {
-      this.focusedObject = this.masterMapData.intersects[0]?.object;
-      if (!this.focusedObject) {
-        this.$refs.pointInfoContainer.style.display = 'none';
-        this.$refs.mapContainer.style.cursor = 'auto';
-        return;
-      }
+      if (this.hoveredElement?.tagName.toLowerCase() === 'canvas') {
+        this.focusedObject = this.masterMapData.intersects[0]?.object;
+        if (!this.focusedObject) {
+          this.$refs.pointInfoContainer.style.display = 'none';
+          this.$refs.mapContainer.style.cursor = 'auto';
+          return;
+        }
 
-      if (this.focusedObject.type === 'Points') {
-        let coordinate = {
-          position: {
-            x: this.focusedObject.geometry.attributes.position.array[0],
-            y: -this.focusedObject.geometry.attributes.position.array[2],
-            // eslint-disable-next-line id-length
-            z: this.focusedObject.geometry.attributes.position.array[1],
-          },
-        };
-        let expandedCoordinates = this.scaleUpCoordinate(coordinate);
+        if (this.focusedObject.type === 'Points') {
+          let coordinate = {
+            position: {
+              x: this.focusedObject.geometry.attributes.position.array[0],
+              y: -this.focusedObject.geometry.attributes.position.array[2],
+              // eslint-disable-next-line id-length
+              z: this.focusedObject.geometry.attributes.position.array[1],
+            },
+          };
+          let expandedCoordinates = this.scaleUpCoordinate(coordinate);
 
-        this.$refs.pointName.innerHTML = this.focusedObject.name;
-        this.$refs.pointCoord.innerHTML = `[${expandedCoordinates.position.x}, ${expandedCoordinates.position.y}, ${expandedCoordinates.position.z}]`;
-        this.$refs.pointInfoContainer.style.display = 'block';
+          this.$refs.pointName.innerHTML = this.focusedObject.name;
+          this.$refs.pointCoord.innerHTML = `[${expandedCoordinates.position.x}, ${expandedCoordinates.position.y}, ${expandedCoordinates.position.z}]`;
+          this.$refs.pointInfoContainer.style.display = 'block';
 
-        this.$refs.mapContainer.style.cursor = 'pointer';
-      } else if (this.focusedObject.type === 'Mesh' && (this.focusedObject.celestialType === 'moon' || this.focusedObject.celestialType === 'planet')) {
-        let coordinate = {
-          position: {
-            x: this.focusedObject.position.x,
-            y: -this.focusedObject.position.z,
-            // eslint-disable-next-line id-length
-            z: this.focusedObject.position.y,
-          },
-        };
-        let expandedCoordinates = this.scaleUpCoordinate(coordinate);
+          this.$refs.mapContainer.style.cursor = 'pointer';
+        } else if (this.focusedObject.type === 'Mesh' && (this.focusedObject.celestialType === 'moon' || this.focusedObject.celestialType === 'planet')) {
+          let coordinate = {
+            position: {
+              x: this.focusedObject.position.x,
+              y: -this.focusedObject.position.z,
+              // eslint-disable-next-line id-length
+              z: this.focusedObject.position.y,
+            },
+          };
+          let expandedCoordinates = this.scaleUpCoordinate(coordinate);
 
-        this.$refs.pointName.innerHTML = this.focusedObject.name;
-        this.$refs.pointCoord.innerHTML = `Estimated [${expandedCoordinates.position.x}, ${expandedCoordinates.position.y}, ${expandedCoordinates.position.z}]`;
-        this.$refs.pointInfoContainer.style.display = 'block';
+          this.$refs.pointName.innerHTML = this.focusedObject.name;
+          this.$refs.pointCoord.innerHTML = `Estimated [${expandedCoordinates.position.x}, ${expandedCoordinates.position.y}, ${expandedCoordinates.position.z}]`;
+          this.$refs.pointInfoContainer.style.display = 'block';
 
-        this.$refs.mapContainer.style.cursor = 'pointer';
+          this.$refs.mapContainer.style.cursor = 'pointer';
+        } else {
+          this.$refs.pointInfoContainer.style.display = 'none';
+          this.$refs.mapContainer.style.cursor = 'auto';
+        }
       } else {
         this.$refs.pointInfoContainer.style.display = 'none';
         this.$refs.mapContainer.style.cursor = 'auto';

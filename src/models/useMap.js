@@ -2,6 +2,7 @@
 import Vue from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from '@/controls/OrbitControls.js';
+import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
 
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
 import {
@@ -14,7 +15,6 @@ import {
   createTorusIntersectionRings,
   createPointIntersectionObjects,
 } from '@/models/useMapObjects.js';
-import { ORIGIN_POINT } from '@/models/useCoordinates.js';
 
 import { ASTROID_BELTS, MOONS, ORBIT_RINGS, EOS_BELT_ZONES } from './presetMapData/celestialBodies';
 
@@ -497,12 +497,25 @@ export function useMap() {
     for (const index in pointsData) {
       let pointData = pointsData[index];
       if (pointData) {
-        let newPoint = await createPoint(pointData);
-
-        masterMapData.points.push(newPoint);
-
-        addPointToScene(newPoint);
+        await createNewPoint(pointData);
       }
+    }
+  };
+
+  const resetDefaultPoints = async () => {
+    const { getInitialPoints } = useCoordinates();
+    let defaultPoints = getInitialPoints();
+
+    for (let index in defaultPoints) {
+      let existingPoint = masterMapData.points.find((elem) => {
+        return elem.data.name === defaultPoints[index].name;
+      });
+
+      if (existingPoint) {
+        deletePoint(existingPoint);
+      }
+
+      await createNewPoint(defaultPoints[index]);
     }
   };
 
@@ -575,9 +588,12 @@ export function useMap() {
   };
 
   const createNewPoint = async (data) => {
-    let newPoint = await createPoint(data);
-    masterMapData.points.push(newPoint);
-    addPointToScene(newPoint);
+    let existingPoint = masterMapData.points.find((elem) => elem.id === data.id);
+    if (!existingPoint) {
+      let newPoint = await createPoint(data);
+      masterMapData.points.push(newPoint);
+      addPointToScene(newPoint);
+    }
   };
 
   const savePoint = async (data) => {
@@ -657,6 +673,7 @@ export function useMap() {
     savePoint,
     deletePoint,
     mergePoints,
+    resetDefaultPoints,
     updateGrid,
     getPointData,
     getVectorData,
