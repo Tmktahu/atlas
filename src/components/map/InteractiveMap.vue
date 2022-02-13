@@ -222,13 +222,13 @@ export default {
       // mouse events need to be handled vanilla
       window.addEventListener('mousemove', (event) => {
         if (this.$refs.pointInfoContainer) {
-          this.$refs.pointInfoContainer.style.left = `${event.pageX - 30}px`;
+          this.$refs.pointInfoContainer.style.left = `${event.pageX + 25}px`;
           this.$refs.pointInfoContainer.style.top = `${event.pageY - 10}px`;
         }
 
         // eslint-disable-next-line prettier/prettier
         if(this.masterMapData?.mapMouse) {
-          this.masterMapData.mapMouse.x = ((event.clientX - 56) / (window.innerWidth - 56)) * 2 - 1;
+          this.masterMapData.mapMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
           this.masterMapData.mapMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         }
 
@@ -273,6 +273,9 @@ export default {
       });
 
       window.addEventListener('dblclick', () => {
+        if (this.hoveredElement?.tagName.toLowerCase() !== 'canvas') {
+          return;
+        }
         this.handleDoubleClick();
       });
     });
@@ -344,11 +347,11 @@ export default {
 @import '@/design/variables/_colors';
 
 .mapContainer::v-deep {
-  width: calc(100vw - 56px);
+  width: calc(100vw);
   overflow: hidden;
 
   .mapCanvas {
-    width: calc(100vw - 56px) !important;
+    width: calc(100vw) !important;
   }
 }
 
@@ -356,7 +359,7 @@ export default {
   position: absolute;
   right: 90px;
   bottom: 0;
-  width: calc(100% - 56px - 90px);
+  width: calc(100% - 90px);
   align-items: center;
   justify-content: flex-end;
 
@@ -390,6 +393,7 @@ export default {
 .point-info {
   position: absolute;
   display: none;
+  pointer-events: none;
 
   .name {
     font-size: 16px;

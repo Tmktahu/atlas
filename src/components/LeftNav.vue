@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer v-model="leftNav" expand-on-hover permanent app class="left-nav" @transitionend="onTransitionEnd">
+  <v-navigation-drawer v-model="leftNav" expand-on-hover permanent class="left-nav" @transitionend="onTransitionEnd">
     <v-layout column fill-height>
       <v-list class="pa-0" style="height: 100%">
         <v-list-item class="pa-0 flex-grow-0">
@@ -253,8 +253,53 @@ export default {
 @import '@/design/variables/_colors';
 
 .left-nav::v-deep {
+  position: absolute;
+  z-index: 9000;
   max-width: 200px;
-  background-color: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+  background-color: transparent !important;
+  overflow: visible;
+
+  &:before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+    clip-path: polygon(
+      0px 0px,
+      100% 0px,
+      100% calc(100% - 600px),
+      calc(100% - 13px) calc(100% - 580px),
+      calc(100% - 13px) calc(100% - 164px),
+      100% calc(100% - 144px),
+      100% 100%,
+      0px 100%
+    );
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    margin-left: 4px;
+    width: 100%;
+    height: 100%;
+    background-color: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+    clip-path: polygon(
+      0px 0px,
+      100% 0px,
+      100% calc(100% - 600px + 1px),
+      calc(100% - 13px) calc(100% - 580px + 1px),
+      calc(100% - 13px) calc(100% - 164px - 1px),
+      100% calc(100% - 144px - 1px),
+      100% 100%,
+      calc(100% - 2px) 100%,
+      calc(100% - 2px) calc(100% - 144px - 1px),
+      calc(100% - 13px - 2px) calc(100% - 164px - 1px),
+      calc(100% - 13px - 2px) calc(100% - 580px + 1px),
+      calc(100% - 2px) calc(100% - 600px + 1px),
+      calc(100% - 2px) 0px
+    );
+  }
 
   .selected {
     background: color.change($primary-blue, $lightness: 50%, $saturation: 50%);
