@@ -268,8 +268,8 @@ export default {
     clip-path: polygon(
       0px 0px,
       100% 0px,
-      100% calc(100% - 600px),
-      calc(100% - 13px) calc(100% - 580px),
+      100% calc(390px),
+      calc(100% - 13px) calc(410px),
       calc(100% - 13px) calc(100% - 164px),
       100% calc(100% - 144px),
       100% 100%,
@@ -287,16 +287,16 @@ export default {
     clip-path: polygon(
       0px 0px,
       100% 0px,
-      100% calc(100% - 600px + 1px),
-      calc(100% - 13px) calc(100% - 580px + 1px),
+      100% calc(390px + 1px),
+      calc(100% - 13px) calc(410px + 1px),
       calc(100% - 13px) calc(100% - 164px - 1px),
       100% calc(100% - 144px - 1px),
       100% 100%,
       calc(100% - 2px) 100%,
       calc(100% - 2px) calc(100% - 144px - 1px),
       calc(100% - 13px - 2px) calc(100% - 164px - 1px),
-      calc(100% - 13px - 2px) calc(100% - 580px + 1px),
-      calc(100% - 2px) calc(100% - 600px + 1px),
+      calc(100% - 13px - 2px) calc(410px + 1px),
+      calc(100% - 2px) calc(390px + 1px),
       calc(100% - 2px) 0px
     );
   }
