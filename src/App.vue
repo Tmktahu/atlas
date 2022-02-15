@@ -6,6 +6,8 @@
     <SaveWidget ref="saveWidget" />
     <ImportWidget ref="importWidget" />
     <InfoWidget ref="infoWidget" />
+    <VectorManagementWidget ref="vectorManagementWidget" />
+    <OldDataDialog ref="oldDataDialog" />
     <v-main>
       <div v-if="isElectron" class="draggable-area-bar" />
       <router-view />
@@ -14,11 +16,11 @@
 </template>
 
 <script>
-import { onMounted, ref, watch, provide, computed, inject, toRefs } from '@vue/composition-api';
-import { LANDING_ROUTE } from '@/router/routes';
+import { onMounted, ref, watch, provide, toRefs } from '@vue/composition-api';
 import { debounce } from 'lodash';
+import { EventBus } from '@/eventBus';
 
-import { useMap } from '@/models/useMap.js';
+import { useMap, masterMapData } from '@/models/useMap.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
 import { useStorage } from '@/models/useStorage.js';
 import { useToasts } from '@/models/useToasts.js';
@@ -29,6 +31,8 @@ import WaypointManagementWidget from '@/components/widgets/WaypointManagementWid
 import SaveWidget from '@/components/widgets/SaveWidget.vue';
 import ImportWidget from '@/components/widgets/ImportWidget.vue';
 import InfoWidget from '@/components/widgets/InfoWidget.vue';
+import VectorManagementWidget from '@/components/widgets/VectorManagementWidget.vue';
+import OldDataDialog from '@/components/dialogs/OldDataDialog.vue';
 
 export default {
   metaInfo: {
@@ -38,15 +42,24 @@ export default {
     },
   },
 
-  components: { LeftNav, ConversionWidget, WaypointManagementWidget, SaveWidget, ImportWidget, InfoWidget },
+  components: { LeftNav, ConversionWidget, WaypointManagementWidget, SaveWidget, ImportWidget, InfoWidget, VectorManagementWidget, OldDataDialog },
 
-  setup() {
+  setup(_, context) {
+    let startApp = true;
     let userAgent = navigator.userAgent.toLowerCase();
     const isElectron = userAgent.indexOf('electron/') > -1;
     provide('isElectron', isElectron);
 
+    EventBus.$on('openOldDataDialog', (data) => {
+      setTimeout(() => {
+        context.refs.oldDataDialog.open(data);
+      }, 100);
+    });
+
     const showControls = ref(false);
     const leftNavCondensed = ref(false);
+
+    const showOldDataDialog = ref(false);
 
     const showConversionWidget = ref(false);
     const showWaypointWidget = ref(false);
@@ -54,12 +67,15 @@ export default {
     const showSaveWidget = ref(false);
     const showImportWidget = ref(false);
     const showInfoWidget = ref(false);
+    const showVectorWidget = ref(false);
+    const showVectorCRUDWidget = ref(false);
 
     watch(showWaypointWidget, () => {
       if (showWaypointWidget.value) {
         showSaveWidget.value = false;
         showImportWidget.value = false;
         showInfoWidget.value = false;
+        showVectorWidget.value = false;
       }
     });
 
@@ -68,6 +84,7 @@ export default {
         showWaypointWidget.value = false;
         showImportWidget.value = false;
         showInfoWidget.value = false;
+        showVectorWidget.value = false;
       }
     });
 
@@ -76,6 +93,7 @@ export default {
         showWaypointWidget.value = false;
         showSaveWidget.value = false;
         showInfoWidget.value = false;
+        showVectorWidget.value = false;
       }
     });
 
@@ -84,6 +102,16 @@ export default {
         showWaypointWidget.value = false;
         showSaveWidget.value = false;
         showImportWidget.value = false;
+        showVectorWidget.value = false;
+      }
+    });
+
+    watch(showVectorWidget, () => {
+      if (showVectorWidget.value) {
+        showWaypointWidget.value = false;
+        showSaveWidget.value = false;
+        showImportWidget.value = false;
+        showInfoWidget.value = false;
       }
     });
 
@@ -94,6 +122,10 @@ export default {
           'border: 2px solid white; background-color: #527cbf; border-radius: 5px; color: #cbdaf2; font-size: 2rem; font-weight: 800; padding: 4px; margin: 5px 0;'
         );
       } else {
+        context.root.$toasted.global.alertWarning({
+          message: 'You must have Hardware Acceleration enabled in your browser,<br>or else this website will max out your CPU trying to render.',
+        });
+
         console.log(
           '%cAtlas Web Version Started',
           'border: 2px solid white; background-color: #527cbf; border-radius: 5px; color: #cbdaf2; font-size: 2rem; font-weight: 800; padding: 4px; margin: 5px 0;'
@@ -108,29 +140,46 @@ export default {
 
     useToasts();
 
-    const { init: initCoordinates } = useCoordinates();
-    const { masterPointsArray } = initCoordinates(isElectron);
-
-    if (isElectron) {
+    const init = async () => {
       const { init: initStorage } = useStorage(isElectron);
-      initStorage(masterPointsArray);
-    }
+      const { storageData, errors: storageErrors } = await initStorage();
 
-    const { initMasterMapData, getPointData } = useMap();
-    const masterMapData = initMasterMapData(masterPointsArray);
+      if (storageErrors && storageErrors.message !== 'noData') {
+        // if there were storage errors, do nothing for now
+        if (storageErrors.message === 'oldData') {
+          startApp = false;
+        }
+      } else {
+        // otherwise we have no storage errors
+        const { init: initPoints } = useCoordinates();
+        initPoints(storageData);
 
-    if (!isElectron) {
-      const { saveToLocalStorage } = useStorage(isElectron);
+        const { initMasterMapData, getPointData } = useMap();
+        initMasterMapData(storageData);
+      }
+    };
 
-      let points = toRefs(masterMapData).points;
-      watch(
-        points,
-        debounce(() => {
-          let pointData = getPointData(masterMapData);
-          saveToLocalStorage(pointData);
-        }, 1000)
-      );
-    }
+    init().then(() => {
+      if (startApp) {
+        if (!isElectron) {
+          const { saveToLocalStorage } = useStorage(isElectron);
+
+          let points = toRefs(masterMapData).points;
+          let vectors = toRefs(masterMapData).vectors;
+
+          let saveDebounce = debounce(() => {
+            saveToLocalStorage(masterMapData);
+          }, 500);
+
+          watch(points, saveDebounce);
+          watch(vectors, saveDebounce);
+        }
+
+        setTimeout(() => {
+          EventBus.$emit('initMap');
+        }, 1000);
+      }
+    });
 
     provide('masterMapData', masterMapData);
     provide('showControls', showControls);
@@ -142,6 +191,10 @@ export default {
     provide('showSaveWidget', showSaveWidget);
     provide('showImportWidget', showImportWidget);
     provide('showInfoWidget', showInfoWidget);
+    provide('showVectorWidget', showVectorWidget);
+    provide('showVectorCRUDWidget', showVectorCRUDWidget);
+
+    provide('showOldDataDialog', showOldDataDialog);
 
     return {
       isElectron,
@@ -197,5 +250,14 @@ html {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: white;
+}
+
+.general-tooltip {
+  z-index: 10000 !important;
+  background-color: color.change($primary-blue, $lightness: 80%) !important;
+
+  div {
+    color: black;
+  }
 }
 </style>

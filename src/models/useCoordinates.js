@@ -1,9 +1,8 @@
 /* eslint-disable id-length */
-import { ref } from '@vue/composition-api';
+import { v4 as uuidv4 } from 'uuid';
+
 import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetMapData/eos';
 import { ELYSIUM_WARP_GATE } from './presetMapData/elysium';
-
-import { useStorage } from '@/models/useStorage.js';
 
 export const COORD_SCALAR = 10000;
 
@@ -12,7 +11,7 @@ export const ORIGIN_POINT = {
   type: 'gate',
   color: 'aqua',
   position: { x: 0, y: 0, z: 0 },
-  id: '0',
+  id: uuidv4(),
   hide: false,
   icon: 'stargate',
   group: 'Origins',
@@ -24,8 +23,8 @@ export const ISAN_ORIGIN_POINT = {
   name: 'ISAN Origin',
   type: 'misc',
   color: 'orange',
-  position: { x: 15313, y: -3476, z: -1535 },
-  id: '1234',
+  position: { x: 15314, y: -3476, z: -1412 },
+  id: uuidv4(),
   hide: false,
   icon: 'isan',
   group: 'Origins',
@@ -33,28 +32,13 @@ export const ISAN_ORIGIN_POINT = {
 };
 
 export function useCoordinates() {
-  const init = (isElectron) => {
-    const masterPointsArray = ref([]);
-
-    if (!isElectron) {
-      const { readFromLocalStorage } = useStorage();
-
-      let localStorageData = readFromLocalStorage();
-      if (localStorageData) {
-        masterPointsArray.value = localStorageData;
-      } else {
-        masterPointsArray.value = setupInitialPoints();
-      }
-    } else {
-      masterPointsArray.value = setupInitialPoints();
+  const init = (storageData) => {
+    if (storageData.points && storageData.points.length === 0) {
+      storageData.points = getInitialPoints();
     }
-
-    return {
-      masterPointsArray,
-    };
   };
 
-  const setupInitialPoints = () => {
+  const getInitialPoints = () => {
     let initialPoints = [];
 
     initialPoints.push(scaleDownCoordinate(ORIGIN_POINT));
@@ -96,7 +80,7 @@ export function useCoordinates() {
 
       return outCoord;
     } else {
-      return Math.round(inCoord * COORD_SCALAR);
+      return inCoord / COORD_SCALAR;
     }
   };
 
@@ -121,13 +105,13 @@ export function useCoordinates() {
 
       return outCoord;
     } else {
-      return Math.round(inCoord * COORD_SCALAR);
+      return inCoord * COORD_SCALAR;
     }
   };
 
   return {
     init,
-    setupInitialPoints,
+    getInitialPoints,
     scaleDownCoordinate,
     scaleUpCoordinate,
   };

@@ -24,6 +24,20 @@ export async function createPointMesh(data) {
   return mesh;
 }
 
+export async function createVectorMesh(data) {
+  let color = new THREE.Color(data.color);
+  let origin = new THREE.Vector3(data.origin.x, data.origin.z, -data.origin.y);
+  let direction = new THREE.Vector3(data.direction.x, data.direction.z, -data.direction.y);
+  direction.normalize();
+
+  let mesh = new THREE.ArrowHelper(direction, origin, data.length, color, Math.min([0.1 * data.length], 0.5), Math.min([0.1 * data.length], 0.5));
+
+  mesh.name = data.name;
+  mesh.vectorId = data.id;
+
+  return mesh;
+}
+
 export function createRing(options) {
   const { scaleDownCoordinate } = useCoordinates();
   let scaledDownMeasurements = scaleDownCoordinate(options);

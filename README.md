@@ -29,7 +29,7 @@ For information on how the coordinate grid is set up, check out the [Independant
 
 ## Locally Stored Information
 
-All waypoint information is stored locally on your computer in the form of JSON files. By default, Atlas functions off a `waypoint_data.json` file that is created in the directory where you run `Atlas.exe`. Atlas also allows you to save your current waypoint information or import waypoints from any JSON file of your choice.
+All waypoint information is stored locally on your computer in the form of JSON files. By default, Atlas functions off a `atlas_data.json` file that is created in the directory where you run `Atlas.exe`. Atlas also allows you to save your current waypoint information or import waypoints from any JSON file of your choice.
 
 For the website version, it loads default waypoint data on initial load and saves information to the [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API) of your web browser. You can upload a custom JSON file to import waypoints and then download the current set of waypoints as a JSON file whenever you wish.
 

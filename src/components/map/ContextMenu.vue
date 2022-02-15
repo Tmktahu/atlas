@@ -24,16 +24,15 @@ export default {
 
     const masterMapData = inject('masterMapData');
 
-    const { scaleUpCoordinate, setupInitialPoints } = useCoordinates();
+    const { scaleUpCoordinate } = useCoordinates();
 
-    const { viewObject, showHidePoint, showAllPoints, mergePoints } = useMap(masterMapData);
+    const { viewObject, showHidePoint, showAllPoints, resetDefaultPoints } = useMap(masterMapData);
 
     return {
       showMenu,
       object,
       scaleUpCoordinate,
-      setupInitialPoints,
-      mergePoints,
+      resetDefaultPoints,
       viewObject,
       showHidePoint,
       showAllPoints,
@@ -111,8 +110,7 @@ export default {
     },
 
     onResetDefaults() {
-      let defaultPoints = this.setupInitialPoints();
-      this.mergePoints(defaultPoints, true);
+      this.resetDefaultPoints();
       this.close();
     },
   },
