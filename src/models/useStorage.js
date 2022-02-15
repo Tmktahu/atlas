@@ -4,35 +4,39 @@ const fs = require('fs');
 import { EventBus } from '@/eventBus';
 
 import { useCoordinates } from './useCoordinates';
+import { useMap } from '@/models/useMap.js';
 
 export function useStorage(isElectron) {
   let dataStoragePath = ref('');
   if (isElectron) {
     if (process.env.NODE_ENV === 'development') {
-      dataStoragePath.value = 'waypoint_data.json';
+      dataStoragePath.value = 'atlas_data.json';
     } else {
       const remote = require('electron').remote;
-      dataStoragePath.value = `${remote.process.env.PORTABLE_EXECUTABLE_DIR}/waypoint_data.json`;
+      dataStoragePath.value = `${remote.process.env.PORTABLE_EXECUTABLE_DIR}/atlas_data.json`;
     }
   }
 
-  const init = async (storageContainer) => {
-    if (fs.existsSync && fs.existsSync(dataStoragePath.value)) {
-      const result = await readFromJSON(null, dataStoragePath.value);
+  const init = async (isElectron) => {
+    // if we are electron, then we want to read from the local json storage file
+    if (isElectron) {
+      if (fs.existsSync && fs.existsSync(dataStoragePath.value)) {
+        const { result, errors } = await readFromJSON(null, dataStoragePath.value);
 
-      const { scaleDownCoordinate } = useCoordinates();
-      let scaledDownData = result.map((item) => {
-        return scaleDownCoordinate(item);
-      });
+        const { scaleDownCoordinate } = useCoordinates();
+        let scaledDownData = result.map((item) => {
+          return scaleDownCoordinate(item);
+        });
 
-      storageContainer.value = scaledDownData;
-
-      setTimeout(() => {
-        EventBus.$emit('initMap');
-      }, 1000);
+        return { storageData: scaledDownData, errors };
+      } else {
+        console.error('No storage. Initing json file with default data.');
+        const result = await saveToJSON(null, dataStoragePath.value, storageContainer, true);
+      }
     } else {
-      console.log('No storage. Initing json file with default data.');
-      const result = await saveToJSON(null, dataStoragePath.value, storageContainer, true);
+      // otherwise we are not electron and want to read from browser local storage
+      const { data, errors } = readFromLocalStorage();
+      return { storageData: data, errors };
     }
   };
 
@@ -50,11 +54,15 @@ export function useStorage(isElectron) {
           container.value = scaledDownData;
           return;
         } else {
-          return rawData;
+          return {
+            data: rawData,
+            errors: null,
+          };
         }
       } catch (error) {
-        console.log('Error reading file: ', error);
+        console.error('Error reading file: ', error);
         Vue.toasted.global.alertError({ message: 'Error reading JSON file', description: error });
+        return { data: null, errors: { message: `Error reading file: ${error}` } };
       }
     } else {
       return new Promise((resolve, reject) => {
@@ -67,7 +75,7 @@ export function useStorage(isElectron) {
         };
 
         fileReader.onerror = function (error) {
-          console.log('Error reading file: ', error);
+          console.error('Error reading file: ', error);
           Vue.toasted.global.alertError({ message: 'Error reading JSON file', description: error });
           reject(error);
         };
@@ -116,7 +124,7 @@ export function useStorage(isElectron) {
         });
         return null;
       } catch (error) {
-        console.log('There was a problem saving data: ', error);
+        console.error('There was a problem saving data: ', error);
         return error;
       }
     } else {
@@ -133,7 +141,7 @@ export function useStorage(isElectron) {
         });
         return null;
       } catch (error) {
-        console.log('There was a problem saving data: ', error);
+        console.error('There was a problem saving data: ', error);
         return error;
       }
     }
@@ -141,27 +149,131 @@ export function useStorage(isElectron) {
 
   const readFromLocalStorage = () => {
     try {
-      let rawData = window.localStorage.getItem('atlasWaypoints');
+      let oldKeyData = window.localStorage.getItem('atlasWaypoints');
+      if (oldKeyData !== null) {
+        // we have an old localStorage key to clear
+        window.localStorage.removeItem('atlasWaypoints');
+        window.localStorage.setItem('atlasData', oldKeyData);
+      }
+
+      let rawData = window.localStorage.getItem('atlasData');
       if (rawData) {
         let parsedData = JSON.parse(rawData);
-        return parsedData;
+        let hasOldData = detectOldDataStructures(parsedData);
+        if (hasOldData) {
+          // data from local storage should always start scaled down
+          // but to let the user download a JSON file, we want to scale it up
+          const { scaleUpCoordinate } = useCoordinates();
+          let scaledUpData = parsedData.map((item) => {
+            return scaleUpCoordinate(item);
+          });
+
+          EventBus.$emit('openOldDataDialog', scaledUpData);
+
+          return {
+            data: parsedData,
+            errors: { message: 'oldData' },
+          };
+        } else {
+          return {
+            data: parsedData,
+            errors: null,
+          };
+        }
       } else {
-        return null;
+        let newData = {
+          version: process.env.VUE_APP_VERSION,
+          points: [],
+          vectors: [],
+        };
+
+        return {
+          data: newData,
+          errors: { message: 'noData' },
+        };
       }
     } catch (error) {
-      console.log('Error reading local storage: ', error);
+      console.error('Error reading local storage: ', error);
       Vue.toasted.global.alertError({ message: 'Error reading localstorage', description: error });
       return null;
     }
   };
 
-  const saveToLocalStorage = async (inData) => {
+  const saveToLocalStorage = async (inData, isStorageData = false) => {
     try {
-      let stringifiedData = JSON.stringify(inData, null, 2);
-      window.localStorage.setItem('atlasWaypoints', stringifiedData);
+      if (inData !== null) {
+        let { data: currentData, errors } = readFromLocalStorage();
+        let newVersion,
+          newPoints,
+          newVectors = null;
+
+        if (isStorageData) {
+          // if we are dealing with storage-formatted data
+          newVersion = inData.version;
+          newPoints = inData.points;
+          newVectors = inData.vectors;
+        } else {
+          // otherwise we are dealing with map-formatted data
+          const { getPointData, getVectorData } = useMap();
+          newVersion = process.env.VUE_APP_VERSION;
+          newPoints = getPointData(inData);
+          newVectors = getVectorData(inData);
+        }
+
+        // Now we check to see what needs to be updated and assemble the new data
+        let newStorageData = {};
+        newStorageData.version = newVersion;
+
+        newStorageData.points = newPoints.length > 0 ? newPoints : currentData.points;
+        newStorageData.vectors = newVectors.length > 0 ? newVectors : currentData.vectors;
+
+        let stringifiedData = JSON.stringify(newStorageData, null, 2);
+        window.localStorage.setItem('atlasData', stringifiedData);
+      }
     } catch (error) {
-      console.log('Error writing to local storage: ', error);
+      console.error('Error writing to local storage: ', error);
       Vue.toasted.global.alertError({ message: 'Error saving to localstorage', description: error });
+    }
+  };
+
+  const detectOldDataStructures = (data) => {
+    if (Array.isArray(data) && data.length > 0) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const updateDataStructure = (oldData) => {
+    if (Array.isArray(oldData) && oldData.length > 0) {
+      // we have a coordinate array, which is from v1 of the data structure
+
+      if (isElectron) {
+        // if we are electron, then we will be saving to a JSON file, which means we do NOT scale down our data
+
+        let newData = {
+          version: process.env.VUE_APP_VERSION,
+          points: oldData,
+          vectors: [],
+        };
+
+        let filePath = 'atlas_data.json';
+        saveToJSON(newData, filePath);
+      } else {
+        // data sent to this function is scaled up, so we need to scale it down for local storage saving
+        const { scaleDownCoordinate } = useCoordinates();
+        let scaledDownData = oldData.map((item) => {
+          return scaleDownCoordinate(item);
+        });
+
+        let newData = {
+          version: process.env.VUE_APP_VERSION,
+          points: scaledDownData,
+          vectors: [],
+        };
+
+        saveToLocalStorage(newData, true);
+      }
     }
   };
 
@@ -172,5 +284,6 @@ export function useStorage(isElectron) {
     dataStoragePath,
     readFromLocalStorage,
     saveToLocalStorage,
+    updateDataStructure,
   };
 }

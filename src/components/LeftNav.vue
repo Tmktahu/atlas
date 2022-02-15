@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer v-model="leftNav" expand-on-hover permanent app class="left-nav" @transitionend="onTransitionEnd">
+  <v-navigation-drawer v-model="leftNav" expand-on-hover permanent class="left-nav" @transitionend="onTransitionEnd">
     <v-layout column fill-height>
       <v-list class="pa-0" style="height: 100%">
         <v-list-item class="pa-0 flex-grow-0">
@@ -18,11 +18,18 @@
           <span class="left-nav-label pl-5">Waypoints</span>
         </v-list-item>
 
+        <v-list-item link :class="{ selected: showVectorWidget }" @click="onManageVectors">
+          <div class="left-nav-icon">
+            <v-icon style="transform: rotate(-45deg)">mdi-ray-start-arrow</v-icon>
+          </div>
+          <span class="left-nav-label pl-5">Vectors</span>
+        </v-list-item>
+
         <v-list-item link :class="{ selected: showSaveWidget }" @click="onSave">
           <div class="left-nav-icon">
             <v-icon>mdi-content-save-outline</v-icon>
           </div>
-          <span class="left-nav-label pl-5">Save Waypoints</span>
+          <span class="left-nav-label pl-5">Save Data</span>
         </v-list-item>
 
         <v-list-item link :class="{ selected: showImportWidget }" @click="onImportWaypoints">
@@ -108,6 +115,7 @@ export default {
     const showWaypointWidget = inject('showWaypointWidget');
     const showImportWidget = inject('showImportWidget');
     const showSaveWidget = inject('showSaveWidget');
+    const showVectorWidget = inject('showVectorWidget');
 
     const { scaleUpCoordinate } = useCoordinates();
 
@@ -122,6 +130,7 @@ export default {
       showWaypointWidget,
       showSaveWidget,
       showImportWidget,
+      showVectorWidget,
     };
   },
 
@@ -153,6 +162,10 @@ export default {
       this.showWaypointWidget = !this.showWaypointWidget;
     },
 
+    onManageVectors() {
+      this.showVectorWidget = !this.showVectorWidget;
+    },
+
     onSave() {
       if (this.isElectron) {
         this.showSaveWidget = !this.showSaveWidget;
@@ -161,13 +174,23 @@ export default {
           return point.data;
         });
 
-        let data = JSON.stringify(points, null, 2);
+        let vectors = this.masterMapData.vectors.map((vector) => {
+          return vector.data;
+        });
+
+        let data = {
+          version: process.env.VUE_APP_VERSION,
+          points,
+          vectors,
+        };
+
+        let stringifiedData = JSON.stringify(data, null, 2);
 
         let elem = document.createElement('a');
-        let file = new Blob([data], { type: 'text/plain' });
+        let file = new Blob([stringifiedData], { type: 'text/plain' });
         elem.href = URL.createObjectURL(file);
         let today = new Date();
-        elem.download = `waypoint_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`;
+        elem.download = `atlas_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`;
         elem.click();
       }
     },
@@ -230,8 +253,53 @@ export default {
 @import '@/design/variables/_colors';
 
 .left-nav::v-deep {
+  position: absolute;
+  z-index: 9000;
   max-width: 200px;
-  background-color: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+  background-color: transparent !important;
+  overflow: visible;
+
+  &:before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+    clip-path: polygon(
+      0px 0px,
+      100% 0px,
+      100% calc(390px),
+      calc(100% - 13px) calc(410px),
+      calc(100% - 13px) calc(100% - 164px),
+      100% calc(100% - 144px),
+      100% 100%,
+      0px 100%
+    );
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    margin-left: 4px;
+    width: 100%;
+    height: 100%;
+    background-color: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+    clip-path: polygon(
+      0px 0px,
+      100% 0px,
+      100% calc(390px + 1px),
+      calc(100% - 13px) calc(410px + 1px),
+      calc(100% - 13px) calc(100% - 164px - 1px),
+      100% calc(100% - 144px - 1px),
+      100% 100%,
+      calc(100% - 2px) 100%,
+      calc(100% - 2px) calc(100% - 144px - 1px),
+      calc(100% - 13px - 2px) calc(100% - 164px - 1px),
+      calc(100% - 13px - 2px) calc(410px + 1px),
+      calc(100% - 2px) calc(390px + 1px),
+      calc(100% - 2px) 0px
+    );
+  }
 
   .selected {
     background: color.change($primary-blue, $lightness: 50%, $saturation: 50%);

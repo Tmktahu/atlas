@@ -66,7 +66,7 @@ export const useToasts = () => {
       if (payload.timeout) {
         defaultAlertConfig.duration = payload.timeout;
       } else {
-        defaultAlertConfig.duration = 10000;
+        defaultAlertConfig.duration = 5000;
       }
 
       defaultAlertConfig.action = [
