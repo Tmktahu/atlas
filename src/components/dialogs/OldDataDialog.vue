@@ -20,9 +20,9 @@
         me directly on Discord for assistance, or try to tackle a manual data structure update based on the information you find in the Github repository.
       </div>
 
-      <div v-if="isElectron">
-        Save To:
-        <v-btn dense :disabled="storageOption !== 'custom'" class="select-path-button ml-2" outlined @click="onSelectPath">{{ buttonText }}</v-btn>
+      <div v-if="isElectron" class="dialog-title--sub">
+        Save Backup Data To:
+        <v-btn dense class="select-path-button ml-2" outlined @click="onSelectPath">{{ buttonText }}</v-btn>
       </div>
 
       <div class="d-flex">
@@ -49,7 +49,7 @@ export default {
     const showDialog = inject('showOldDataDialog');
     const filePath = ref('');
 
-    const { saveToJSON, updateDataStructure } = useStorage();
+    const { saveToJSON, updateDataStructure } = useStorage(isElectron);
 
     const oldData = ref(null);
     const updateLoading = ref(false);
@@ -92,12 +92,10 @@ export default {
 
     async onSave() {
       if (this.isElectron) {
-        const errors = await this.saveToJSON(this.masterMapData.pointsArray, this.filePath);
+        const errors = await this.saveToJSON(this.oldData, this.filePath);
         if (errors) {
           console.error('File Save Error: ', errors);
           this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });
-        } else {
-          this.close();
         }
       } else {
         let data = JSON.stringify(this.oldData, null, 2);
@@ -113,7 +111,7 @@ export default {
 
     onUpdate() {
       this.updateLoading = true;
-      this.updateDataStructure(this.oldData);
+      this.updateDataStructure(this.oldData, this.isElectron);
 
       setTimeout(() => {
         window.location.reload(false);
@@ -160,21 +158,7 @@ export default {
 }
 
 .select-path-button {
-  color: $primary-blue !important;
   text-transform: none;
   letter-spacing: 0.01em;
-}
-
-.radio-option::v-deep {
-  label {
-    color: white;
-  }
-}
-
-.save-button {
-  color: $primary-blue !important;
-  text-transform: none;
-  letter-spacing: 0.01em;
-  background-color: #222 !important;
 }
 </style>

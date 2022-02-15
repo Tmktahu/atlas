@@ -46,7 +46,7 @@
           <span class="left-nav-label pl-5">Coord Conversion</span>
         </v-list-item>
 
-        <v-list-item link :class="{ selected: showControls }" @click="onControls">
+        <v-list-item link :class="{ selected: showControlsWidget }" @click="onControls">
           <div class="left-nav-icon">
             <v-icon>mdi-camera-control</v-icon>
           </div>
@@ -109,7 +109,7 @@ export default {
 
     const showConversionWidget = inject('showConversionWidget');
 
-    const showControls = inject('showControls');
+    const showControlsWidget = inject('showControlsWidget');
     const masterMapData = inject('masterMapData');
 
     const showWaypointWidget = inject('showWaypointWidget');
@@ -125,7 +125,7 @@ export default {
       leftNavCondensed,
       showConversionWidget,
       masterMapData,
-      showControls,
+      showControlsWidget,
       scaleUpCoordinate,
       showWaypointWidget,
       showSaveWidget,
@@ -208,7 +208,7 @@ export default {
     },
 
     onControls() {
-      this.showControls = !this.showControls;
+      this.showControlsWidget = !this.showControlsWidget;
     },
 
     onGithub() {

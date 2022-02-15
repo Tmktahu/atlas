@@ -26,10 +26,6 @@
 import { ref, inject } from '@vue/composition-api';
 
 import { useStorage } from '@/models/useStorage.js';
-import { useMap } from '@/models/useMap.js';
-import { useCoordinates } from '@/models/useCoordinates';
-
-import { ICON_MAP } from '@/models/useIcons.js';
 
 export default {
   name: 'SaveWidget',
@@ -42,7 +38,9 @@ export default {
     const storageOption = ref('storage');
     const filePath = ref('');
 
-    const { saveToJSON, dataStoragePath } = useStorage(isElectron);
+    const { saveToJSON, dataStoragePath, assembleStorageData } = useStorage(isElectron);
+
+    //TODO the css on the path selector needs to be tweaked. specifically the selected path text
 
     return {
       isElectron,
@@ -52,6 +50,7 @@ export default {
       filePath,
       saveToJSON,
       dataStoragePath,
+      assembleStorageData,
     };
   },
 
@@ -81,8 +80,9 @@ export default {
     },
 
     async onSave() {
+      let storageData = this.assembleStorageData(this.masterMapData);
       if (this.storageOption === 'storage') {
-        const errors = await this.saveToJSON(this.masterMapData.points, this.dataStoragePath);
+        const errors = await this.saveToJSON(storageData, this.dataStoragePath);
         if (errors) {
           console.error('File Save Error: ', errors);
           this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });
@@ -90,7 +90,7 @@ export default {
           this.close();
         }
       } else {
-        const errors = await this.saveToJSON(this.masterMapData.points, this.filePath);
+        const errors = await this.saveToJSON(storageData, this.filePath);
         if (errors) {
           console.error('File Save Error: ', errors);
           this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });

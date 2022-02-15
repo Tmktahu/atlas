@@ -26,26 +26,6 @@
       <div ref="pointName" class="name">Point Name</div>
       <div ref="pointCoord" class="coord">[Coordinate]</div>
     </div>
-    <div
-      v-if="showControls"
-      class="controls-info"
-      :class="{ out: leftNavCondensed, 'with-conversion-widget': showConversionWidget, 'with-draggable-bar': isElectron }"
-    >
-      <div v-if="isElectron">
-        Local Storage File:
-        <span>{{ localStorageText }}</span>
-      </div>
-      <div>W: <span>Pan Forward</span></div>
-      <div>S: <span>Pan Backward</span></div>
-      <div>A: <span>Pan Left</span></div>
-      <div>D: <span>Pan Right</span></div>
-      <div>Space: <span>Pan Up</span></div>
-      <div>L-Shift: <span>Pan Down</span></div>
-      <div>L-Click Hold + R-Click Hold: <span>Rotate Camera</span></div>
-      <div>R-Click Hold: <span>Pan Camera</span></div>
-      <div>R-Click: <span>Context Menu</span></div>
-      <div>L-Click: <span>Select Point</span></div>
-    </div>
     <ContextMenu ref="contextMenu" />
   </div>
 </template>
@@ -55,13 +35,11 @@ import Stats from 'stats.js';
 import Mousetrap from 'mousetrap';
 import ContextMenu from './ContextMenu.vue';
 
-import { ref, inject, watch, toRefs } from '@vue/composition-api';
+import { ref, inject, toRefs } from '@vue/composition-api';
 import { EventBus } from '@/eventBus';
 
 import { useMap, MIN_PAN_SPEED, MAX_PAN_SPEED } from '@/models/useMap.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
-
-import { useStorage } from '@/models/useStorage.js';
 
 export default {
   metaInfo() {
@@ -76,15 +54,10 @@ export default {
   components: { ContextMenu },
 
   setup() {
-    const isElectron = inject('isElectron');
     const masterMapData = inject('masterMapData');
-    const showControls = inject('showControls');
-    const leftNavCondensed = inject('leftNavCondensed');
-    const showConversionWidget = inject('showConversionWidget');
     const showInfoWidget = inject('showInfoWidget');
     let stats = null;
 
-    const { dataStoragePath } = useStorage(isElectron);
     const { init: initMap, resizeMap, panForward, panBackward, viewObject, updateGrid } = useMap(masterMapData);
 
     const intersects = toRefs(masterMapData).intersects;
@@ -101,21 +74,16 @@ export default {
     const mapLoading = ref(true);
 
     return {
-      isElectron,
       stats,
       initMap,
       resizeMap,
       panForward,
       panBackward,
       masterMapData,
-      showControls,
-      leftNavCondensed,
-      showConversionWidget,
       showInfoWidget,
       MIN_PAN_SPEED,
       MAX_PAN_SPEED,
       intersects,
-      dataStoragePath,
       scaleUpCoordinate,
       showGrid,
       showEosZones,
@@ -125,14 +93,6 @@ export default {
       hoveredElement,
       mapLoading,
     };
-  },
-
-  computed: {
-    localStorageText() {
-      let path = require('path');
-      let absolutePath = path.resolve(this.dataStoragePath);
-      return absolutePath;
-    },
   },
 
   watch: {
@@ -401,39 +361,6 @@ export default {
 
   .coord {
     font-size: 12px;
-  }
-}
-
-.controls-info {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  width: 100%;
-  pointer-events: none;
-  background: transparent;
-  transition: left 0.05s ease;
-
-  div {
-    width: fit-content;
-    font-size: 14px;
-    color: white;
-    pointer-events: all;
-
-    span {
-      color: color.change($primary-blue, $lightness: 60%, $saturation: 80%);
-    }
-  }
-
-  &.out {
-    left: 160px !important;
-  }
-
-  &.with-conversion-widget {
-    margin-top: 190px !important;
-  }
-
-  &.with-draggable-bar {
-    margin-top: 30px;
   }
 }
 </style>
