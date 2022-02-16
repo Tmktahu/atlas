@@ -62,6 +62,6 @@ If you are interested in contributing to this project, feel free to look through
 
 - LoopHule#9398 for Elysium measurements.
 - Rabir#7523 and EPIC Corp for their brilliant solar system map and moon distance measurements.
-- Arch#6267 for his infograpbics and measurement information.
+- Arch#6267 for his infographics and measurement information.
 - Cycle_Of_Insanity#3074 for helping with company logo collection.
 - Strikeeaglechase#0001 and [Starmap](https://github.com/Collective-SB/Starmap) for inspiration.

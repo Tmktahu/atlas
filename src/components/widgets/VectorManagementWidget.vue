@@ -62,6 +62,7 @@
       </v-row>
     </div>
     <VectorCRUDWidget ref="vectorCRUDWidget" />
+    <ConfirmationDialog ref="confirmationDialog" />
   </div>
 </template>
 
@@ -76,10 +77,11 @@ import { ICON_MAP } from '@/models/useIcons.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
 
 import VectorCRUDWidget from '@/components/widgets/VectorCRUDWidget.vue';
+import ConfirmationDialog from '@/components/dialogs/ConfirmationDialog.vue';
 
 export default {
   name: 'VectorManagementWidget',
-  components: { VectorCRUDWidget },
+  components: { VectorCRUDWidget, ConfirmationDialog },
 
   setup() {
     const isElectron = inject('isElectron');
@@ -158,7 +160,16 @@ export default {
     },
 
     onDelete(vector) {
-      this.deleteVector(vector);
+      this.$refs.confirmationDialog.open({
+        titleText: 'Are you sure?',
+        descriptionText: 'You will be unable to recover deleted vectors.',
+        yesText: 'Yes',
+        noText: 'No',
+        onYes: () => {
+          this.deleteVector(vector);
+          this.$refs.confirmationDialog.close();
+        },
+      });
     },
   },
 };

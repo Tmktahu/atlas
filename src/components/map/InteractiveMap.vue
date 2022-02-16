@@ -117,7 +117,10 @@ export default {
           let expandedCoordinates = this.scaleUpCoordinate(coordinate);
 
           this.$refs.pointName.innerHTML = this.focusedObject.name;
-          this.$refs.pointCoord.innerHTML = `[${expandedCoordinates.position.x}, ${expandedCoordinates.position.y}, ${expandedCoordinates.position.z}]`;
+          this.$refs.pointCoord.innerHTML = `
+            [${Math.round(expandedCoordinates.position.x)},
+            ${Math.round(expandedCoordinates.position.y)},
+            ${Math.round(expandedCoordinates.position.z)}]`;
           this.$refs.pointInfoContainer.style.display = 'block';
 
           this.$refs.mapContainer.style.cursor = 'pointer';
@@ -133,7 +136,10 @@ export default {
           let expandedCoordinates = this.scaleUpCoordinate(coordinate);
 
           this.$refs.pointName.innerHTML = this.focusedObject.name;
-          this.$refs.pointCoord.innerHTML = `Estimated [${expandedCoordinates.position.x}, ${expandedCoordinates.position.y}, ${expandedCoordinates.position.z}]`;
+          this.$refs.pointCoord.innerHTML = `
+            Estimated [${Math.round(expandedCoordinates.position.x)},
+            ${Math.round(expandedCoordinates.position.y)},
+            ${Math.round(expandedCoordinates.position.z)}]`;
           this.$refs.pointInfoContainer.style.display = 'block';
 
           this.$refs.mapContainer.style.cursor = 'pointer';

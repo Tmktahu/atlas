@@ -86,6 +86,7 @@
       <v-spacer />
       <v-btn dense class="action-button" small outlined @click="onImport">Import</v-btn>
     </v-row>
+    <ConfirmationDialog ref="confirmationDialog" />
   </div>
 </template>
 
@@ -97,9 +98,11 @@ import { useMap } from '@/models/useMap.js';
 import { useCoordinates } from '@/models/useCoordinates';
 
 import { ICON_MAP } from '@/models/useIcons.js';
+import ConfirmationDialog from '@/components/dialogs/ConfirmationDialog.vue';
 
 export default {
   name: 'ImportWidget',
+  components: { ConfirmationDialog },
 
   setup() {
     const isElectron = inject('isElectron');
@@ -183,16 +186,28 @@ export default {
     },
 
     async onImport() {
-      let selectedPoints = this.loadedData.filter((obj) => {
-        return this.checkedWaypoints.includes(obj.id);
-      });
+      this.$refs.confirmationDialog.open({
+        titleText: 'Are you sure?',
+        descriptionText:
+          this.mode === 'replace'
+            ? 'You are set to replace points with the imported ones. This action cannot be undone.'
+            : 'You are set to skip conflicting points. This action cannot be undone.',
+        yesText: 'Yes',
+        noText: 'No',
+        onYes: () => {
+          let selectedPoints = this.loadedData.filter((obj) => {
+            return this.checkedWaypoints.includes(obj.id);
+          });
 
-      let scaledDownPoints = selectedPoints.map((obj) => {
-        return this.scaleDownCoordinate(obj);
-      });
+          let scaledDownPoints = selectedPoints.map((obj) => {
+            return this.scaleDownCoordinate(obj);
+          });
 
-      this.mergePoints(scaledDownPoints, this.mode === 'replace');
-      this.close();
+          this.mergePoints(scaledDownPoints, this.mode === 'replace');
+          this.close();
+          this.$refs.confirmationDialog.close();
+        },
+      });
     },
 
     flipAllChecked() {
