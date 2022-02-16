@@ -31,12 +31,18 @@
               <div class="image-wrapper" :style="{ 'background-color': item.data.color }">
                 <img :src="ICON_MAP[item.data.icon].workingFilePath" contain width="20px" height="20px" style="filter: invert(1)" />
               </div>
-              <span class="waypoint-name px-2"> {{ item.data.name }}</span>
+              <span class="waypoint-name pl-2"> {{ item.data.name }}</span>
             </div>
           </template>
           <template v-slot:item.position="{ item }">
-            <div style="font-size: 10px">
-              {{ `[${scaleUpCoordinate(item.data.position.x)}, ${scaleUpCoordinate(item.data.position.y)}, ${scaleUpCoordinate(item.data.position.z)}]` }}
+            <div class="d-flex align-center">
+              <span class="waypoint-coord">
+                {{
+                  `[${Math.round(scaleUpCoordinate(item.data.position.x))},` +
+                  `${Math.round(scaleUpCoordinate(item.data.position.y))},` +
+                  `${Math.round(scaleUpCoordinate(item.data.position.z))}]`
+                }}
+              </span>
             </div>
           </template>
           <template v-slot:item.actions="{ item }">
@@ -68,6 +74,7 @@
       </v-row>
     </div>
     <WaypointCRUDWidget ref="waypointCRUDWidget" />
+    <ConfirmationDialog ref="confirmationDialog" />
   </div>
 </template>
 
@@ -82,10 +89,11 @@ import { ICON_MAP } from '@/models/useIcons.js';
 import { useCoordinates } from '@/models/useCoordinates.js';
 
 import WaypointCRUDWidget from '@/components/widgets/WaypointCRUDWidget.vue';
+import ConfirmationDialog from '@/components/dialogs/ConfirmationDialog.vue';
 
 export default {
   name: 'WaypointManagementWidget',
-  components: { WaypointCRUDWidget },
+  components: { WaypointCRUDWidget, ConfirmationDialog },
 
   setup() {
     const isElectron = inject('isElectron');
@@ -115,7 +123,7 @@ export default {
       },
     ];
 
-    const { viewObject, showHidePoint, addPoint, deletePoint, mergePoints } = useMap(masterMapData);
+    const { viewObject, showHidePoint, addPoint, deletePoint, resetDefaultPoints } = useMap(masterMapData);
 
     return {
       isElectron,
@@ -125,10 +133,10 @@ export default {
       viewObject,
       showHidePoint,
       deletePoint,
-      mergePoints,
       ICON_MAP,
       scaleUpCoordinate,
       getInitialPoints,
+      resetDefaultPoints,
     };
   },
 
@@ -159,13 +167,30 @@ export default {
     },
 
     onDelete(point) {
-      this.deletePoint(point);
+      this.$refs.confirmationDialog.open({
+        titleText: 'Are you sure?',
+        descriptionText: 'You will be unable to recover deleted points.',
+        yesText: 'Yes',
+        noText: 'No',
+        onYes: () => {
+          this.deletePoint(point);
+          this.$refs.confirmationDialog.close();
+        },
+      });
     },
 
     onResetDefaults() {
-      let defaultPoints = this.getInitialPoints();
-      this.mergePoints(defaultPoints);
-      this.close();
+      this.$refs.confirmationDialog.open({
+        titleText: 'Are you sure?',
+        descriptionText: 'This deletes and re-adds the default waypoints based on their name. Any changes you have made will be overridden.',
+        yesText: 'Yes',
+        noText: 'No',
+        onYes: () => {
+          this.resetDefaultPoints();
+          this.close();
+          this.$refs.confirmationDialog.close();
+        },
+      });
     },
   },
 };
@@ -268,7 +293,13 @@ export default {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    max-width: 120px;
+    max-width: 100px;
+  }
+
+  .waypoint-coord {
+    font-size: 10px;
+    white-space: wrap;
+    max-width: 100px;
   }
 
   th {

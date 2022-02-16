@@ -6,6 +6,7 @@
     <v-btn v-if="!object" small text @click="onViewOrigin">View Origin</v-btn>
     <v-btn v-if="!object" small text @click="onShowAll">Show All Points</v-btn>
     <v-btn v-if="!object" small text @click="onResetDefaults">Reset Default Points</v-btn>
+    <ConfirmationDialog ref="confirmationDialog" />
   </div>
 </template>
 
@@ -15,8 +16,11 @@ import { ref, inject } from '@vue/composition-api';
 import { useCoordinates } from '@/models/useCoordinates.js';
 import { useMap } from '@/models/useMap.js';
 
+import ConfirmationDialog from '@/components/dialogs/ConfirmationDialog.vue';
+
 export default {
   name: 'ContextMenu',
+  components: { ConfirmationDialog },
 
   setup() {
     const showMenu = ref(false);
@@ -110,8 +114,17 @@ export default {
     },
 
     onResetDefaults() {
-      this.resetDefaultPoints();
-      this.close();
+      this.$refs.confirmationDialog.open({
+        titleText: 'Are you sure?',
+        descriptionText: 'This deletes and re-adds the default waypoints based on their name. Any changes you have made will be overridden.',
+        yesText: 'Yes',
+        noText: 'No',
+        onYes: () => {
+          this.resetDefaultPoints();
+          this.close();
+          this.$refs.confirmationDialog.close();
+        },
+      });
     },
   },
 };

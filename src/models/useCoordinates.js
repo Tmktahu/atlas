@@ -62,23 +62,23 @@ export function useCoordinates() {
       // we are dealing with a vector
       let outVector = JSON.parse(JSON.stringify(inObject));
 
-      outVector.origin.x = Math.round(inObject.origin.x / GRID_SCALAR);
-      outVector.origin.y = Math.round(inObject.origin.y / GRID_SCALAR);
-      outVector.origin.z = Math.round(inObject.origin.z / GRID_SCALAR);
+      outVector.origin.x = inObject.origin.x / GRID_SCALAR;
+      outVector.origin.y = inObject.origin.y / GRID_SCALAR;
+      outVector.origin.z = inObject.origin.z / GRID_SCALAR;
 
-      outVector.endPoint.x = Math.round(inObject.endPoint.x / GRID_SCALAR);
-      outVector.endPoint.y = Math.round(inObject.endPoint.y / GRID_SCALAR);
-      outVector.endPoint.z = Math.round(inObject.endPoint.z / GRID_SCALAR);
+      outVector.endPoint.x = inObject.endPoint.x / GRID_SCALAR;
+      outVector.endPoint.y = inObject.endPoint.y / GRID_SCALAR;
+      outVector.endPoint.z = inObject.endPoint.z / GRID_SCALAR;
 
-      outVector.length = Math.round(inObject.length / GRID_SCALAR);
+      outVector.length = inObject.length / GRID_SCALAR;
 
       return outVector;
     } else if (inObject.position) {
       // we are dealing with a point or something with a general position
       let outPoint = JSON.parse(JSON.stringify(inObject));
-      outPoint.position.x = Math.round(inObject.position.x / GRID_SCALAR);
-      outPoint.position.y = Math.round(inObject.position.y / GRID_SCALAR);
-      outPoint.position.z = Math.round(inObject.position.z / GRID_SCALAR);
+      outPoint.position.x = inObject.position.x / GRID_SCALAR;
+      outPoint.position.y = inObject.position.y / GRID_SCALAR;
+      outPoint.position.z = inObject.position.z / GRID_SCALAR;
 
       if (outPoint.radius) {
         outPoint.radius = inObject.radius / GRID_SCALAR;
@@ -104,23 +104,23 @@ export function useCoordinates() {
       // we are dealing with a vector
       let outVector = JSON.parse(JSON.stringify(inObject));
 
-      outVector.origin.x = Math.round(inObject.origin.x * GRID_SCALAR);
-      outVector.origin.y = Math.round(inObject.origin.y * GRID_SCALAR);
-      outVector.origin.z = Math.round(inObject.origin.z * GRID_SCALAR);
+      outVector.origin.x = inObject.origin.x * GRID_SCALAR;
+      outVector.origin.y = inObject.origin.y * GRID_SCALAR;
+      outVector.origin.z = inObject.origin.z * GRID_SCALAR;
 
-      outVector.endPoint.x = Math.round(inObject.endPoint.x * GRID_SCALAR);
-      outVector.endPoint.y = Math.round(inObject.endPoint.y * GRID_SCALAR);
-      outVector.endPoint.z = Math.round(inObject.endPoint.z * GRID_SCALAR);
+      outVector.endPoint.x = inObject.endPoint.x * GRID_SCALAR;
+      outVector.endPoint.y = inObject.endPoint.y * GRID_SCALAR;
+      outVector.endPoint.z = inObject.endPoint.z * GRID_SCALAR;
 
-      outVector.length = Math.round(inObject.length * GRID_SCALAR);
+      outVector.length = inObject.length * GRID_SCALAR;
 
       return outVector;
     } else if (inObject.position) {
       // we are dealing with a point or something with a general position
       let outPoint = JSON.parse(JSON.stringify(inObject));
-      outPoint.position.x = Math.round(inObject.position.x * GRID_SCALAR);
-      outPoint.position.y = Math.round(inObject.position.y * GRID_SCALAR);
-      outPoint.position.z = Math.round(inObject.position.z * GRID_SCALAR);
+      outPoint.position.x = inObject.position.x * GRID_SCALAR;
+      outPoint.position.y = inObject.position.y * GRID_SCALAR;
+      outPoint.position.z = inObject.position.z * GRID_SCALAR;
 
       if (outPoint.radius) {
         outPoint.radius = inObject.radius * GRID_SCALAR;
