@@ -304,6 +304,10 @@ export default {
   .selected {
     background: color.change($primary-blue, $lightness: 50%, $saturation: 50%);
   }
+
+  .v-navigation-drawer__border {
+    background-color: transparent !important;
+  }
 }
 
 .left-nav-logo {
