@@ -655,7 +655,6 @@ export function useMap() {
   };
 
   const getVectorData = (inMapData) => {
-    console.log(inMapData.vectors);
     let data = inMapData.vectors.map((vector) => {
       return vector.data;
     });

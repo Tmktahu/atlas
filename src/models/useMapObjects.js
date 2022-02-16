@@ -40,9 +40,9 @@ export async function createVectorMesh(data) {
 
 export function createRing(options) {
   const { scaleDownCoordinate } = useCoordinates();
-  let scaledDownMeasurements = scaleDownCoordinate(options);
+  let scaledDownRadius = scaleDownCoordinate(options.radius);
 
-  const geometry = new THREE.RingGeometry(scaledDownMeasurements.radius - 3, scaledDownMeasurements.radius + 3, 200);
+  const geometry = new THREE.RingGeometry(scaledDownRadius - 3, scaledDownRadius + 3, 200);
   const material = new THREE.MeshStandardMaterial({ color: options.color, side: THREE.DoubleSide, blending: THREE.NoBlending });
   const ring = new THREE.Mesh(geometry, material);
   ring.rotateX(Math.PI / 2);

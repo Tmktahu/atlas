@@ -21,17 +21,41 @@ export function useStorage(isElectron) {
     // if we are electron, then we want to read from the local json storage file
     if (isElectron) {
       if (fs.existsSync && fs.existsSync(dataStoragePath.value)) {
-        const { result, errors } = await readFromJSON(null, dataStoragePath.value);
+        const { data, errors } = await readFromJSON(null, dataStoragePath.value);
 
-        const { scaleDownCoordinate } = useCoordinates();
-        let scaledDownData = result.map((item) => {
-          return scaleDownCoordinate(item);
-        });
+        let hasOldData = detectOldDataStructures(data);
+
+        if (hasOldData) {
+          // data from json files should always start scaled up
+          // right now, it is being sent to the old data dialog, so it's fine to stay scaled up
+          EventBus.$emit('openOldDataDialog', data);
+
+          return {
+            data: data,
+            errors: { message: 'oldData' },
+          };
+        }
+
+        let scaledDownData = scaleDownStorageData(data);
 
         return { storageData: scaledDownData, errors };
       } else {
         console.error('No storage. Initing json file with default data.');
-        const result = await saveToJSON(null, dataStoragePath.value, storageContainer, true);
+        let useCoordinates = await import('./useCoordinates');
+        let eosData = await import('./presetMapData/eos');
+        let elysiumData = await import('./presetMapData/elysium');
+
+        // TODO update this to the correct new format
+        let defaultData = [
+          useCoordinates.ORIGIN_POINT,
+          elysiumData.ELYSIUM_WARP_GATE,
+          useCoordinates.ISAN_ORIGIN_POINT,
+          ...eosData.ORIGIN_STATIONS,
+          ...eosData.TRANSMITTER_STATIONS,
+        ];
+
+        const { result, errors } = await saveToJSON(defaultData, dataStoragePath.value);
+        return { storageData: scaledDownData, errors };
       }
     } else {
       // otherwise we are not electron and want to read from browser local storage
@@ -45,20 +69,11 @@ export function useStorage(isElectron) {
       try {
         const data = await fs.promises.readFile(filePath, 'utf-8');
         let rawData = JSON.parse(data);
-        const { scaleDownCoordinate } = useCoordinates();
-        let scaledDownData = rawData.map((item) => {
-          return scaleDownCoordinate(item);
-        });
 
-        if (container) {
-          container.value = scaledDownData;
-          return;
-        } else {
-          return {
-            data: rawData,
-            errors: null,
-          };
-        }
+        return {
+          data: rawData,
+          errors: null,
+        };
       } catch (error) {
         console.error('Error reading file: ', error);
         Vue.toasted.global.alertError({ message: 'Error reading JSON file', description: error });
@@ -85,32 +100,12 @@ export function useStorage(isElectron) {
     }
   };
 
-  const saveToJSON = async (inData, filePath, container = null, useDefaultData = false) => {
+  const saveToJSON = async (inData, filePath, container = null) => {
     if (isElectron) {
-      const { scaleUpCoordinate } = useCoordinates();
       let stringifiedData = null;
       let scaledData = null;
 
-      if (useDefaultData) {
-        let useCoordinates = await import('./useCoordinates');
-        let eosData = await import('./presetMapData/eos');
-        let elysiumData = await import('./presetMapData/elysium');
-
-        let defaultData = [
-          useCoordinates.ORIGIN_POINT,
-          elysiumData.ELYSIUM_WARP_GATE,
-          useCoordinates.ISAN_ORIGIN_POINT,
-          ...eosData.ORIGIN_STATIONS,
-          ...eosData.TRANSMITTER_STATIONS,
-        ];
-
-        stringifiedData = JSON.stringify(defaultData, null, 2);
-      } else {
-        scaledData = inData.map((item) => {
-          return scaleUpCoordinate(item.data);
-        });
-        stringifiedData = JSON.stringify(scaledData, null, 2);
-      }
+      stringifiedData = JSON.stringify(inData, null, 2);
 
       try {
         fs.writeFile(filePath, stringifiedData, 'utf-8', () => {
@@ -244,7 +239,7 @@ export function useStorage(isElectron) {
     return false;
   };
 
-  const updateDataStructure = (oldData) => {
+  const updateDataStructure = (oldData, isElectron) => {
     if (Array.isArray(oldData) && oldData.length > 0) {
       // we have a coordinate array, which is from v1 of the data structure
 
@@ -257,8 +252,7 @@ export function useStorage(isElectron) {
           vectors: [],
         };
 
-        let filePath = 'atlas_data.json';
-        saveToJSON(newData, filePath);
+        saveToJSON(newData, dataStoragePath.value);
       } else {
         // data sent to this function is scaled up, so we need to scale it down for local storage saving
         const { scaleDownCoordinate } = useCoordinates();
@@ -277,6 +271,72 @@ export function useStorage(isElectron) {
     }
   };
 
+  const assembleStorageData = (mapData, shouldScaleUp = true) => {
+    // this will always be sent masterMapData
+    // this means data should always begin scaled down by default
+
+    let pointsData = mapData.points.map((point) => {
+      return point.data;
+    });
+
+    let vectorsData = mapData.vectors.map((vector) => {
+      return vector.data;
+    });
+
+    let newStorageData = {
+      version: process.env.VUE_APP_VERSION,
+      points: pointsData,
+      vectors: vectorsData,
+    };
+
+    if (shouldScaleUp) {
+      let scaledStorageData = scaleUpStorageData(newStorageData);
+      return scaledStorageData;
+    } else {
+      return newStorageData;
+    }
+  };
+
+  const scaleUpStorageData = (inData) => {
+    const { scaleUpCoordinate } = useCoordinates();
+
+    let points = inData.points.map((point) => {
+      return scaleUpCoordinate(point);
+    });
+
+    let vectors = inData.vectors.map((vector) => {
+      return scaleUpCoordinate(vector);
+    });
+
+    let newStorageData = {
+      version: inData.version,
+      points: points,
+      vectors: vectors,
+    };
+
+    return newStorageData;
+  };
+
+  const scaleDownStorageData = (inData) => {
+    const { scaleDownCoordinate } = useCoordinates();
+
+    let points = inData.points.map((point) => {
+      return scaleDownCoordinate(point);
+    });
+
+    let vectors = inData.vectors.map((vector) => {
+      return scaleDownCoordinate(vector);
+    });
+
+    let newStorageData = {
+      version: inData.version,
+      points: points,
+      vectors: vectors,
+    };
+
+    return newStorageData;
+  };
+
   return {
     init,
     readFromJSON,
@@ -285,5 +345,6 @@ export function useStorage(isElectron) {
     readFromLocalStorage,
     saveToLocalStorage,
     updateDataStructure,
+    assembleStorageData,
   };
 }

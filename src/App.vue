@@ -8,6 +8,7 @@
     <InfoWidget ref="infoWidget" />
     <VectorManagementWidget ref="vectorManagementWidget" />
     <OldDataDialog ref="oldDataDialog" />
+    <ControlsWidget ref="controlsWidget" />
     <v-main>
       <div v-if="isElectron" class="draggable-area-bar" />
       <router-view />
@@ -33,6 +34,7 @@ import ImportWidget from '@/components/widgets/ImportWidget.vue';
 import InfoWidget from '@/components/widgets/InfoWidget.vue';
 import VectorManagementWidget from '@/components/widgets/VectorManagementWidget.vue';
 import OldDataDialog from '@/components/dialogs/OldDataDialog.vue';
+import ControlsWidget from '@/components/widgets/ControlsWidget.vue';
 
 export default {
   metaInfo: {
@@ -42,7 +44,17 @@ export default {
     },
   },
 
-  components: { LeftNav, ConversionWidget, WaypointManagementWidget, SaveWidget, ImportWidget, InfoWidget, VectorManagementWidget, OldDataDialog },
+  components: {
+    LeftNav,
+    ConversionWidget,
+    WaypointManagementWidget,
+    SaveWidget,
+    ImportWidget,
+    InfoWidget,
+    VectorManagementWidget,
+    OldDataDialog,
+    ControlsWidget,
+  },
 
   setup(_, context) {
     let startApp = true;
@@ -56,7 +68,6 @@ export default {
       }, 100);
     });
 
-    const showControls = ref(false);
     const leftNavCondensed = ref(false);
 
     const showOldDataDialog = ref(false);
@@ -69,6 +80,7 @@ export default {
     const showInfoWidget = ref(false);
     const showVectorWidget = ref(false);
     const showVectorCRUDWidget = ref(false);
+    const showControlsWidget = ref(false);
 
     watch(showWaypointWidget, () => {
       if (showWaypointWidget.value) {
@@ -142,7 +154,7 @@ export default {
 
     const init = async () => {
       const { init: initStorage } = useStorage(isElectron);
-      const { storageData, errors: storageErrors } = await initStorage();
+      const { storageData, errors: storageErrors } = await initStorage(isElectron);
 
       if (storageErrors && storageErrors.message !== 'noData') {
         // if there were storage errors, do nothing for now
@@ -182,7 +194,7 @@ export default {
     });
 
     provide('masterMapData', masterMapData);
-    provide('showControls', showControls);
+    provide('showControlsWidget', showControlsWidget);
     provide('leftNavCondensed', leftNavCondensed);
 
     provide('showConversionWidget', showConversionWidget);
@@ -223,7 +235,7 @@ html {
   height: 30px;
   -webkit-user-select: none;
   -webkit-app-region: drag;
-  background: #333;
+  background: #222;
 }
 
 .with-draggable-bar {
