@@ -46,7 +46,7 @@ export const ORBIT_RINGS = [
 ];
 
 export const ASTROID_BELTS = [
-  { name: 'Eos Belt', type: 'belt', moonId: 'p0', color: '#2c809b', position: { x: -8450000, y: 0, z: 0 }, overalRadius: 2618229.42235, innerRadius: 300000, radialSegments: 100, tubularSegments: 200, scaleX: 3.6666, scaleY: 3.6666, opacity: 0.5 },
+  { name: 'Eos Belt', type: 'belt', moonId: 'p0', color: '#2c809b', position: { x: -8450000, y: 0, z: 0 }, overalRadius: 2610047.45540, innerRadius: 300000, radialSegments: 100, tubularSegments: 200, scaleX: 3.6666, scaleY: 3.6666, opacity: 0.5 },
   { name: 'Elysium Belt', type: 'belt', moonId: 'm0', color: '#459474', position: { x: -5008441.769, y: -21729143.49, z: 0 }, overalRadius: 220000, innerRadius: 40000, radialSegments: 100, tubularSegments: 200, scaleX: 2, scaleY: 2, opacity: 0.5 },
   { name: 'Chemosh Belt', type: 'belt', moonId: 'm1', color: '#981300', position: { x: -21571180.58, y: 15094191.6, z: 0 }, overalRadius: 220000, innerRadius: 40000, radialSegments: 100, tubularSegments: 200, scaleX: 2, scaleY: 2, opacity: 0.5 },
   { name: 'Kumi Belt', type: 'belt', moonId: 'm2', color: '#A05400', position: { x: -28873963.81, y: -31450146.3, z: 0 }, overalRadius: 220000, innerRadius: 40000, radialSegments: 100, tubularSegments: 200, scaleX: 2, scaleY: 2, opacity: 0.5 },
@@ -55,9 +55,9 @@ export const ASTROID_BELTS = [
 ];
 
 export const EOS_BELT_ZONES = [
-  { name: 'Eos Belt Zone 5', moonId: 'p0', color: '#931fff', position: { x: -8450000, y: 0, z: 0 }, overalRadius: 2618229.42235, innerRadius: 27272.72727, radialSegments: 100, tubularSegments: 200, scaleX: 3.6666, scaleY: 3.6666, opacity: 0.5 },
-  { name: 'Eos Belt Zone 4', moonId: 'p0', color: '#ff2121', position: { x: -8450000, y: 0, z: 0 }, overalRadius: 2618229.42235, innerRadius: 122727.272727272, radialSegments: 100, tubularSegments: 200, scaleX: 3.6666, scaleY: 3.6666, opacity: 0.5 },
-  { name: 'Eos Belt Zone 3', moonId: 'p0', color: '#ff902e', position: { x: -8450000, y: 0, z: 0 }, overalRadius: 2618229.42235, innerRadius: 204545.454545454, radialSegments: 100, tubularSegments: 200, scaleX: 3.6666, scaleY: 3.6666, opacity: 0.5 },
-  { name: 'Eos Belt Zone 2', moonId: 'p0', color: '#2e74ff', position: { x: -8450000, y: 0, z: 0 }, overalRadius: 2618229.42235, innerRadius: 286363.636363636, radialSegments: 100, tubularSegments: 200, scaleX: 3.6666, scaleY: 3.6666, opacity: 0.5 },
-  { name: 'Eos Belt Zone 1', moonId: 'p0', color: '#2eff66', position: { x: -8450000, y: 0, z: 0 }, overalRadius: 2618229.42235, innerRadius: 300000, radialSegments: 100, tubularSegments: 200, scaleX: 3.6666, scaleY: 3.6666, opacity: 0.5 },
+  { name: 'Eos Belt Zone 5', moonId: 'p0', color: '#931fff', position: { x: -8450000, y: 0, z: 0 }, overalRadius: 2610047.45540, innerRadius: 27272.72727, radialSegments: 100, tubularSegments: 200, scaleX: 3.6666, scaleY: 3.6666, opacity: 0.5 },
+  { name: 'Eos Belt Zone 4', moonId: 'p0', color: '#ff2121', position: { x: -8450000, y: 0, z: 0 }, overalRadius: 2610047.45540, innerRadius: 122727.272727272, radialSegments: 100, tubularSegments: 200, scaleX: 3.6666, scaleY: 3.6666, opacity: 0.5 },
+  { name: 'Eos Belt Zone 3', moonId: 'p0', color: '#ff902e', position: { x: -8450000, y: 0, z: 0 }, overalRadius: 2610047.45540, innerRadius: 204545.454545454, radialSegments: 100, tubularSegments: 200, scaleX: 3.6666, scaleY: 3.6666, opacity: 0.5 },
+  { name: 'Eos Belt Zone 2', moonId: 'p0', color: '#2e74ff', position: { x: -8450000, y: 0, z: 0 }, overalRadius: 2610047.45540, innerRadius: 286363.636363636, radialSegments: 100, tubularSegments: 200, scaleX: 3.6666, scaleY: 3.6666, opacity: 0.5 },
+  { name: 'Eos Belt Zone 1', moonId: 'p0', color: '#2eff66', position: { x: -8450000, y: 0, z: 0 }, overalRadius: 2610047.45540, innerRadius: 300000, radialSegments: 100, tubularSegments: 200, scaleX: 3.6666, scaleY: 3.6666, opacity: 0.5 },
 ];
