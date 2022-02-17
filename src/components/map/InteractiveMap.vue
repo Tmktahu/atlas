@@ -4,6 +4,7 @@
     <v-progress-circular v-show="mapLoading || !masterMapData.initialized" size="100" indeterminate style="margin: auto" />
     <div v-show="!mapLoading || masterMapData.initialized" ref="mapContainer" v-resize="onResize" class="mapContainer" @keypress="onWDown" />
     <v-row no-gutters class="bottom-controls">
+      <v-checkbox v-model="showEosSafeZone" hide-details reverse class="hide-grid-checkbox mr-2" label="Eos SafeZone" />
       <v-checkbox v-model="showEosZones" hide-details reverse class="hide-grid-checkbox mr-2" label="Eos Zones" />
       <v-checkbox v-model="showGrid" hide-details reverse class="hide-grid-checkbox mr-2" label="Grid" />
       <v-slider
@@ -63,6 +64,7 @@ export default {
     const intersects = toRefs(masterMapData).intersects;
     const showGrid = toRefs(masterMapData).showGrid;
     const showEosZones = toRefs(masterMapData.belts['p0']).showZones;
+    const showEosSafeZone = toRefs(masterMapData).showEosSafeZone;
 
     const { scaleUpCoordinate } = useCoordinates();
 
@@ -87,6 +89,7 @@ export default {
       scaleUpCoordinate,
       showGrid,
       showEosZones,
+      showEosSafeZone,
       updateGrid,
       mouseMoved,
       viewObject,
