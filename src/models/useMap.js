@@ -1,4 +1,6 @@
 /* eslint-disable id-length */
+import testingTexture from '@/assets/textures/safezone.png';
+
 import Vue from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from '@/controls/OrbitControls.js';
@@ -14,6 +16,7 @@ import {
   createSphereIntersectionRing,
   createTorusIntersectionRings,
   createPointIntersectionObjects,
+  createSafeZoneMesh,
 } from '@/models/useMapObjects.js';
 
 import { ASTROID_BELTS, MOONS, ORBIT_RINGS, EOS_BELT_ZONES } from './presetMapData/celestialBodies';
@@ -67,6 +70,8 @@ export const masterMapData = reactive({
   }
   */
 
+  showEosSafeZone: ref(false),
+  eosSafeZoneMesh: null,
   belts: {
     p0: {
       zones: [],
@@ -262,6 +267,8 @@ export function useMap() {
       masterMapData.belts[index].belt.intersectionRings.outerRing.visible = !masterMapData.belts[index].showZones;
     }
 
+    masterMapData.eosSafeZoneMesh.visible = masterMapData.showEosSafeZone;
+
     masterMapData.controls.update();
     masterMapData.renderer.render(masterMapData.scene, masterMapData.camera);
     masterMapData.stats?.end();
@@ -336,6 +343,25 @@ export function useMap() {
       masterMapData.scene.add(moon.mesh);
       masterMapData.scene.add(moon.intersectionRing);
     }
+
+    // TODO move this definition into some other file and import it
+    // probably will do this when I go to add more safezones around other stations?
+
+    let safeZoneOptions = {
+      baseRadius: 50000 / 10000,
+      scaleX: 1,
+      scaleY: 4.4,
+      scaleZ: 10,
+      texture: testingTexture,
+      position: {
+        x: 10000 / 10000,
+        y: 0,
+        z: 0,
+      },
+    };
+
+    masterMapData.eosSafeZoneMesh = await createSafeZoneMesh(safeZoneOptions);
+    masterMapData.scene.add(masterMapData.eosSafeZoneMesh);
   };
 
   const updateGrid = () => {

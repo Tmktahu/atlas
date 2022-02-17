@@ -163,6 +163,45 @@ export function createTorusFrame(options, mapData) {
   return { torusFrontMesh, torusBackMesh };
 }
 
+export async function createSafeZoneMesh(options) {
+  let scaledRadiusX = options.baseRadius * options.scaleX;
+  let scaledRadiusY = options.baseRadius * options.scaleY;
+  let scaledRadiusZ = options.baseRadius * options.scaleZ;
+
+  let horzThing = Math.pow(scaledRadiusX - scaledRadiusZ, 2) / Math.pow(scaledRadiusX + scaledRadiusZ, 2);
+  let elypsisHorzCir = Math.PI * (scaledRadiusX + scaledRadiusZ) * (1 + (3 * horzThing) / (10 + Math.sqrt(4 - 3 * horzThing)));
+
+  let vertThing = Math.pow(scaledRadiusZ - scaledRadiusY, 2) / Math.pow(scaledRadiusZ + scaledRadiusY, 2);
+  let elypsisVertCir = Math.PI * (scaledRadiusZ + scaledRadiusY) * (1 + (3 * vertThing) / (10 + Math.sqrt(4 - 3 * vertThing)));
+
+  let textureLoader = new THREE.TextureLoader();
+  let texture = await textureLoader.load(options.texture);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat = new THREE.Vector2(elypsisHorzCir * 2, elypsisVertCir / 2);
+
+  const geometry = new THREE.SphereGeometry(options.baseRadius, 100, 100);
+  const material = new THREE.MeshLambertMaterial({
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide,
+    opacity: 0.99,
+    color: '#00FF00',
+  });
+
+  material.map = texture;
+  material.alphaMap = texture;
+  //material.depthTest = false;
+  material.depthFunc = THREE.AlwaysDepth;
+
+  const sphere = new THREE.Mesh(geometry, material);
+
+  sphere.position.set(options.position.x, options.position.z, -options.position.y);
+  sphere.scale.set(options.scaleX, options.scaleY, options.scaleZ);
+
+  return sphere;
+}
+
 // ============= Plane Intersection Objects =============
 
 export function createSphereIntersectionRing(options) {
