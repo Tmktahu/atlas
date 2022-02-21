@@ -199,6 +199,10 @@
       </v-col>
     </v-row>
 
+    <v-row no-gutters>
+      <v-checkbox v-model="formInfo.autoScale" :ripple="false" class="atlas-checkbox" dense hide-details label="Auto-Scale" />
+    </v-row>
+
     <v-row no-gutters class="mt-2">
       <v-btn class="form-button mr-1 px-1" dense small outlined @click="onPaste"><v-icon size="16" class="mr-1">mdi-content-paste</v-icon>Paste Coord</v-btn>
       <div class="mode-wrapper d-flex flex-grow-0 px-1 mr-1 align-center">
@@ -275,6 +279,7 @@ export default {
         // eslint-disable-next-line id-length
         z: null,
       },
+      autoScale: false,
       description: '',
     });
 
@@ -367,6 +372,7 @@ export default {
           // eslint-disable-next-line id-length
           z: null,
         },
+        autoScale: false,
       };
     },
 
@@ -417,6 +423,7 @@ export default {
         hide: false,
         icon: this.formInfo.icon,
         group: this.formInfo.group,
+        autoScale: this.formInfo.autoScale,
         description: this.formInfo.description,
       };
 
@@ -446,6 +453,7 @@ export default {
         color: color,
         icon: this.formInfo.icon,
         group: this.formInfo.group,
+        autoScale: this.formInfo.autoScale,
         description: this.formInfo.description,
       };
 

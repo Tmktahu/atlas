@@ -1,0 +1,23 @@
+.atlas-checkbox {
+  padding: 2px 5px 2px 0px !important;
+  border: 1px solid black;
+  border-radius: 4px;
+
+  .v-label {
+    color: black;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  &.v-input--is-label-active {
+    .v-input__slot {
+      i {
+        color: white !important;
+      }
+    }
+  }
+
+  .v-input--selection-controls__input {
+    margin-right: 2px;
+  }
+}

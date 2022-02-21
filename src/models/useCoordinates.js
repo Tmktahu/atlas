@@ -13,6 +13,7 @@ export const ORIGIN_POINT = {
   position: { x: 0, y: 0, z: 0 },
   id: uuidv4(),
   hide: false,
+  autoScale: true,
   icon: 'stargate',
   group: 'Origins',
   description:
@@ -26,6 +27,7 @@ export const ISAN_ORIGIN_POINT = {
   position: { x: 15314, y: -3476, z: -1412 },
   id: uuidv4(),
   hide: false,
+  autoScale: false,
   icon: 'isan',
   group: 'Origins',
   description: 'This is the origin point of the ISAN coordinate grid. It represents a point equidistant to the four transmitter stations.',
