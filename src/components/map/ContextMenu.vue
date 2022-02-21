@@ -3,7 +3,8 @@
     <v-btn v-if="meshObject" small text @click="onView">View</v-btn>
     <v-btn v-if="meshObject" small text @click="onCopy">Copy Coordinate</v-btn>
     <v-btn v-if="meshObject && isPoint" small text @click="onEditPoint">Edit Point</v-btn>
-    <v-btn v-if="meshObject && isPoint" small text @click="onHide">Hide Point</v-btn>
+    <v-btn v-if="meshObject && isPoint" small text @click="onHidePoint">Hide Point</v-btn>
+    <v-btn v-if="meshObject && isPoint" small text @click="onDeletePoint">Delete Point</v-btn>
     <v-btn v-if="!meshObject" small text @click="onViewOrigin">View Origin</v-btn>
     <v-btn v-if="!meshObject" small text @click="onShowAll">Show All Points</v-btn>
     <v-btn v-if="!meshObject" small text @click="onResetDefaults">Reset Default Points</v-btn>
@@ -32,7 +33,7 @@ export default {
 
     const { scaleUpCoordinate } = useCoordinates();
 
-    const { viewObject, showHidePoint, showAllPoints, resetDefaultPoints } = useMap(masterMapData);
+    const { viewObject, showHidePoint, deletePoint, showAllPoints, resetDefaultPoints } = useMap(masterMapData);
 
     return {
       showMenu,
@@ -43,6 +44,7 @@ export default {
       viewObject,
       showHidePoint,
       showAllPoints,
+      deletePoint,
     };
   },
 
@@ -79,8 +81,27 @@ export default {
       this.close();
     },
 
+    onHidePoint() {
+      this.showHidePoint(this.meshObject.pointId);
+      this.close();
+    },
+
     onEditPoint() {
       EventBus.$emit('editPoint', this.pointObject);
+      this.close();
+    },
+
+    onDeletePoint() {
+      this.$refs.confirmationDialog.open({
+        titleText: 'Are you sure?',
+        descriptionText: 'You will be unable to recover deleted points.',
+        yesText: 'Yes',
+        noText: 'No',
+        onYes: () => {
+          this.deletePoint(this.pointObject);
+          this.$refs.confirmationDialog.close();
+        },
+      });
       this.close();
     },
 
@@ -110,11 +131,6 @@ export default {
         this.$toasted.global.alertError({ message: 'Copy failed' });
         console.error('Failed to copy: ', error);
       }
-    },
-
-    onHide() {
-      this.showHidePoint(this.meshObject.pointId);
-      this.close();
     },
 
     onViewOrigin() {
