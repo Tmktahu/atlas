@@ -9,6 +9,7 @@ export const ELYSIUM_WARP_GATE = {
   position: { x: -4948921, y: -21470914, z: 0 },
   id: uuidv4(),
   hide: false,
+  autoScale: true,
   icon: 'stargate',
   group: 'Gates',
   description: 'This is the Elysium warp gate. It allows fast travel to the Eos Warp Gate provided the ship has a functioning fast travel core.'

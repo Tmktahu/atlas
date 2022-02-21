@@ -234,7 +234,7 @@ export function useMap() {
           point.intersectionMeshes.ring.visible = hovered;
 
           // Scale warpgate points so they are always visible
-          if (point.data.type === 'gate') {
+          if (point.data.autoScale) {
             let distance = calcDistance(masterMapData.camera.position, {
               x: point.mesh.geometry.attributes.position.array[0],
               y: -point.mesh.geometry.attributes.position.array[1],
