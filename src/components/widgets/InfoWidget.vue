@@ -204,6 +204,11 @@ export default {
         }
       }
     });
+
+    EventBus.$on('viewBeltInfo', () => {
+      this.showBeltInfo = true;
+      this.showInfoWidget = true;
+    });
   },
 
   methods: {
@@ -228,7 +233,7 @@ export default {
     },
 
     onEdit() {
-      EventBus.$emit('openEditWidget', this.currentObject);
+      EventBus.$emit('editPoint', this.currentObject);
     },
 
     onDelete() {

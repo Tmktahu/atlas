@@ -5,6 +5,7 @@
     <v-btn v-if="meshObject && isPoint" small text @click="onEditPoint">Edit Point</v-btn>
     <v-btn v-if="meshObject && isPoint" small text @click="onHidePoint">Hide Point</v-btn>
     <v-btn v-if="meshObject && isPoint" small text @click="onDeletePoint">Delete Point</v-btn>
+    <v-btn v-if="meshObject && isMoon && hasBelt" small text @click="onViewBeltInfo">View Belt Info</v-btn>
     <v-btn v-if="!meshObject" small text @click="onViewOrigin">View Origin</v-btn>
     <v-btn v-if="!meshObject" small text @click="onShowAll">Show All Points</v-btn>
     <v-btn v-if="!meshObject" small text @click="onResetDefaults">Reset Default Points</v-btn>
@@ -28,6 +29,8 @@ export default {
   setup() {
     const showMenu = ref(false);
     const meshObject = ref(null);
+    const pointObject = ref(null);
+    const moonObject = ref(null);
 
     const masterMapData = inject('masterMapData');
 
@@ -38,6 +41,8 @@ export default {
     return {
       showMenu,
       meshObject,
+      pointObject,
+      moonObject,
       masterMapData,
       scaleUpCoordinate,
       resetDefaultPoints,
@@ -52,14 +57,34 @@ export default {
     isPoint() {
       return this.meshObject.type === 'Points';
     },
+
+    isMoon() {
+      return this.meshObject.celestialType === 'planet' || this.meshObject.celestialType === 'moon';
+    },
+
+    hasBelt() {
+      let moonsWithBelts = [];
+      if (this.isMoon && this.moonObject) {
+        return this.masterMapData.belts[this.moonObject.data.id] !== undefined;
+      } else {
+        return false;
+      }
+    },
   },
 
   methods: {
     open(meshObject) {
       this.meshObject = meshObject;
+
       if (this.meshObject?.type === 'Points') {
         this.pointObject = this.masterMapData.points.find((point) => {
           return this.meshObject.pointId === point.data.id;
+        });
+      }
+
+      if (this.meshObject?.celestialType === 'planet' || this.meshObject?.celestialType === 'moon') {
+        this.moonObject = this.masterMapData.moons.find((moon) => {
+          return this.meshObject.objectId === moon.data.id;
         });
       }
 
@@ -136,6 +161,13 @@ export default {
     onViewOrigin() {
       // eslint-disable-next-line id-length
       this.viewObject({ position: { x: 0, y: 0, z: 0 } });
+      this.close();
+    },
+
+    onViewBeltInfo() {
+      EventBus.$emit('setInfoWidgetData', this.meshObject);
+      EventBus.$emit('viewBeltInfo');
+      this.close();
     },
 
     onShowAll() {
