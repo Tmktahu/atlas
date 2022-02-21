@@ -1,17 +1,19 @@
 <template>
   <div ref="container" class="context-menu" :class="{ hide: !showMenu }">
-    <v-btn v-if="object" small text @click="onView">View</v-btn>
-    <v-btn v-if="object" small text @click="onCopy">Copy Coordinate</v-btn>
-    <v-btn v-if="object && isPoint" small text @click="onHide">Hide Point</v-btn>
-    <v-btn v-if="!object" small text @click="onViewOrigin">View Origin</v-btn>
-    <v-btn v-if="!object" small text @click="onShowAll">Show All Points</v-btn>
-    <v-btn v-if="!object" small text @click="onResetDefaults">Reset Default Points</v-btn>
+    <v-btn v-if="meshObject" small text @click="onView">View</v-btn>
+    <v-btn v-if="meshObject" small text @click="onCopy">Copy Coordinate</v-btn>
+    <v-btn v-if="meshObject && isPoint" small text @click="onEditPoint">Edit Point</v-btn>
+    <v-btn v-if="meshObject && isPoint" small text @click="onHide">Hide Point</v-btn>
+    <v-btn v-if="!meshObject" small text @click="onViewOrigin">View Origin</v-btn>
+    <v-btn v-if="!meshObject" small text @click="onShowAll">Show All Points</v-btn>
+    <v-btn v-if="!meshObject" small text @click="onResetDefaults">Reset Default Points</v-btn>
     <ConfirmationDialog ref="confirmationDialog" />
   </div>
 </template>
 
 <script>
 import { ref, inject } from '@vue/composition-api';
+import { EventBus } from '@/eventBus';
 
 import { useCoordinates } from '@/models/useCoordinates.js';
 import { useMap } from '@/models/useMap.js';
@@ -24,7 +26,7 @@ export default {
 
   setup() {
     const showMenu = ref(false);
-    const object = ref(null);
+    const meshObject = ref(null);
 
     const masterMapData = inject('masterMapData');
 
@@ -34,7 +36,8 @@ export default {
 
     return {
       showMenu,
-      object,
+      meshObject,
+      masterMapData,
       scaleUpCoordinate,
       resetDefaultPoints,
       viewObject,
@@ -45,13 +48,18 @@ export default {
 
   computed: {
     isPoint() {
-      return this.object.type === 'Points';
+      return this.meshObject.type === 'Points';
     },
   },
 
   methods: {
-    open(object) {
-      this.object = object;
+    open(meshObject) {
+      this.meshObject = meshObject;
+      if (this.meshObject?.type === 'Points') {
+        this.pointObject = this.masterMapData.points.find((point) => {
+          return this.meshObject.pointId === point.data.id;
+        });
+      }
 
       this.$refs.container.style.left = `${event.pageX + 25}px`;
       this.$refs.container.style.top = `${event.pageY + 35}px`;
@@ -61,28 +69,34 @@ export default {
 
     close() {
       this.showMenu = false;
-      this.object = null;
+      this.meshObject = null;
     },
 
     // Actions
 
     onView() {
-      this.viewObject(this.object);
+      this.viewObject(this.meshObject);
+      this.close();
+    },
+
+    onEditPoint() {
+      EventBus.$emit('editPoint', this.pointObject);
+      this.close();
     },
 
     async onCopy() {
       try {
-        if (this.object && this.object.position) {
+        if (this.meshObject && this.meshObject.position) {
           let coord = null;
-          if (this.object.type === 'Mesh') {
-            coord = { position: this.object.position };
-          } else if (this.object.type === 'Points') {
+          if (this.meshObject.type === 'Mesh') {
+            coord = { position: this.meshObject.position };
+          } else if (this.meshObject.type === 'Points') {
             coord = {
               position: {
-                x: this.object.geometry.attributes.position.array[0],
-                y: -this.object.geometry.attributes.position.array[2],
+                x: this.meshObject.geometry.attributes.position.array[0],
+                y: -this.meshObject.geometry.attributes.position.array[2],
                 // eslint-disable-next-line id-length
-                z: this.object.geometry.attributes.position.array[1],
+                z: this.meshObject.geometry.attributes.position.array[1],
               },
             };
           }
@@ -99,7 +113,7 @@ export default {
     },
 
     onHide() {
-      this.showHidePoint(this.object.pointId);
+      this.showHidePoint(this.meshObject.pointId);
       this.close();
     },
 

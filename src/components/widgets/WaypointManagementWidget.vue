@@ -81,6 +81,7 @@
 <script>
 import { ref, inject } from '@vue/composition-api';
 import { v4 as uuidv4 } from 'uuid';
+import { EventBus } from '@/eventBus';
 
 import { required } from 'vuelidate/lib/validators';
 
@@ -138,6 +139,13 @@ export default {
       getInitialPoints,
       resetDefaultPoints,
     };
+  },
+
+  mounted() {
+    EventBus.$on('editPoint', (data) => {
+      this.open();
+      this.onEdit(data);
+    });
   },
 
   methods: {
