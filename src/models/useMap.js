@@ -728,6 +728,23 @@ export function useMap() {
       masterMapData.controls.target.set(object.position.x + dist, object.position.y + dist, object.position.z + dist);
 
       masterMapData.controls.update();
+    } else if (object.type === 'Line2') {
+      let vector = masterMapData.vectors.find((vector) => {
+        return object.vectorId === vector.data.id;
+      });
+
+      let midPoint = {
+        x: (vector.data.origin.x + vector.data.endPoint.x) / 2,
+        y: (vector.data.origin.y + vector.data.endPoint.y) / 2,
+        z: (vector.data.origin.z + vector.data.endPoint.z) / 2,
+      };
+
+      let dist = calcDistance(midPoint, vector.data.endPoint) * 0.8;
+
+      masterMapData.camera.position.set(midPoint.x + dist + 0.1, midPoint.z + dist + 0.1, -midPoint.y + dist + 0.1);
+      masterMapData.controls.target.set(midPoint.x + dist, midPoint.z + dist, -midPoint.y + dist);
+
+      masterMapData.controls.update();
     } else if (object.position) {
       let dist = 4;
       masterMapData.camera.position.set(object.position.x + dist + 0.1, object.position.z + dist + 0.1, object.position.y + dist + 0.1);

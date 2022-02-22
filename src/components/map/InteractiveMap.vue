@@ -291,7 +291,7 @@ export default {
 
     // Click action and context menu handlers
     handleMouseClick() {
-      if (this.intersect !== undefined) {
+      if (this.intersect !== undefined && this.intersect?.object?.type !== 'Line2') {
         EventBus.$emit('setInfoWidgetData', this.intersect.object);
         this.showInfoWidget = true;
       }

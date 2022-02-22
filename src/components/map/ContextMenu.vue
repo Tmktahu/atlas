@@ -34,6 +34,7 @@ export default {
     const intersect = ref(null);
     const meshObject = ref(null);
     const pointObject = ref(null);
+    const vectorObject = ref(null);
     const moonObject = ref(null);
 
     const masterMapData = inject('masterMapData');
@@ -47,6 +48,7 @@ export default {
       intersect,
       meshObject,
       pointObject,
+      vectorObject,
       moonObject,
       masterMapData,
       scaleUpCoordinate,
@@ -90,6 +92,12 @@ export default {
       if (this.meshObject?.type === 'Points') {
         this.pointObject = this.masterMapData.points.find((point) => {
           return this.meshObject.pointId === point.data.id;
+        });
+      }
+
+      if (this.meshObject?.type === 'Line2') {
+        this.vectorObject = this.masterMapData.vectors.find((vector) => {
+          return this.meshObject.vectorId === vector.data.id;
         });
       }
 
@@ -187,7 +195,7 @@ export default {
     },
 
     onEditVector() {
-      EventBus.$emit('editVector', this.intersect.object);
+      EventBus.$emit('editVector', this.vectorObject);
       this.close();
     },
 
