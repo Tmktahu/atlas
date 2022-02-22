@@ -13,8 +13,8 @@
     <v-btn v-if="!meshObject" small text @click="onShowAll">Show All Points</v-btn>
     <v-btn v-if="!meshObject" small text @click="onResetDefaults">Reset Default Points</v-btn>
     <ConfirmationDialog ref="confirmationDialog" />
-  </div> </template
->isVector
+  </div>
+</template>
 
 <script>
 import { ref, inject } from '@vue/composition-api';
@@ -69,7 +69,7 @@ export default {
     },
 
     isVector() {
-      return this.meshObject.type === 'Line';
+      return this.meshObject.type === 'Line2';
     },
 
     hasBelt() {
@@ -172,7 +172,7 @@ export default {
     async onCopyOnVector() {
       try {
         if (this.intersect && this.intersect.point) {
-          let coord = { position: this.intersect.point };
+          let coord = { position: this.intersect.pointOnLine };
 
           let scaledCoord = this.scaleUpCoordinate(coord);
           let output = `${scaledCoord.position.x},${scaledCoord.position.y},${scaledCoord.position.z}`;

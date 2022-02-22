@@ -3,7 +3,12 @@ import testingTexture from '@/assets/textures/safezone.png';
 
 import Vue from 'vue';
 import * as THREE from 'three';
-import { OrbitControls } from '@/controls/OrbitControls.js';
+import { OrbitControls } from '@/custom/OrbitControls.js';
+
+import { Line2 } from '@/custom/Line2.js';
+import { LineMaterial } from '@/custom/LineMaterial.js';
+import { LineGeometry } from '@/custom/LineGeometry.js';
+
 import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
 const { scaleUpCoordinate, scaleDownCoordinate } = useCoordinates();
 
@@ -124,7 +129,8 @@ export const masterMapData = reactive({
   showGrid: ref(true),
   initialized: false,
 
-  testingLine: null,
+  hoverLine: null,
+  hoverCircle: null,
 
   anchors: [ORIGIN_POINT, ELYSIUM_WARP_GATE],
 });
@@ -152,7 +158,7 @@ export function useMap() {
     masterMapData.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000000000);
     masterMapData.camera.position.set(startingCameraPosition[0], startingCameraPosition[1], startingCameraPosition[2]);
 
-    masterMapData.renderer = new THREE.WebGLRenderer({ alpha: true });
+    masterMapData.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     masterMapData.renderer.setSize(window.innerWidth - 56, window.innerHeight);
     masterMapData.renderer.domElement.classList = 'mapCanvas';
     masterMapData.containerElement?.appendChild(masterMapData.renderer.domElement);
@@ -179,20 +185,6 @@ export function useMap() {
     updateGrid(masterMapData);
 
     await setupObjects(masterMapData);
-
-    ///////////////// testing code
-
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, blending: THREE.AdditiveBlending });
-    const points = [];
-    points.push(new THREE.Vector3(0, 4, 0));
-    points.push(new THREE.Vector3(0, 0, 0));
-
-    const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
-    masterMapData.testingLine = new THREE.Line(lineGeometry, lineMaterial);
-    masterMapData.scene.add(masterMapData.testingLine);
-    //line.visible = false;
-
-    //////////////////////
 
     addLight(4, 2, 4, masterMapData);
     addLight(-4, -1, -2, masterMapData);
@@ -279,7 +271,7 @@ export function useMap() {
     //console.log(scaledDownDist);
 
     masterMapData.raycaster.params.Points.threshold = 0.3;
-    masterMapData.raycaster.params.Line.threshold = Math.max(scaledDownDist / 5, 5);
+    masterMapData.raycaster.params.Line2 = { threshold: Math.max(scaledDownDist / 1000, 0.01) };
     masterMapData.raycaster.setFromCamera(masterMapData.mapMouse, masterMapData.camera);
 
     //if (Date.now() - masterMapData.lastRaycast > masterMapData.raycastInterval) {
@@ -324,12 +316,13 @@ export function useMap() {
         masterMapData.previousIntersect.object.material.color = new THREE.Color(pointData.data.color);
       }
 
-      if (masterMapData.previousIntersect?.object.type === 'Line') {
-        let vectorData = masterMapData.vectors.find((vector) => vector.mesh.line.id === masterMapData.previousIntersect.object.id);
+      if (masterMapData.previousIntersect?.object.type === 'Line2') {
+        let vectorData = masterMapData.vectors.find((vector) => vector.mesh.id === masterMapData.previousIntersect.object.id);
         masterMapData.previousIntersect.object.material.color = new THREE.Color(vectorData?.data.color);
       }
 
-      masterMapData.testingLine.visible = false;
+      masterMapData.hoverLine.visible = false;
+      masterMapData.hoverCircle.visible = false;
     }
 
     if (currentIntersect) {
@@ -344,30 +337,36 @@ export function useMap() {
           currentIntersect.object.geometry.attributes.position.array[2]
         );
 
-        masterMapData.testingLine.visible = true;
+        masterMapData.hoverLine.visible = true;
+        masterMapData.hoverCircle.visible = true;
       }
 
-      if (currentIntersect.object.type === 'Line') {
+      if (currentIntersect.object.type === 'Line2') {
         //console.log('we are currently intersecting a vector');
         //console.log(currentIntersect);
         currentIntersect.object.material.color = new THREE.Color(1, 1, 1);
 
-        lineEnd = currentIntersect.point;
+        lineEnd = currentIntersect.pointOnLine;
 
-        masterMapData.testingLine.visible = true;
+        masterMapData.hoverLine.visible = true;
+        masterMapData.hoverCircle.visible = true;
       }
 
       if (lineEnd) {
         const points = [];
-        points.push(new THREE.Vector3(lineEnd.x, 0, lineEnd.z));
-        points.push(lineEnd);
+        points.push([lineEnd.x, 0, lineEnd.z]);
+        points.push([lineEnd.x, lineEnd.y, lineEnd.z]);
 
-        masterMapData.testingLine.geometry.setFromPoints(points);
+        masterMapData.hoverLine.geometry.setPositions(points.flat());
+        masterMapData.hoverCircle.position.set(lineEnd.x, 0, lineEnd.z);
+        let distFromIntersect = calcDistance(masterMapData.camera.position, lineEnd);
+        let hoverCircleRadius = distFromIntersect / 25;
+        masterMapData.hoverCircle.geometry = new THREE.RingGeometry(hoverCircleRadius, hoverCircleRadius * 0.9, 50);
       }
     }
 
     //console.log(currentIntersect.object.name, ...currentIntersect.point);
-    //console.log(masterMapData.testingLine);
+    //console.log(masterMapData.hoverLine);
 
     //const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
 
@@ -476,6 +475,28 @@ export function useMap() {
 
     masterMapData.eosSafeZoneMesh = await createSafeZoneMesh(safeZoneOptions);
     masterMapData.scene.add(masterMapData.eosSafeZoneMesh);
+
+    ///////////////// testing code
+
+    const lineGeometry = new LineGeometry();
+    const lineMaterial = new LineMaterial({
+      color: 0xffffff,
+      linewidth: 0.001,
+      dashed: false,
+      blending: THREE.AdditiveBlending,
+    });
+    masterMapData.hoverLine = new Line2(lineGeometry, lineMaterial);
+    masterMapData.hoverLine.visible = false;
+    masterMapData.scene.add(masterMapData.hoverLine);
+
+    const ringMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+    const ringGeometry = new THREE.RingGeometry(0.3, 0.35, 50);
+    masterMapData.hoverCircle = new THREE.Mesh(ringGeometry, ringMaterial);
+    masterMapData.hoverCircle.rotateX(Math.PI / 2);
+    masterMapData.hoverCircle.visible = false;
+    masterMapData.scene.add(masterMapData.hoverCircle);
+
+    //////////////////////
   };
 
   const updateGrid = () => {

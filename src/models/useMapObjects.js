@@ -1,4 +1,8 @@
 import * as THREE from 'three';
+import { Line2 } from '@/custom/Line2.js';
+import { LineMaterial } from '@/custom/LineMaterial.js';
+import { LineGeometry } from '@/custom/LineGeometry.js';
+
 import { useCoordinates } from '@/models/useCoordinates.js';
 
 import { ICON_MAP } from '@/models/useIcons.js';
@@ -26,16 +30,23 @@ export async function createPointMesh(data) {
 
 export async function createVectorMesh(data) {
   let color = new THREE.Color(data.color);
-  let origin = new THREE.Vector3(data.origin.x, data.origin.z, -data.origin.y);
-  let direction = new THREE.Vector3(data.direction.x, data.direction.z, -data.direction.y);
-  direction.normalize();
+  let startPoint = [data.origin.x, data.origin.z, -data.origin.y];
+  let endPoint = [data.endPoint.x, data.endPoint.z, -data.endPoint.y];
 
-  let mesh = new THREE.ArrowHelper(direction, origin, data.length, color, Math.min([0.1 * data.length], 0.5), Math.min([0.1 * data.length], 0.5));
+  let points = [startPoint, endPoint];
 
+  const lineGeometry = new LineGeometry();
+  lineGeometry.setPositions(points.flat());
+
+  const lineMaterial = new LineMaterial({
+    color: color,
+    linewidth: 0.001,
+    dashed: false,
+    blending: THREE.AdditiveBlending,
+  });
+  let mesh = new Line2(lineGeometry, lineMaterial);
   mesh.name = data.name;
   mesh.vectorId = data.id;
-  mesh.line.vectorId = data.id;
-  mesh.line.name = data.name;
 
   return mesh;
 }

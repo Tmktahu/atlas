@@ -148,12 +148,12 @@ export default {
           this.$refs.pointInfoContainer.style.display = 'block';
 
           this.$refs.mapContainer.style.cursor = 'pointer';
-        } else if (this.intersect.object.type === 'Line') {
+        } else if (this.intersect.object.type === 'Line2') {
           this.$refs.pointName.innerHTML = this.intersect.object.name;
           this.$refs.pointCoord.innerHTML = `
-            [${Math.round(this.scaleUpCoordinate(this.intersect.point.x))},
-            ${Math.round(this.scaleUpCoordinate(this.intersect.point.y))},
-            ${Math.round(this.scaleUpCoordinate(this.intersect.point.z))}]`;
+            [${Math.round(this.scaleUpCoordinate(this.intersect.pointOnLine.x))},
+            ${Math.round(this.scaleUpCoordinate(this.intersect.pointOnLine.y))},
+            ${Math.round(this.scaleUpCoordinate(this.intersect.pointOnLine.z))}]`;
           this.$refs.pointInfoContainer.style.display = 'block';
 
           this.$refs.mapContainer.style.cursor = 'pointer';
