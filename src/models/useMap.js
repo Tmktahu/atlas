@@ -5,6 +5,7 @@ import Vue from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from '@/controls/OrbitControls.js';
 import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
+const { scaleUpCoordinate, scaleDownCoordinate } = useCoordinates();
 
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
 import {
@@ -20,6 +21,7 @@ import {
 } from '@/models/useMapObjects.js';
 
 import { ASTROID_BELTS, MOONS, ORBIT_RINGS, EOS_BELT_ZONES } from './presetMapData/celestialBodies';
+import { ELYSIUM_WARP_GATE } from './presetMapData/elysium';
 
 export const EOS_OFFSET = {
   x: -8450000,
@@ -115,11 +117,16 @@ export const masterMapData = reactive({
 
   mapMouse: new THREE.Vector2(),
   intersects: null,
+  previousIntersect: null,
 
   pointSize: 0.5,
 
   showGrid: ref(true),
   initialized: false,
+
+  testingLine: null,
+
+  anchors: [ORIGIN_POINT, ELYSIUM_WARP_GATE],
 });
 
 export function useMap() {
@@ -173,6 +180,20 @@ export function useMap() {
 
     await setupObjects(masterMapData);
 
+    ///////////////// testing code
+
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, blending: THREE.AdditiveBlending });
+    const points = [];
+    points.push(new THREE.Vector3(0, 4, 0));
+    points.push(new THREE.Vector3(0, 0, 0));
+
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+    masterMapData.testingLine = new THREE.Line(lineGeometry, lineMaterial);
+    masterMapData.scene.add(masterMapData.testingLine);
+    //line.visible = false;
+
+    //////////////////////
+
     addLight(4, 2, 4, masterMapData);
     addLight(-4, -1, -2, masterMapData);
 
@@ -196,44 +217,13 @@ export function useMap() {
     requestAnimationFrame(animate);
     masterMapData.stats?.begin();
 
-    // update the picking ray with the camera and mouse position
-    masterMapData.raycaster.params.Points.threshold = 0.3;
-    masterMapData.raycaster.setFromCamera(masterMapData.mapMouse, masterMapData.camera);
-
-    if (Date.now() - masterMapData.lastRaycast > masterMapData.raycastInterval) {
-      let pointMeshes = masterMapData.points.map((point) => {
-        return point.mesh;
-      });
-
-      let moonMeshes = masterMapData.moons.map((moon) => {
-        return moon.mesh;
-      });
-
-      let filteredPointMeshes = pointMeshes.filter((mesh) => mesh.visible);
-      let intersectableObjects = [...filteredPointMeshes, ...moonMeshes];
-
-      masterMapData.intersects = masterMapData.raycaster.intersectObjects(intersectableObjects);
-      masterMapData.lastRaycast = Date.now();
-      masterMapData.qRaycast = false;
-      handleIntersects();
-    }
+    handleRaycasting();
 
     if (masterMapData.pointMeshes) {
       for (let i in masterMapData.points) {
         let point = masterMapData.points[i];
         if (point && point.mesh) {
-          let hovered = masterMapData.intersects[0]?.object?.id === point?.mesh?.id;
-          if (hovered) {
-            point.mesh.material.size = masterMapData.pointSize;
-            point.mesh.material.color = new THREE.Color(1, 1, 1);
-          } else {
-            point.mesh.material.color = new THREE.Color(point.data.color);
-          }
-
-          point.intersectionMeshes.line.visible = hovered;
-          point.intersectionMeshes.ring.visible = hovered;
-
-          // Scale warpgate points so they are always visible
+          // Scale autoScale points so they are always visible
           if (point.data.autoScale) {
             let distance = calcDistance(masterMapData.camera.position, {
               x: point.mesh.geometry.attributes.position.array[0],
@@ -274,11 +264,115 @@ export function useMap() {
     masterMapData.stats?.end();
   };
 
+  const handleRaycasting = () => {
+    // update the picking ray with the camera and mouse position
+    let cameraPos = {
+      position: {
+        x: masterMapData.camera.position.x,
+        y: masterMapData.camera.position.y,
+        z: masterMapData.camera.position.z,
+      },
+    };
+    let scaledUpCameraPos = scaleUpCoordinate(cameraPos);
+    let dist = minDistanceFromAnchors(scaledUpCameraPos);
+    let scaledDownDist = scaleDownCoordinate(dist);
+    //console.log(scaledDownDist);
+
+    masterMapData.raycaster.params.Points.threshold = 0.3;
+    masterMapData.raycaster.params.Line.threshold = Math.max(scaledDownDist / 5, 5);
+    masterMapData.raycaster.setFromCamera(masterMapData.mapMouse, masterMapData.camera);
+
+    //if (Date.now() - masterMapData.lastRaycast > masterMapData.raycastInterval) {
+    let pointMeshes = masterMapData.points.map((point) => {
+      return point.mesh;
+    });
+
+    let moonMeshes = masterMapData.moons.map((moon) => {
+      return moon.mesh;
+    });
+
+    let vectorMeshes = masterMapData.vectors.map((vector) => {
+      return vector.mesh;
+    });
+
+    let filteredPointMeshes = pointMeshes.filter((mesh) => mesh.visible);
+    let intersectableObjects = [...filteredPointMeshes, ...moonMeshes, ...vectorMeshes]; //, masterMapData.plane];
+
+    masterMapData.intersects = masterMapData.raycaster.intersectObjects(intersectableObjects);
+    masterMapData.lastRaycast = Date.now();
+    masterMapData.qRaycast = false;
+    handleIntersects();
+    //}
+  };
+
   const handleIntersects = () => {
-    if (masterMapData.intersects[0]?.object.type === 'Points') {
-      let object = masterMapData.intersects[0].object;
-      object.material.size = masterMapData.pointSize * 1.25;
+    // first we check our current intersect to see if there are things to do
+    let currentIntersect = masterMapData.intersects[0];
+
+    // we need to handle the previous case.
+    // if there has been a change, we want to reset the PREVIOUS intersect
+    if (
+      //(currentIntersect && !masterMapData.previousIntersect) ||
+      //(!currentIntersect && masterMapData.previousIntersect) ||
+      currentIntersect?.object.id !== masterMapData.previousIntersect?.object.id
+    ) {
+      //console.log('there has been a change');
+      if (masterMapData.previousIntersect?.object.type === 'Points') {
+        // here we want to reset the point back to default values
+        let pointData = masterMapData.points.find((point) => point.mesh.id === masterMapData.previousIntersect.object.id);
+        masterMapData.previousIntersect.object.material.size = masterMapData.pointSize;
+        masterMapData.previousIntersect.object.material.color = new THREE.Color(pointData.data.color);
+      }
+
+      if (masterMapData.previousIntersect?.object.type === 'Line') {
+        let vectorData = masterMapData.vectors.find((vector) => vector.mesh.line.id === masterMapData.previousIntersect.object.id);
+        masterMapData.previousIntersect.object.material.color = new THREE.Color(vectorData?.data.color);
+      }
+
+      masterMapData.testingLine.visible = false;
     }
+
+    if (currentIntersect) {
+      let lineEnd = null;
+      if (currentIntersect.object.type === 'Points') {
+        //console.log(currentIntersect);
+        currentIntersect.object.material.size = masterMapData.pointSize * 1.25;
+        currentIntersect.object.material.color = new THREE.Color(1, 1, 1);
+        lineEnd = new THREE.Vector3(
+          currentIntersect.object.geometry.attributes.position.array[0],
+          currentIntersect.object.geometry.attributes.position.array[1],
+          currentIntersect.object.geometry.attributes.position.array[2]
+        );
+
+        masterMapData.testingLine.visible = true;
+      }
+
+      if (currentIntersect.object.type === 'Line') {
+        //console.log('we are currently intersecting a vector');
+        //console.log(currentIntersect);
+        currentIntersect.object.material.color = new THREE.Color(1, 1, 1);
+
+        lineEnd = currentIntersect.point;
+
+        masterMapData.testingLine.visible = true;
+      }
+
+      if (lineEnd) {
+        const points = [];
+        points.push(new THREE.Vector3(lineEnd.x, 0, lineEnd.z));
+        points.push(lineEnd);
+
+        masterMapData.testingLine.geometry.setFromPoints(points);
+      }
+    }
+
+    //console.log(currentIntersect.object.name, ...currentIntersect.point);
+    //console.log(masterMapData.testingLine);
+
+    //const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+
+    // and finally we save our current intersect for the next interation
+    masterMapData.previousIntersect = currentIntersect;
   };
 
   const resizeMap = () => {
@@ -288,6 +382,26 @@ export function useMap() {
 
       masterMapData.renderer.setSize(window.innerWidth, window.innerHeight);
     }
+  };
+
+  const minDistanceFromAnchors = (input) => {
+    //console.log('input', input);
+    let minDistance = Number.MAX_SAFE_INTEGER;
+    //console.log('initial min distance', minDistance);
+    masterMapData.anchors.forEach((elem) => {
+      //console.log('looping for anchor', elem);
+      let dist = Math.sqrt(
+        Math.pow(input.position.x - elem.position.x, 2) + Math.pow(input.position.y - elem.position.z, 2) + Math.pow(input.position.z - -elem.position.y, 2)
+      );
+      //console.log('calculated dist', dist);
+      //console.log('bool check', dist < minDistance);
+      if (dist < minDistance) {
+        //console.log('setting min dist');
+        minDistance = dist;
+      }
+    });
+    //console.log('final distance selected', minDistance);
+    return minDistance;
   };
 
   // ============ Object Adding Methods ===============
@@ -376,6 +490,7 @@ export function useMap() {
       });
       const plainGeometry = new THREE.CircleGeometry(14000, 500);
       const plane = new THREE.Mesh(plainGeometry, planeMaterial);
+      plane.name = 'Horizontal Plane';
       plane.rotateX(Math.PI / 2);
       masterMapData.plane = plane;
       masterMapData.scene.add(plane);

@@ -34,6 +34,8 @@ export async function createVectorMesh(data) {
 
   mesh.name = data.name;
   mesh.vectorId = data.id;
+  mesh.line.vectorId = data.id;
+  mesh.line.name = data.name;
 
   return mesh;
 }

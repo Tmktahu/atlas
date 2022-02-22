@@ -1,7 +1,10 @@
 <template>
   <div ref="container" class="context-menu" :class="{ hide: !showMenu }">
-    <v-btn v-if="meshObject" small text @click="onView">View</v-btn>
-    <v-btn v-if="meshObject" small text @click="onCopy">Copy Coordinate</v-btn>
+    <v-btn v-if="meshObject && !isVector" small text @click="onView">View</v-btn>
+    <v-btn v-if="meshObject && !isVector" small text @click="onCopy">Copy Coordinate</v-btn>
+    <v-btn v-if="meshObject && isVector" small text @click="onCopyOnVector">Copy Coordinate Here</v-btn>
+    <v-btn v-if="meshObject && isVector" small text @click="onEditVector">Edit Vector</v-btn>
+    <v-btn v-if="meshObject && isVector" small text @click="onDeleteVector">Delete Vector</v-btn>
     <v-btn v-if="meshObject && isPoint" small text @click="onEditPoint">Edit Point</v-btn>
     <v-btn v-if="meshObject && isPoint" small text @click="onHidePoint">Hide Point</v-btn>
     <v-btn v-if="meshObject && isPoint" small text @click="onDeletePoint">Delete Point</v-btn>
@@ -10,8 +13,8 @@
     <v-btn v-if="!meshObject" small text @click="onShowAll">Show All Points</v-btn>
     <v-btn v-if="!meshObject" small text @click="onResetDefaults">Reset Default Points</v-btn>
     <ConfirmationDialog ref="confirmationDialog" />
-  </div>
-</template>
+  </div> </template
+>isVector
 
 <script>
 import { ref, inject } from '@vue/composition-api';
@@ -28,6 +31,7 @@ export default {
 
   setup() {
     const showMenu = ref(false);
+    const intersect = ref(null);
     const meshObject = ref(null);
     const pointObject = ref(null);
     const moonObject = ref(null);
@@ -36,10 +40,11 @@ export default {
 
     const { scaleUpCoordinate } = useCoordinates();
 
-    const { viewObject, showHidePoint, deletePoint, showAllPoints, resetDefaultPoints } = useMap(masterMapData);
+    const { viewObject, showHidePoint, deletePoint, showAllPoints, resetDefaultPoints, deleteVector } = useMap(masterMapData);
 
     return {
       showMenu,
+      intersect,
       meshObject,
       pointObject,
       moonObject,
@@ -50,6 +55,7 @@ export default {
       showHidePoint,
       showAllPoints,
       deletePoint,
+      deleteVector,
     };
   },
 
@@ -60,6 +66,10 @@ export default {
 
     isMoon() {
       return this.meshObject.celestialType === 'planet' || this.meshObject.celestialType === 'moon';
+    },
+
+    isVector() {
+      return this.meshObject.type === 'Line';
     },
 
     hasBelt() {
@@ -73,8 +83,9 @@ export default {
   },
 
   methods: {
-    open(meshObject) {
-      this.meshObject = meshObject;
+    open(intersect) {
+      this.intersect = intersect;
+      this.meshObject = intersect?.object;
 
       if (this.meshObject?.type === 'Points') {
         this.pointObject = this.masterMapData.points.find((point) => {
@@ -156,6 +167,43 @@ export default {
         this.$toasted.global.alertError({ message: 'Copy failed' });
         console.error('Failed to copy: ', error);
       }
+    },
+
+    async onCopyOnVector() {
+      try {
+        if (this.intersect && this.intersect.point) {
+          let coord = { position: this.intersect.point };
+
+          let scaledCoord = this.scaleUpCoordinate(coord);
+          let output = `${scaledCoord.position.x},${scaledCoord.position.y},${scaledCoord.position.z}`;
+          await navigator.clipboard.writeText(output);
+          this.$toasted.global.alertInfo({ message: 'Copied Coordinate to Clipboard', timeout: 1000 });
+          this.close();
+        }
+      } catch (error) {
+        this.$toasted.global.alertError({ message: 'Copy failed' });
+        console.error('Failed to copy: ', error);
+      }
+    },
+
+    onEditVector() {
+      EventBus.$emit('editVector', this.intersect.object);
+      this.close();
+    },
+
+    onDeleteVector() {
+      let vectorToRemove = this.masterMapData.vectors.find((vector) => vector.data.id === this.intersect.object.vectorId);
+      this.$refs.confirmationDialog.open({
+        titleText: 'Are you sure?',
+        descriptionText: 'You will be unable to recover deleted vectors.',
+        yesText: 'Yes',
+        noText: 'No',
+        onYes: () => {
+          this.deleteVector(vectorToRemove);
+          this.$refs.confirmationDialog.close();
+        },
+      });
+      this.close();
     },
 
     onViewOrigin() {
