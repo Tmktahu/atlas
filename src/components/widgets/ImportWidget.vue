@@ -179,7 +179,8 @@ export default {
     },
 
     async onLoadData() {
-      this.loadedData = await this.readFromJSON(null, this.uploadedFile.path, this.uploadedFile);
+      let storageData = await this.readFromJSON(null, this.uploadedFile.path, this.uploadedFile);
+      this.loadedData = storageData.points;
       this.checkedWaypoints = this.loadedData.map((obj) => {
         return obj.id;
       });
