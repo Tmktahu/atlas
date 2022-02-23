@@ -18,6 +18,7 @@ import {
   createSphereIntersectionRing,
   createTorusIntersectionRings,
   createSafeZoneMesh,
+  createSafeZoneMeshRing,
   createHoverLine,
   createHoverCircle,
 } from '@/models/useMapObjects.js';
@@ -73,6 +74,7 @@ export const masterMapData = reactive({
 
   showEosSafeZone: ref(false),
   eosSafeZoneMesh: null,
+  eosSafeZoneMeshRing: null,
   belts: {
     p0: {
       zones: [],
@@ -244,6 +246,7 @@ export function useMap() {
     }
 
     masterMapData.eosSafeZoneMesh.visible = masterMapData.showEosSafeZone;
+    masterMapData.eosSafeZoneMeshRing.visible = masterMapData.showEosSafeZone;
 
     masterMapData.controls.update();
     masterMapData.renderer.render(masterMapData.scene, masterMapData.camera);
@@ -455,6 +458,9 @@ export function useMap() {
 
     masterMapData.eosSafeZoneMesh = await createSafeZoneMesh(safeZoneOptions);
     masterMapData.scene.add(masterMapData.eosSafeZoneMesh);
+
+    masterMapData.eosSafeZoneMeshRing = await createSafeZoneMeshRing(safeZoneOptions);
+    masterMapData.scene.add(masterMapData.eosSafeZoneMeshRing);
 
     // These objects are for the hover functionality
     masterMapData.hoverLine = createHoverLine();

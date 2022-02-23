@@ -215,6 +215,17 @@ export async function createSafeZoneMesh(options) {
   return sphere;
 }
 
+export async function createSafeZoneMeshRing(options) {
+  const geometry = new THREE.RingGeometry(options.baseRadius, options.baseRadius + options.baseRadius / 200, 100);
+  const material = new THREE.MeshBasicMaterial({ color: '#00FF00', side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+  const ring = new THREE.Mesh(geometry, material);
+  ring.rotateX(Math.PI / 2);
+
+  ring.position.set(options.position.x, options.position.z, -options.position.y);
+  ring.scale.set(options.scaleX, options.scaleZ, options.scaleY);
+  return ring;
+}
+
 // ============= Plane Intersection Objects =============
 
 export function createSphereIntersectionRing(options) {
