@@ -1,13 +1,9 @@
 /* eslint-disable id-length */
-import testingTexture from '@/assets/textures/safezone.png';
+import safezoneTexture from '@/assets/textures/safezone.png';
 
 import Vue from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from '@/custom/OrbitControls.js';
-
-import { Line2 } from '@/custom/Line2.js';
-import { LineMaterial } from '@/custom/LineMaterial.js';
-import { LineGeometry } from '@/custom/LineGeometry.js';
 
 import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
 const { scaleUpCoordinate, scaleDownCoordinate } = useCoordinates();
@@ -21,8 +17,9 @@ import {
   createTorus,
   createSphereIntersectionRing,
   createTorusIntersectionRings,
-  createPointIntersectionObjects,
   createSafeZoneMesh,
+  createHoverLine,
+  createHoverCircle,
 } from '@/models/useMapObjects.js';
 
 import { ASTROID_BELTS, MOONS, ORBIT_RINGS, EOS_BELT_ZONES } from './presetMapData/celestialBodies';
@@ -51,12 +48,9 @@ export const masterMapData = reactive({
   points: [],
   /*
   point = {
+    id,
     data,
     mesh,
-    intersectionMeshes: [
-      ring,
-      line,
-    ]
   }
   */
 
@@ -268,12 +262,12 @@ export function useMap() {
     let scaledUpCameraPos = scaleUpCoordinate(cameraPos);
     let dist = minDistanceFromAnchors(scaledUpCameraPos);
     let scaledDownDist = scaleDownCoordinate(dist);
-    //console.log(scaledDownDist);
 
     masterMapData.raycaster.params.Points.threshold = 0.3;
-    masterMapData.raycaster.params.Line2 = { threshold: Math.max(scaledDownDist / 1000, 0.01) };
+    masterMapData.raycaster.params.Line2 = { threshold: Math.max(Math.pow(scaledDownDist, 0.2) / 400, 0.01) };
     masterMapData.raycaster.setFromCamera(masterMapData.mapMouse, masterMapData.camera);
 
+    // TODO we may need to put this back if we hear anything about performance issues
     //if (Date.now() - masterMapData.lastRaycast > masterMapData.raycastInterval) {
     let pointMeshes = masterMapData.points.map((point) => {
       return point.mesh;
@@ -303,12 +297,7 @@ export function useMap() {
 
     // we need to handle the previous case.
     // if there has been a change, we want to reset the PREVIOUS intersect
-    if (
-      //(currentIntersect && !masterMapData.previousIntersect) ||
-      //(!currentIntersect && masterMapData.previousIntersect) ||
-      currentIntersect?.object.id !== masterMapData.previousIntersect?.object.id
-    ) {
-      //console.log('there has been a change');
+    if (currentIntersect?.object.id !== masterMapData.previousIntersect?.object.id) {
       if (masterMapData.previousIntersect?.object.type === 'Points') {
         // here we want to reset the point back to default values
         let pointData = masterMapData.points.find((point) => point.mesh.id === masterMapData.previousIntersect.object.id);
@@ -342,12 +331,8 @@ export function useMap() {
       }
 
       if (currentIntersect.object.type === 'Line2') {
-        //console.log('we are currently intersecting a vector');
-        //console.log(currentIntersect);
         currentIntersect.object.material.color = new THREE.Color(1, 1, 1);
-
         lineEnd = currentIntersect.pointOnLine;
-
         masterMapData.hoverLine.visible = true;
         masterMapData.hoverCircle.visible = true;
       }
@@ -364,11 +349,6 @@ export function useMap() {
         masterMapData.hoverCircle.geometry = new THREE.RingGeometry(hoverCircleRadius, hoverCircleRadius * 0.9, 50);
       }
     }
-
-    //console.log(currentIntersect.object.name, ...currentIntersect.point);
-    //console.log(masterMapData.hoverLine);
-
-    //const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
 
     // and finally we save our current intersect for the next interation
     masterMapData.previousIntersect = currentIntersect;
@@ -465,7 +445,7 @@ export function useMap() {
       scaleX: 1,
       scaleY: 4.4,
       scaleZ: 10,
-      texture: testingTexture,
+      texture: safezoneTexture,
       position: {
         x: 10000 / 10000,
         y: 0,
@@ -476,27 +456,12 @@ export function useMap() {
     masterMapData.eosSafeZoneMesh = await createSafeZoneMesh(safeZoneOptions);
     masterMapData.scene.add(masterMapData.eosSafeZoneMesh);
 
-    ///////////////// testing code
-
-    const lineGeometry = new LineGeometry();
-    const lineMaterial = new LineMaterial({
-      color: 0xffffff,
-      linewidth: 0.001,
-      dashed: false,
-      blending: THREE.AdditiveBlending,
-    });
-    masterMapData.hoverLine = new Line2(lineGeometry, lineMaterial);
-    masterMapData.hoverLine.visible = false;
+    // These objects are for the hover functionality
+    masterMapData.hoverLine = createHoverLine();
     masterMapData.scene.add(masterMapData.hoverLine);
 
-    const ringMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
-    const ringGeometry = new THREE.RingGeometry(0.3, 0.35, 50);
-    masterMapData.hoverCircle = new THREE.Mesh(ringGeometry, ringMaterial);
-    masterMapData.hoverCircle.rotateX(Math.PI / 2);
-    masterMapData.hoverCircle.visible = false;
+    masterMapData.hoverCircle = createHoverCircle();
     masterMapData.scene.add(masterMapData.hoverCircle);
-
-    //////////////////////
   };
 
   const updateGrid = () => {
@@ -684,13 +649,11 @@ export function useMap() {
 
   const createPoint = async (data) => {
     let pointMesh = await createPointMesh(data);
-    let intersectionMeshes = createPointIntersectionObjects(data);
 
     let point = {
       id: data.id,
       data: data,
       mesh: pointMesh,
-      intersectionMeshes: intersectionMeshes,
     };
 
     return point;
@@ -698,14 +661,10 @@ export function useMap() {
 
   const addPointToScene = (point) => {
     masterMapData.scene.add(point.mesh);
-    masterMapData.scene.add(point.intersectionMeshes.line);
-    masterMapData.scene.add(point.intersectionMeshes.ring);
   };
 
   const removePointFromScene = (point) => {
     masterMapData.scene.remove(point.mesh);
-    masterMapData.scene.remove(point.intersectionMeshes.line);
-    masterMapData.scene.remove(point.intersectionMeshes.ring);
   };
 
   const viewObject = (object) => {

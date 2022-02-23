@@ -258,6 +258,28 @@ export function createTorusIntersectionRings(options) {
   return { innerRing, outerRing };
 }
 
+export function createHoverLine() {
+  const lineGeometry = new LineGeometry();
+  const lineMaterial = new LineMaterial({
+    color: 0xffffff,
+    linewidth: 0.001,
+    dashed: false,
+    blending: THREE.AdditiveBlending,
+  });
+  let hoverLine = new Line2(lineGeometry, lineMaterial);
+  hoverLine.visible = false;
+  return hoverLine;
+}
+
+export function createHoverCircle() {
+  const ringMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+  const ringGeometry = new THREE.RingGeometry(0.3, 0.35, 50);
+  let hoverCircle = new THREE.Mesh(ringGeometry, ringMaterial);
+  hoverCircle.rotateX(Math.PI / 2);
+  hoverCircle.visible = false;
+  return hoverCircle;
+}
+
 export function createPointIntersectionObjects(options) {
   const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, blending: THREE.AdditiveBlending });
   const points = [];
