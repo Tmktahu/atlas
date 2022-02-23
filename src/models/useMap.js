@@ -7,6 +7,8 @@ import { OrbitControls } from '@/custom/OrbitControls.js';
 
 import { useCoordinates, ORIGIN_POINT } from '@/models/useCoordinates.js';
 const { scaleUpCoordinate, scaleDownCoordinate } = useCoordinates();
+import { useStorage } from '@/models/useStorage.js';
+const { scaleDownStorageData } = useStorage();
 
 import { ref, watch, reactive, toRefs } from '@vue/composition-api';
 import {
@@ -133,8 +135,9 @@ export const masterMapData = reactive({
 
 export function useMap() {
   const initMasterMapData = (storageData) => {
-    masterMapData.initialPointData = storageData.points;
-    masterMapData.initialVectorData = storageData.vectors;
+    let scaledStorage = scaleDownStorageData(storageData);
+    masterMapData.initialPointData = scaledStorage.points;
+    masterMapData.initialVectorData = scaledStorage.vectors;
   };
 
   const init = async (inContainerElement) => {
