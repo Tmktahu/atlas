@@ -285,7 +285,8 @@ export function useMap() {
     });
 
     let filteredPointMeshes = pointMeshes.filter((mesh) => mesh.visible);
-    let intersectableObjects = [...filteredPointMeshes, ...moonMeshes, ...vectorMeshes]; //, masterMapData.plane];
+    let filteredVectorMeshes = vectorMeshes.filter((mesh) => mesh.visible);
+    let intersectableObjects = [...filteredPointMeshes, ...moonMeshes, ...filteredVectorMeshes]; //, masterMapData.plane];
 
     masterMapData.intersects = masterMapData.raycaster.intersectObjects(intersectableObjects);
     masterMapData.lastRaycast = Date.now();
