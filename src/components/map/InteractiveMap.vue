@@ -68,7 +68,6 @@ export default {
 
     const { scaleUpCoordinate } = useCoordinates();
 
-    const focusedObject = ref(null);
     const mouseMoved = false;
 
     const hoveredElement = ref(null);
@@ -101,25 +100,25 @@ export default {
   watch: {
     intersects() {
       if (this.hoveredElement?.tagName.toLowerCase() === 'canvas') {
-        this.focusedObject = this.masterMapData.intersects[0]?.object;
-        if (!this.focusedObject) {
+        this.intersect = this.masterMapData.intersects[0];
+        if (!this.intersect?.object) {
           this.$refs.pointInfoContainer.style.display = 'none';
           this.$refs.mapContainer.style.cursor = 'auto';
           return;
         }
 
-        if (this.focusedObject.type === 'Points') {
+        if (this.intersect.object.type === 'Points') {
           let coordinate = {
             position: {
-              x: this.focusedObject.geometry.attributes.position.array[0],
-              y: -this.focusedObject.geometry.attributes.position.array[2],
+              x: this.intersect.object.geometry.attributes.position.array[0],
+              y: -this.intersect.object.geometry.attributes.position.array[2],
               // eslint-disable-next-line id-length
-              z: this.focusedObject.geometry.attributes.position.array[1],
+              z: this.intersect.object.geometry.attributes.position.array[1],
             },
           };
           let expandedCoordinates = this.scaleUpCoordinate(coordinate);
 
-          this.$refs.pointName.innerHTML = this.focusedObject.name;
+          this.$refs.pointName.innerHTML = this.intersect.object.name;
           this.$refs.pointCoord.innerHTML = `
             [${Math.round(expandedCoordinates.position.x)},
             ${Math.round(expandedCoordinates.position.y)},
@@ -127,18 +126,21 @@ export default {
           this.$refs.pointInfoContainer.style.display = 'block';
 
           this.$refs.mapContainer.style.cursor = 'pointer';
-        } else if (this.focusedObject.type === 'Mesh' && (this.focusedObject.celestialType === 'moon' || this.focusedObject.celestialType === 'planet')) {
+        } else if (
+          this.intersect.object.type === 'Mesh' &&
+          (this.intersect.object.celestialType === 'moon' || this.intersect.object.celestialType === 'planet')
+        ) {
           let coordinate = {
             position: {
-              x: this.focusedObject.position.x,
-              y: -this.focusedObject.position.z,
+              x: this.intersect.object.position.x,
+              y: -this.intersect.object.position.z,
               // eslint-disable-next-line id-length
-              z: this.focusedObject.position.y,
+              z: this.intersect.object.position.y,
             },
           };
           let expandedCoordinates = this.scaleUpCoordinate(coordinate);
 
-          this.$refs.pointName.innerHTML = this.focusedObject.name;
+          this.$refs.pointName.innerHTML = this.intersect.object.name;
           this.$refs.pointCoord.innerHTML = `
             Estimated [${Math.round(expandedCoordinates.position.x)},
             ${Math.round(expandedCoordinates.position.y)},
@@ -146,11 +148,22 @@ export default {
           this.$refs.pointInfoContainer.style.display = 'block';
 
           this.$refs.mapContainer.style.cursor = 'pointer';
+        } else if (this.intersect.object.type === 'Line2') {
+          this.$refs.pointName.innerHTML = this.intersect.object.name;
+          this.$refs.pointCoord.innerHTML = `
+            [${Math.round(this.scaleUpCoordinate(this.intersect.pointOnLine.x))},
+            ${Math.round(this.scaleUpCoordinate(this.intersect.pointOnLine.y))},
+            ${Math.round(this.scaleUpCoordinate(this.intersect.pointOnLine.z))}]`;
+          this.$refs.pointInfoContainer.style.display = 'block';
+
+          this.$refs.mapContainer.style.cursor = 'pointer';
         } else {
+          this.$refs.pointCoord.innerHTML = '';
           this.$refs.pointInfoContainer.style.display = 'none';
           this.$refs.mapContainer.style.cursor = 'auto';
         }
       } else {
+        this.$refs.pointCoord.innerHTML = '';
         this.$refs.pointInfoContainer.style.display = 'none';
         this.$refs.mapContainer.style.cursor = 'auto';
       }
@@ -278,23 +291,23 @@ export default {
 
     // Click action and context menu handlers
     handleMouseClick() {
-      if (this.focusedObject !== undefined) {
-        EventBus.$emit('setInfoWidgetData', this.focusedObject);
+      if (this.intersect !== undefined && this.intersect?.object?.type !== 'Line2') {
+        EventBus.$emit('setInfoWidgetData', this.intersect.object);
         this.showInfoWidget = true;
       }
     },
 
     handleRightClick() {
-      if (this.focusedObject) {
-        this.$refs.contextMenu.open(this.focusedObject);
+      if (this.intersect) {
+        this.$refs.contextMenu.open(this.intersect);
       } else {
         this.$refs.contextMenu.open(null);
       }
     },
 
     handleDoubleClick() {
-      if (this.focusedObject) {
-        this.viewObject(this.focusedObject);
+      if (this.intersect) {
+        this.viewObject(this.intersect.object);
       }
     },
   },

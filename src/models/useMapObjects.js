@@ -1,4 +1,8 @@
 import * as THREE from 'three';
+import { Line2 } from '@/custom/Line2.js';
+import { LineMaterial } from '@/custom/LineMaterial.js';
+import { LineGeometry } from '@/custom/LineGeometry.js';
+
 import { useCoordinates } from '@/models/useCoordinates.js';
 
 import { ICON_MAP } from '@/models/useIcons.js';
@@ -26,12 +30,21 @@ export async function createPointMesh(data) {
 
 export async function createVectorMesh(data) {
   let color = new THREE.Color(data.color);
-  let origin = new THREE.Vector3(data.origin.x, data.origin.z, -data.origin.y);
-  let direction = new THREE.Vector3(data.direction.x, data.direction.z, -data.direction.y);
-  direction.normalize();
+  let startPoint = [data.origin.x, data.origin.z, -data.origin.y];
+  let endPoint = [data.endPoint.x, data.endPoint.z, -data.endPoint.y];
 
-  let mesh = new THREE.ArrowHelper(direction, origin, data.length, color, Math.min([0.1 * data.length], 0.5), Math.min([0.1 * data.length], 0.5));
+  let points = [startPoint, endPoint];
 
+  const lineGeometry = new LineGeometry();
+  lineGeometry.setPositions(points.flat());
+
+  const lineMaterial = new LineMaterial({
+    color: color,
+    linewidth: 0.001,
+    dashed: false,
+    blending: THREE.AdditiveBlending,
+  });
+  let mesh = new Line2(lineGeometry, lineMaterial);
   mesh.name = data.name;
   mesh.vectorId = data.id;
 
@@ -202,6 +215,17 @@ export async function createSafeZoneMesh(options) {
   return sphere;
 }
 
+export async function createSafeZoneMeshRing(options) {
+  const geometry = new THREE.RingGeometry(options.baseRadius, options.baseRadius + options.baseRadius / 200, 100);
+  const material = new THREE.MeshBasicMaterial({ color: '#00FF00', side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+  const ring = new THREE.Mesh(geometry, material);
+  ring.rotateX(Math.PI / 2);
+
+  ring.position.set(options.position.x, options.position.z, -options.position.y);
+  ring.scale.set(options.scaleX, options.scaleZ, options.scaleY);
+  return ring;
+}
+
 // ============= Plane Intersection Objects =============
 
 export function createSphereIntersectionRing(options) {
@@ -243,6 +267,28 @@ export function createTorusIntersectionRings(options) {
   outerRing.position.set(scaledDownMeasurements.position.x, scaledDownMeasurements.position.z, -scaledDownMeasurements.position.y);
 
   return { innerRing, outerRing };
+}
+
+export function createHoverLine() {
+  const lineGeometry = new LineGeometry();
+  const lineMaterial = new LineMaterial({
+    color: 0xffffff,
+    linewidth: 0.001,
+    dashed: false,
+    blending: THREE.AdditiveBlending,
+  });
+  let hoverLine = new Line2(lineGeometry, lineMaterial);
+  hoverLine.visible = false;
+  return hoverLine;
+}
+
+export function createHoverCircle() {
+  const ringMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+  const ringGeometry = new THREE.RingGeometry(0.3, 0.35, 50);
+  let hoverCircle = new THREE.Mesh(ringGeometry, ringMaterial);
+  hoverCircle.rotateX(Math.PI / 2);
+  hoverCircle.visible = false;
+  return hoverCircle;
 }
 
 export function createPointIntersectionObjects(options) {

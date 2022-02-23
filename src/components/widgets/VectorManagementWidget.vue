@@ -69,6 +69,7 @@
 <script>
 import { ref, inject } from '@vue/composition-api';
 import { v4 as uuidv4 } from 'uuid';
+import { EventBus } from '@/eventBus';
 
 import { required } from 'vuelidate/lib/validators';
 
@@ -135,6 +136,13 @@ export default {
       ICON_MAP,
       scaleUpCoordinate,
     };
+  },
+
+  mounted() {
+    EventBus.$on('editVector', (data) => {
+      this.open();
+      this.onEdit(data);
+    });
   },
 
   methods: {

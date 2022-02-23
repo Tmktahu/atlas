@@ -299,12 +299,6 @@ export default {
     },
   },
 
-  mounted() {
-    EventBus.$on('openEditWidget', (data) => {
-      this.open('edit', data);
-    });
-  },
-
   methods: {
     open(type, vector = null) {
       this.type = type;
