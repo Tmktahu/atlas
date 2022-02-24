@@ -31,14 +31,12 @@ export function useStorage(isElectron) {
           EventBus.$emit('openOldDataDialog', data);
 
           return {
-            data: data,
+            storageData: data,
             errors: { message: 'oldData' },
           };
         }
 
-        let scaledDownData = scaleDownStorageData(data);
-
-        return { storageData: scaledDownData, errors };
+        return { storageData: data, errors };
       } else {
         console.error('No storage. Initing json file with default data.');
         let useCoordinates = await import('./useCoordinates');
