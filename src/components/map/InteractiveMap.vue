@@ -152,8 +152,8 @@ export default {
           this.$refs.pointName.innerHTML = this.intersect.object.name;
           this.$refs.pointCoord.innerHTML = `
             [${Math.round(this.scaleUpCoordinate(this.intersect.pointOnLine.x))},
-            ${Math.round(this.scaleUpCoordinate(this.intersect.pointOnLine.y))},
-            ${Math.round(this.scaleUpCoordinate(this.intersect.pointOnLine.z))}]`;
+            ${Math.round(this.scaleUpCoordinate(-this.intersect.pointOnLine.z))},
+            ${Math.round(this.scaleUpCoordinate(this.intersect.pointOnLine.y))}]`;
           this.$refs.pointInfoContainer.style.display = 'block';
 
           this.$refs.mapContainer.style.cursor = 'pointer';
