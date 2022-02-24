@@ -30,7 +30,7 @@ export async function createPointMesh(data) {
 
 export async function createVectorMesh(data) {
   let color = new THREE.Color(data.color);
-  let startPoint = [data.origin.x, data.origin.z, -data.origin.y];
+  let startPoint = [data.startPoint.x, data.startPoint.z, -data.startPoint.y];
   let endPoint = [data.endPoint.x, data.endPoint.z, -data.endPoint.y];
 
   let points = [startPoint, endPoint];

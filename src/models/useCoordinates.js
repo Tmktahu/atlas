@@ -43,30 +43,30 @@ export function useCoordinates() {
   const getInitialPoints = () => {
     let initialPoints = [];
 
-    initialPoints.push(scaleDownCoordinate(ORIGIN_POINT));
-    initialPoints.push(scaleDownCoordinate(ELYSIUM_WARP_GATE));
+    initialPoints.push(ORIGIN_POINT);
+    initialPoints.push(ELYSIUM_WARP_GATE);
 
-    initialPoints.push(scaleDownCoordinate(ISAN_ORIGIN_POINT));
+    initialPoints.push(ISAN_ORIGIN_POINT);
 
     for (let index in ORIGIN_STATIONS) {
-      initialPoints.push(scaleDownCoordinate(ORIGIN_STATIONS[index]));
+      initialPoints.push(ORIGIN_STATIONS[index]);
     }
 
     for (let index in TRANSMITTER_STATIONS) {
-      initialPoints.push(scaleDownCoordinate(TRANSMITTER_STATIONS[index]));
+      initialPoints.push(TRANSMITTER_STATIONS[index]);
     }
 
     return initialPoints;
   };
 
   const scaleDownCoordinate = (inObject) => {
-    if (inObject.origin && inObject.endPoint && inObject.length) {
+    if (inObject.startPoint && inObject.endPoint && inObject.length) {
       // we are dealing with a vector
       let outVector = JSON.parse(JSON.stringify(inObject));
 
-      outVector.origin.x = inObject.origin.x / GRID_SCALAR;
-      outVector.origin.y = inObject.origin.y / GRID_SCALAR;
-      outVector.origin.z = inObject.origin.z / GRID_SCALAR;
+      outVector.startPoint.x = inObject.startPoint.x / GRID_SCALAR;
+      outVector.startPoint.y = inObject.startPoint.y / GRID_SCALAR;
+      outVector.startPoint.z = inObject.startPoint.z / GRID_SCALAR;
 
       outVector.endPoint.x = inObject.endPoint.x / GRID_SCALAR;
       outVector.endPoint.y = inObject.endPoint.y / GRID_SCALAR;
@@ -102,13 +102,13 @@ export function useCoordinates() {
   };
 
   const scaleUpCoordinate = (inObject) => {
-    if (inObject.origin && inObject.endPoint && inObject.length) {
+    if (inObject.startPoint && inObject.endPoint && inObject.length) {
       // we are dealing with a vector
       let outVector = JSON.parse(JSON.stringify(inObject));
 
-      outVector.origin.x = inObject.origin.x * GRID_SCALAR;
-      outVector.origin.y = inObject.origin.y * GRID_SCALAR;
-      outVector.origin.z = inObject.origin.z * GRID_SCALAR;
+      outVector.startPoint.x = inObject.startPoint.x * GRID_SCALAR;
+      outVector.startPoint.y = inObject.startPoint.y * GRID_SCALAR;
+      outVector.startPoint.z = inObject.startPoint.z * GRID_SCALAR;
 
       outVector.endPoint.x = inObject.endPoint.x * GRID_SCALAR;
       outVector.endPoint.y = inObject.endPoint.y * GRID_SCALAR;

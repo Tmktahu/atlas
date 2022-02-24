@@ -199,12 +199,12 @@
       </v-col>
     </v-row>
 
-    <v-row no-gutters>
+    <v-row no-gutters class="mt-2">
+      <v-btn class="form-button mr-1 px-1" dense small outlined @click="onPaste"><v-icon size="16" class="mr-1">mdi-content-paste</v-icon>Paste Coord</v-btn>
       <v-checkbox v-model="formInfo.autoScale" :ripple="false" class="atlas-checkbox" dense hide-details label="Auto-Scale" />
     </v-row>
 
     <v-row no-gutters class="mt-2">
-      <v-btn class="form-button mr-1 px-1" dense small outlined @click="onPaste"><v-icon size="16" class="mr-1">mdi-content-paste</v-icon>Paste Coord</v-btn>
       <div class="mode-wrapper d-flex flex-grow-0 px-1 mr-1 align-center">
         <span>IPS</span>
         <v-switch v-model="mode" hide-details dense true-value="isan" class="ma-0 pl-2" style="padding-top: 2px" false-value="ips" />

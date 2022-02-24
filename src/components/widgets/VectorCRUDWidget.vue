@@ -46,41 +46,43 @@
 
     <v-row no-gutters class="mt-2">
       <v-col class="d-flex flex-column align-center mr-1">
-        <div class="col-label">Origin Point</div>
+        <div class="col-label">Start Point</div>
         <v-text-field
-          v-model="formInfo.origin.x"
+          v-model="formInfo.startPoint.x"
           class="input-field mt-2"
           type="number"
           label="X Coord"
           outlined
           hide-details
           dense
-          :error="$v.formInfo.origin.x.$invalid && $v.formInfo.origin.x.$dirty"
-          @input="onInput($v.formInfo.origin.x)"
+          :error="$v.formInfo.startPoint.x.$invalid && $v.formInfo.startPoint.x.$dirty"
+          @input="onInput($v.formInfo.start.x)"
         />
         <v-text-field
-          v-model="formInfo.origin.y"
+          v-model="formInfo.startPoint.y"
           class="input-field mt-2"
           type="number"
           label="Y Coord"
           outlined
           hide-details
           dense
-          :error="$v.formInfo.origin.y.$invalid && $v.formInfo.origin.y.$dirty"
-          @input="onInput($v.formInfo.origin.y)"
+          :error="$v.formInfo.startPoint.y.$invalid && $v.formInfo.startPoint.y.$dirty"
+          @input="onInput($v.formInfo.startPoint.y)"
         />
         <v-text-field
-          v-model="formInfo.origin.z"
+          v-model="formInfo.startPoint.z"
           class="input-field mt-2"
           type="number"
           label="Z Coord"
           outlined
           hide-details
           dense
-          :error="$v.formInfo.origin.z.$invalid && $v.formInfo.origin.z.$dirty"
-          @input="onInput($v.formInfo.origin.z)"
+          :error="$v.formInfo.startPoint.z.$invalid && $v.formInfo.startPoint.z.$dirty"
+          @input="onInput($v.formInfo.startPoint.z)"
         />
-        <v-btn class="form-button mt-2" dense small outlined @click="onPaste('origin')"><v-icon size="16" class="mr-1">mdi-content-paste</v-icon>Paste</v-btn>
+        <v-btn class="form-button mt-2" dense small outlined @click="onPaste('startPoint')"
+          ><v-icon size="16" class="mr-1">mdi-content-paste</v-icon>Paste</v-btn
+        >
       </v-col>
       <v-col class="d-flex flex-column align-center mr-1">
         <div class="col-label">Direction</div>
@@ -178,9 +180,9 @@
         <div>
           This switch controls the two modes you have available for defining vectors.
           <br />
-          <strong>ODL:</strong> This mode uses the Origin Point, Direction, and Length.
+          <strong>ODL:</strong> This mode uses the Start Point, Direction, and Length.
           <br />
-          <strong>OE:</strong> This mode uses the Origin Point and End Point.
+          <strong>OE:</strong> This mode uses the Start Point and End Point.
         </div>
       </v-tooltip>
 
@@ -209,7 +211,7 @@ export default {
     formInfo: {
       name: { required },
       length: { required },
-      origin: {
+      startPoint: {
         x: { required },
         y: { required },
         // eslint-disable-next-line id-length
@@ -242,7 +244,7 @@ export default {
       name: '',
       color: '#FF0000',
       length: null,
-      origin: {
+      startPoint: {
         x: null,
         y: null,
         // eslint-disable-next-line id-length
@@ -311,11 +313,11 @@ export default {
           name: vector.data.name,
           color: vector.data.color,
           length: this.scaleUpCoordinate(vector.data.length),
-          origin: {
-            x: this.scaleUpCoordinate(vector.data.origin.x),
-            y: this.scaleUpCoordinate(vector.data.origin.y),
+          startPoint: {
+            x: this.scaleUpCoordinate(vector.data.startPoint.x),
+            y: this.scaleUpCoordinate(vector.data.startPoint.y),
             // eslint-disable-next-line id-length
-            z: this.scaleUpCoordinate(vector.data.origin.z),
+            z: this.scaleUpCoordinate(vector.data.startPoint.z),
           },
           direction: {
             x: vector.data.direction.x,
@@ -346,7 +348,7 @@ export default {
         name: '',
         color: '#FF0000',
         length: null,
-        origin: {
+        startPoint: {
           x: null,
           y: null,
           // eslint-disable-next-line id-length
@@ -378,11 +380,11 @@ export default {
             return;
           }
 
-          if (type === 'origin') {
-            this.formInfo.origin.x = parseFloat(coord[0]);
-            this.formInfo.origin.y = parseFloat(coord[1]);
+          if (type === 'startPoint') {
+            this.formInfo.startPoint.x = parseFloat(coord[0]);
+            this.formInfo.startPoint.y = parseFloat(coord[1]);
             // eslint-disable-next-line id-length
-            this.formInfo.origin.z = parseFloat(coord[2]);
+            this.formInfo.startPoint.z = parseFloat(coord[2]);
           } else if (type === 'direction') {
             this.formInfo.direction.x = parseFloat(coord[0]);
             this.formInfo.direction.y = parseFloat(coord[1]);
@@ -417,11 +419,11 @@ export default {
         name: this.formInfo.name,
         color: color,
         hide: false,
-        origin: {
-          x: this.scaleDownCoordinate(parseFloat(this.formInfo.origin.x)),
-          y: this.scaleDownCoordinate(parseFloat(this.formInfo.origin.y)),
+        startPoint: {
+          x: this.scaleDownCoordinate(parseFloat(this.formInfo.startPoint.x)),
+          y: this.scaleDownCoordinate(parseFloat(this.formInfo.startPoint.y)),
           // eslint-disable-next-line id-length
-          z: this.scaleDownCoordinate(parseFloat(this.formInfo.origin.z)),
+          z: this.scaleDownCoordinate(parseFloat(this.formInfo.startPoint.z)),
         },
         direction: {
           x: parseFloat(this.formInfo.direction.x),
@@ -455,11 +457,11 @@ export default {
         name: this.formInfo.name,
         color: color,
         hide: false,
-        origin: {
-          x: this.scaleDownCoordinate(parseFloat(this.formInfo.origin.x)),
-          y: this.scaleDownCoordinate(parseFloat(this.formInfo.origin.y)),
+        startPoint: {
+          x: this.scaleDownCoordinate(parseFloat(this.formInfo.startPoint.x)),
+          y: this.scaleDownCoordinate(parseFloat(this.formInfo.startPoint.y)),
           // eslint-disable-next-line id-length
-          z: this.scaleDownCoordinate(parseFloat(this.formInfo.origin.z)),
+          z: this.scaleDownCoordinate(parseFloat(this.formInfo.startPoint.z)),
         },
         direction: {
           x: parseFloat(this.formInfo.direction.x),
@@ -482,7 +484,7 @@ export default {
 
     onInput(validationObject) {
       validationObject.$touch();
-      let hasOrigin = this.formInfo.origin.x !== null && this.formInfo.origin.y !== null && this.formInfo.origin.z !== null;
+      let hasStartPoint = this.formInfo.startPoint.x !== null && this.formInfo.startPoint.y !== null && this.formInfo.startPoint.z !== null;
       let hasDirection = this.formInfo.direction.x !== null && this.formInfo.direction.y !== null && this.formInfo.direction.z !== null;
       let hasEndPoint = this.formInfo.endPoint.x !== null && this.formInfo.endPoint.y !== null && this.formInfo.endPoint.z !== null;
       let hasLength = this.formInfo.length !== null;
@@ -502,34 +504,34 @@ export default {
         };
 
         this.formInfo.endPoint.x =
-          this.formInfo.origin.x !== null && hasDirection && hasLength
-            ? parseFloat(this.formInfo.origin.x) + normalizedDirection.x * parseFloat(this.formInfo.length)
+          this.formInfo.startPoint.x !== null && hasDirection && hasLength
+            ? parseFloat(this.formInfo.startPoint.x) + normalizedDirection.x * parseFloat(this.formInfo.length)
             : null;
         this.formInfo.endPoint.y =
-          this.formInfo.origin.y !== null && hasDirection && hasLength
-            ? parseFloat(this.formInfo.origin.y) + normalizedDirection.y * parseFloat(this.formInfo.length)
+          this.formInfo.startPoint.y !== null && hasDirection && hasLength
+            ? parseFloat(this.formInfo.startPoint.y) + normalizedDirection.y * parseFloat(this.formInfo.length)
             : null;
         // eslint-disable-next-line id-length
         this.formInfo.endPoint.z =
-          this.formInfo.origin.z !== null && hasDirection && hasLength
-            ? parseFloat(this.formInfo.origin.z) + normalizedDirection.z * parseFloat(this.formInfo.length)
+          this.formInfo.startPoint.z !== null && hasDirection && hasLength
+            ? parseFloat(this.formInfo.startPoint.z) + normalizedDirection.z * parseFloat(this.formInfo.length)
             : null;
       } else {
         // otherwise we want to calculate the direction and length
         let direction = {
-          x: parseFloat(this.formInfo.endPoint.x) - parseFloat(this.formInfo.origin.x),
-          y: parseFloat(this.formInfo.endPoint.y) - parseFloat(this.formInfo.origin.y),
+          x: parseFloat(this.formInfo.endPoint.x) - parseFloat(this.formInfo.startPoint.x),
+          y: parseFloat(this.formInfo.endPoint.y) - parseFloat(this.formInfo.startPoint.y),
           // eslint-disable-next-line id-length
-          z: parseFloat(this.formInfo.endPoint.z) - parseFloat(this.formInfo.origin.z),
+          z: parseFloat(this.formInfo.endPoint.z) - parseFloat(this.formInfo.startPoint.z),
         };
 
-        this.formInfo.direction.x = this.formInfo.endPoint.x !== null && this.formInfo.origin.x !== null ? direction.x : null;
-        this.formInfo.direction.y = this.formInfo.endPoint.y !== null && this.formInfo.origin.y !== null ? direction.y : null;
+        this.formInfo.direction.x = this.formInfo.endPoint.x !== null && this.formInfo.startPoint.x !== null ? direction.x : null;
+        this.formInfo.direction.y = this.formInfo.endPoint.y !== null && this.formInfo.startPoint.y !== null ? direction.y : null;
         // eslint-disable-next-line id-length
-        this.formInfo.direction.z = this.formInfo.endPoint.z !== null && this.formInfo.origin.z !== null ? direction.z : null;
+        this.formInfo.direction.z = this.formInfo.endPoint.z !== null && this.formInfo.startPoint.z !== null ? direction.z : null;
 
         this.formInfo.length =
-          hasOrigin && hasEndPoint
+          hasStartPoint && hasEndPoint
             ? Math.sqrt(Math.pow(parseFloat(direction.x), 2) + Math.pow(parseFloat(direction.y), 2) + Math.pow(parseFloat(direction.z), 2))
             : null;
       }

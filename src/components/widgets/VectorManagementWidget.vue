@@ -30,12 +30,12 @@
               <span class="vector-name pl-2"> {{ item.data.name }}</span>
             </div>
           </template>
-          <template v-slot:item.origin="{ item }">
+          <template v-slot:item.startPoint="{ item }">
             <div style="font-size: 10px">
               {{
-                `[${Math.round(scaleUpCoordinate(item.data.origin.x))}, ` +
-                `${Math.round(scaleUpCoordinate(item.data.origin.y))}, ` +
-                `${Math.round(scaleUpCoordinate(item.data.origin.z))}]`
+                `[${Math.round(scaleUpCoordinate(item.data.startPoint.x))}, ` +
+                `${Math.round(scaleUpCoordinate(item.data.startPoint.y))}, ` +
+                `${Math.round(scaleUpCoordinate(item.data.startPoint.z))}]`
               }}
             </div>
           </template>
@@ -99,10 +99,10 @@ export default {
         value: 'name',
       },
       {
-        text: 'Origin',
+        text: 'Start Point',
         align: 'start',
         sortable: false,
-        value: 'origin',
+        value: 'startPoint',
       },
       {
         text: 'Direction',

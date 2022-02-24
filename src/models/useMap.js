@@ -65,8 +65,9 @@ export const masterMapData = reactive({
       id,
       name,
       hide,
+      startPoint
       direction,
-      origin,
+      endPoint,
       length,
       color,
     },
@@ -695,9 +696,9 @@ export function useMap() {
       });
 
       let midPoint = {
-        x: (vector.data.origin.x + vector.data.endPoint.x) / 2,
-        y: (vector.data.origin.y + vector.data.endPoint.y) / 2,
-        z: (vector.data.origin.z + vector.data.endPoint.z) / 2,
+        x: (vector.data.startPoint.x + vector.data.endPoint.x) / 2,
+        y: (vector.data.startPoint.y + vector.data.endPoint.y) / 2,
+        z: (vector.data.startPoint.z + vector.data.endPoint.z) / 2,
       };
 
       let dist = calcDistance(midPoint, vector.data.endPoint) * 0.8;
