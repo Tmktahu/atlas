@@ -324,7 +324,6 @@ export function useMap() {
     if (currentIntersect) {
       let lineEnd = null;
       if (currentIntersect.object.type === 'Points') {
-        //console.log(currentIntersect);
         currentIntersect.object.material.size = masterMapData.pointSize * 1.25;
         currentIntersect.object.material.color = new THREE.Color(1, 1, 1);
         lineEnd = new THREE.Vector3(
@@ -371,22 +370,15 @@ export function useMap() {
   };
 
   const minDistanceFromAnchors = (input) => {
-    //console.log('input', input);
     let minDistance = Number.MAX_SAFE_INTEGER;
-    //console.log('initial min distance', minDistance);
     masterMapData.anchors.forEach((elem) => {
-      //console.log('looping for anchor', elem);
       let dist = Math.sqrt(
         Math.pow(input.position.x - elem.position.x, 2) + Math.pow(input.position.y - elem.position.z, 2) + Math.pow(input.position.z - -elem.position.y, 2)
       );
-      //console.log('calculated dist', dist);
-      //console.log('bool check', dist < minDistance);
       if (dist < minDistance) {
-        //console.log('setting min dist');
         minDistance = dist;
       }
     });
-    //console.log('final distance selected', minDistance);
     return minDistance;
   };
 
