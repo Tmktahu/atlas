@@ -16,10 +16,10 @@
           </v-card>
         </v-menu>
       </v-col>
-      <v-col class="mr-2">
+      <v-col>
         <v-text-field
           v-model="formInfo.name"
-          class="input-field"
+          class="input-field mr-2"
           outlined
           label="Name"
           dense
@@ -45,7 +45,7 @@
     </v-row>
 
     <v-row no-gutters class="mt-2">
-      <v-col class="d-flex flex-column align-center mr-1">
+      <v-col class="d-flex flex-column mr-1">
         <div class="col-label">Start Point</div>
         <v-text-field
           v-model="formInfo.startPoint.x"
@@ -84,7 +84,7 @@
           ><v-icon size="16" class="mr-1">mdi-content-paste</v-icon>Paste</v-btn
         >
       </v-col>
-      <v-col class="d-flex flex-column align-center mr-1">
+      <v-col class="d-flex flex-column mr-1">
         <div class="col-label">Direction</div>
         <v-text-field
           v-model="formInfo.direction.x"
@@ -126,7 +126,7 @@
           <v-icon size="16" class="mr-1">mdi-content-paste</v-icon>Paste
         </v-btn>
       </v-col>
-      <v-col class="d-flex flex-column align-center">
+      <v-col class="d-flex flex-column">
         <div class="col-label">End Point</div>
         <v-text-field
           v-model="formInfo.endPoint.x"
