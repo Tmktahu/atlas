@@ -2,7 +2,7 @@
   "name": "atlas",
   "description": "An interactive map for the game Starbase",
   "author": "Fryke",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
