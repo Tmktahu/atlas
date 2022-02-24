@@ -243,7 +243,9 @@ export function useStorage(isElectron) {
       if (isElectron) {
         saveToJSON(newData, dataStoragePath.value);
       } else {
-        saveToLocalStorage(newData, true);
+        // for the web, local storage use to be scaled down, so we need to scale it up
+        let scaledUpData = scaleUpStorageData(newData);
+        saveToLocalStorage(scaledUpData, true);
       }
     }
   };
