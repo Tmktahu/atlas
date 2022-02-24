@@ -183,7 +183,7 @@ export default {
           let coord = { position: this.intersect.pointOnLine };
 
           let scaledCoord = this.scaleUpCoordinate(coord);
-          let output = `${scaledCoord.position.x},${scaledCoord.position.y},${scaledCoord.position.z}`;
+          let output = `${scaledCoord.position.x},${-scaledCoord.position.z},${scaledCoord.position.y}`;
           await navigator.clipboard.writeText(output);
           this.$toasted.global.alertInfo({ message: 'Copied Coordinate to Clipboard', timeout: 1000 });
           this.close();
