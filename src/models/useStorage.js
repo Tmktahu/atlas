@@ -31,14 +31,12 @@ export function useStorage(isElectron) {
           EventBus.$emit('openOldDataDialog', data);
 
           return {
-            data: data,
+            storageData: data,
             errors: { message: 'oldData' },
           };
         }
 
-        let scaledDownData = scaleDownStorageData(data);
-
-        return { storageData: scaledDownData, errors };
+        return { storageData: data, errors };
       } else {
         console.error('No storage. Initing json file with default data.');
         let useCoordinates = await import('./useCoordinates');
@@ -156,14 +154,7 @@ export function useStorage(isElectron) {
         let parsedData = JSON.parse(rawData);
         let hasOldData = detectOldDataStructures(parsedData);
         if (hasOldData) {
-          // data from local storage should always start scaled down
-          // but to let the user download a JSON file, we want to scale it up
-          const { scaleUpCoordinate } = useCoordinates();
-          let scaledUpData = parsedData.map((item) => {
-            return scaleUpCoordinate(item);
-          });
-
-          EventBus.$emit('openOldDataDialog', scaledUpData);
+          EventBus.$emit('openOldDataDialog', parsedData);
 
           return {
             data: parsedData,
@@ -198,29 +189,29 @@ export function useStorage(isElectron) {
     try {
       if (inData !== null) {
         let { data: currentData, errors } = readFromLocalStorage();
-        let newVersion,
-          newPoints,
-          newVectors = null;
+        let newStorageData = {
+          version: null,
+          points: null,
+          vectors: null,
+        };
 
         if (isStorageData) {
           // if we are dealing with storage-formatted data
-          newVersion = inData.version;
-          newPoints = inData.points;
-          newVectors = inData.vectors;
+          newStorageData.version = inData.version;
+          newStorageData.points = inData.points;
+          newStorageData.vectors = inData.vectors;
         } else {
           // otherwise we are dealing with map-formatted data
           const { getPointData, getVectorData } = useMap();
-          newVersion = process.env.VUE_APP_VERSION;
-          newPoints = getPointData(inData);
-          newVectors = getVectorData(inData);
+          newStorageData.version = process.env.VUE_APP_VERSION;
+          newStorageData.points = getPointData(inData);
+          newStorageData.vectors = getVectorData(inData);
+          newStorageData = scaleUpStorageData(newStorageData);
         }
 
         // Now we check to see what needs to be updated and assemble the new data
-        let newStorageData = {};
-        newStorageData.version = newVersion;
-
-        newStorageData.points = newPoints.length > 0 ? newPoints : currentData.points;
-        newStorageData.vectors = newVectors.length > 0 ? newVectors : currentData.vectors;
+        newStorageData.points = newStorageData.points.length > 0 ? newStorageData.points : currentData.points;
+        newStorageData.vectors = newStorageData.vectors.length > 0 ? newStorageData.vectors : currentData.vectors;
 
         let stringifiedData = JSON.stringify(newStorageData, null, 2);
         window.localStorage.setItem('atlasData', stringifiedData);
@@ -243,29 +234,15 @@ export function useStorage(isElectron) {
     if (Array.isArray(oldData) && oldData.length > 0) {
       // we have a coordinate array, which is from v1 of the data structure
 
+      let newData = {
+        version: process.env.VUE_APP_VERSION,
+        points: oldData,
+        vectors: [],
+      };
+
       if (isElectron) {
-        // if we are electron, then we will be saving to a JSON file, which means we do NOT scale down our data
-
-        let newData = {
-          version: process.env.VUE_APP_VERSION,
-          points: oldData,
-          vectors: [],
-        };
-
         saveToJSON(newData, dataStoragePath.value);
       } else {
-        // data sent to this function is scaled up, so we need to scale it down for local storage saving
-        const { scaleDownCoordinate } = useCoordinates();
-        let scaledDownData = oldData.map((item) => {
-          return scaleDownCoordinate(item);
-        });
-
-        let newData = {
-          version: process.env.VUE_APP_VERSION,
-          points: scaledDownData,
-          vectors: [],
-        };
-
         saveToLocalStorage(newData, true);
       }
     }
@@ -320,11 +297,11 @@ export function useStorage(isElectron) {
   const scaleDownStorageData = (inData) => {
     const { scaleDownCoordinate } = useCoordinates();
 
-    let points = inData.points.map((point) => {
+    let points = inData.points?.map((point) => {
       return scaleDownCoordinate(point);
     });
 
-    let vectors = inData.vectors.map((vector) => {
+    let vectors = inData.vectors?.map((vector) => {
       return scaleDownCoordinate(vector);
     });
 
@@ -346,5 +323,6 @@ export function useStorage(isElectron) {
     saveToLocalStorage,
     updateDataStructure,
     assembleStorageData,
+    scaleDownStorageData,
   };
 }

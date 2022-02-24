@@ -179,10 +179,18 @@ export default {
     },
 
     async onLoadData() {
-      this.loadedData = await this.readFromJSON(null, this.uploadedFile.path, this.uploadedFile);
-      this.checkedWaypoints = this.loadedData.map((obj) => {
-        return obj.id;
-      });
+      let storageData = await this.readFromJSON(null, this.uploadedFile.path, this.uploadedFile);
+      if (storageData.version !== '2.3.0') {
+        this.$toasted.global.alertError({
+          message: 'That JSON file is from an outdated version',
+          description: 'Please use a JSON file that has been updated to the current version of Atlas.',
+        });
+      } else {
+        this.loadedData = storageData.points;
+        this.checkedWaypoints = this.loadedData.map((obj) => {
+          return obj.id;
+        });
+      }
     },
 
     async onImport() {
