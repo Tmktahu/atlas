@@ -1,6 +1,0 @@
-/node_modules/**
-/dist/**
-/server/dist/**
-/build/**
-/tests/unit/coverage/**
-/generators/**
