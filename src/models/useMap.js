@@ -636,17 +636,20 @@ export function useMap() {
   const resetDefaultPoints = async () => {
     const { getInitialPoints } = useCoordinates();
     let defaultPoints = getInitialPoints();
+    let scaledDownPoints = defaultPoints.map((point) => {
+      return scaleDownCoordinate(point);
+    });
 
-    for (let index in defaultPoints) {
+    for (let index in scaledDownPoints) {
       let existingPoint = masterMapData.points.find((elem) => {
-        return elem.data.name === defaultPoints[index].name;
+        return elem.data.name === scaledDownPoints[index].name;
       });
 
       if (existingPoint) {
         deletePoint(existingPoint);
       }
 
-      await createNewPoint(defaultPoints[index]);
+      await createNewPoint(scaledDownPoints[index]);
     }
   };
 
