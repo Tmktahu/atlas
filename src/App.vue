@@ -16,18 +16,6 @@
   </v-app>
 </template>
 
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-813N5Z7DQS"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag() {
-  dataLayer.push(arguments);
-}
-gtag('js', new Date());
-
-gtag('config', 'G-813N5Z7DQS');
-</script>
-
 <script>
 import { onMounted, ref, watch, provide, toRefs } from '@vue/composition-api';
 import { debounce } from 'lodash';
