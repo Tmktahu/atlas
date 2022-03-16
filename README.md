@@ -35,6 +35,12 @@ Both versions of the app allow you to import and export your map data as JSON fi
 
 Atlas allows users to select icons for their custom waypoints. If you are interested, I would love to add your company logo to the options. Check out the wiki page [Submitting an Icon](https://github.com/Tmktahu/atlas/wiki/Submitting-an-Icon) for more information.
 
+## Google Analytics
+
+Unfortunately Github Pages doesn't provide deployment traffic information, so I use Google Analytics to collect basic usage data so I can tell if people are actually using Atlas. This lets me keep an eye on site traffic and gives me a source of motivation to continue developing the app. If this doesn't sit well with you, any basic ad-blocker will successfully stop Google Analytics in its tracks.
+
+If you do use an ad-blocker, I would greatly appreciate it if you would consider giving this repository a star or hop in the discord and let me know that you use Atlas. The more I hear about people using this tool, the more I'll want to make it better.
+
 ## Want to help?
 
 If you are interested in contributing to this project, feel free to look through the [Issues](https://github.com/Tmktahu/atlas/issues) to see what is currently being worked on. Any thoughts, comments, or PRs are much appreciated. If you have any questions or ideas, feel free to join the [IPS/Atlas Discord](https://discord.gg/Vafdx5JWBh).
