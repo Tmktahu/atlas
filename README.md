@@ -52,4 +52,4 @@ If you are interested in contributing to this project, feel free to look through
 - Arch#6267 for his infographics and measurement information.
 - Cycle_Of_Insanity#3074 for helping with company logo collection.
 - Critblade#6851 for information on capital ships and moon measurements.
-- Strikeeaglechase#0001 and [Starmap](https://github.com/Collective-SB/Starmap) for inspiration.
+- Strikeeaglechase#0001 and [Starmap](https://github.com/Collective-SB/Starmap) for inspiration and object coordinates.
