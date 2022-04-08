@@ -69,6 +69,7 @@ export default {
     });
 
     const leftNavCondensed = ref(false);
+    const needsToSave = ref(false);
 
     const showOldDataDialog = ref(false);
 
@@ -173,19 +174,20 @@ export default {
 
     init().then(() => {
       if (startApp) {
-        if (!isElectron) {
-          const { saveToLocalStorage } = useStorage(isElectron);
+        const { saveToLocalStorage } = useStorage(isElectron);
 
-          let points = toRefs(masterMapData).points;
-          let vectors = toRefs(masterMapData).vectors;
+        let points = toRefs(masterMapData).points;
+        let vectors = toRefs(masterMapData).vectors;
 
-          let saveDebounce = debounce(() => {
+        let saveDebounce = debounce(() => {
+          if (!isElectron) {
             saveToLocalStorage(masterMapData);
-          }, 500);
+          }
+          needsToSave.value = true;
+        }, 500);
 
-          watch(points, saveDebounce);
-          watch(vectors, saveDebounce);
-        }
+        watch(points, saveDebounce);
+        watch(vectors, saveDebounce);
 
         setTimeout(() => {
           EventBus.$emit('initMap');
@@ -196,6 +198,7 @@ export default {
     provide('masterMapData', masterMapData);
     provide('showControlsWidget', showControlsWidget);
     provide('leftNavCondensed', leftNavCondensed);
+    provide('needsToSave', needsToSave);
 
     provide('showConversionWidget', showConversionWidget);
     provide('showWaypointWidget', showWaypointWidget);

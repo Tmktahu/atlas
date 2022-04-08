@@ -28,8 +28,9 @@
         <v-list-item link :class="{ selected: showSaveWidget }" @click="onSave">
           <div class="left-nav-icon">
             <v-icon>mdi-content-save-outline</v-icon>
+            <v-icon v-if="needsToSave" class="notification-icon">mdi-circle</v-icon>
           </div>
-          <span class="left-nav-label pl-5">Save Data</span>
+          <span class="left-nav-label pl-5">{{ isElectron ? 'Save Data' : 'Download Data' }}</span>
         </v-list-item>
 
         <v-list-item link :class="{ selected: showImportWidget }" @click="onImportWaypoints">
@@ -117,6 +118,8 @@ export default {
     const showSaveWidget = inject('showSaveWidget');
     const showVectorWidget = inject('showVectorWidget');
 
+    const needsToSave = inject('needsToSave');
+
     const { scaleUpCoordinate } = useCoordinates();
 
     return {
@@ -131,6 +134,7 @@ export default {
       showSaveWidget,
       showImportWidget,
       showVectorWidget,
+      needsToSave,
     };
   },
 
@@ -168,6 +172,7 @@ export default {
 
     onSave() {
       if (this.isElectron) {
+        this.needsToSave = false;
         this.showSaveWidget = !this.showSaveWidget;
       } else {
         let points = this.masterMapData.points.map((point) => {
@@ -192,6 +197,8 @@ export default {
         let today = new Date();
         elem.download = `atlas_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`;
         elem.click();
+
+        this.needsToSave = false;
       }
     },
 
@@ -317,6 +324,7 @@ export default {
 }
 
 .left-nav-icon {
+  position: relative;
   display: flex;
   justify-content: center;
   width: 100px !important;
@@ -326,6 +334,14 @@ export default {
   i {
     font-weight: 800;
     color: black;
+  }
+
+  .notification-icon {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    font-size: 10px;
+    color: orangered;
   }
 }
 
