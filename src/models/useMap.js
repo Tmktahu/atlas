@@ -211,6 +211,7 @@ export function useMap() {
 
     handleRaycasting();
 
+    // dynamically scale the size of points as needed
     if (masterMapData.pointMeshes) {
       for (let i in masterMapData.points) {
         let point = masterMapData.points[i];
@@ -219,7 +220,7 @@ export function useMap() {
           if (point.data.autoScale) {
             let distance = calcDistance(masterMapData.camera.position, {
               x: point.mesh.geometry.attributes.position.array[0],
-              y: -point.mesh.geometry.attributes.position.array[1],
+              y: point.mesh.geometry.attributes.position.array[1],
               // eslint-disable-next-line id-length
               z: point.mesh.geometry.attributes.position.array[2],
             });
@@ -236,6 +237,7 @@ export function useMap() {
     masterMapData.grid.scale.x = masterMapData.gridScale;
     masterMapData.grid.scale.z = masterMapData.gridScale;
 
+    // hide or display the eos belt zone info as needed
     for (let index in masterMapData.belts) {
       if (masterMapData.belts[index]?.zones !== undefined) {
         for (let zindex in masterMapData.belts[index].zones) {
@@ -249,9 +251,11 @@ export function useMap() {
       masterMapData.belts[index].belt.intersectionRings.outerRing.visible = !masterMapData.belts[index].showZones;
     }
 
+    // hide or display the eos safe zone as needed
     masterMapData.eosSafeZoneMesh.visible = masterMapData.showEosSafeZone;
     masterMapData.eosSafeZoneMeshRing.visible = masterMapData.showEosSafeZone;
 
+    // update controls and render
     masterMapData.controls.update();
     masterMapData.renderer.render(masterMapData.scene, masterMapData.camera);
     masterMapData.stats?.end();
