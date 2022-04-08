@@ -228,7 +228,7 @@ html {
 }
 
 #app {
-  color: white;
+  color: black;
   background: #333;
 }
 

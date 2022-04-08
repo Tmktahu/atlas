@@ -1,10 +1,10 @@
 <!-- eslint-disable vue/valid-v-slot */ -->
 <template>
-  <div class="import-widget py-3 pl-3" :class="{ open: showImportWidget, 'with-drag-bar': isElectron }">
+  <div class="import-widget pa-3" :class="{ open: showImportWidget, 'with-drag-bar': isElectron }">
     <v-row no-gutters>
       <div class="page-title">Import Waypoints</div>
       <v-spacer />
-      <v-btn text @click="close"><v-icon>mdi-close</v-icon></v-btn>
+      <v-btn icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
     </v-row>
 
     <v-row no-gutters class="align-center mt-1">
@@ -22,52 +22,28 @@
       <v-btn dense class="action-button" small outlined @click="onLoadData">Load Data</v-btn>
     </v-row>
 
-    <v-row no-gutters class="mt-1">
-      <div class="import-info">{{ importInfoText }}</div>
+    <v-row v-if="loadedData && needsMigration" no-gutters class="d-flex flex-column mt-2">
+      <div class="import-info">
+        <span class="field-title">JSON Import Version: </span>
+        <span class="needs-migration">!! {{ loadedData.version }} !!</span>
+      </div>
+      <div class="import-info">
+        <span class="field-title">Current Atlas Version: {{ currentAppVersion }}</span>
+      </div>
+      <div class="import-info"> The data in this JSON file is from an outdated version of Atlas. You must migrate it before you import. </div>
     </v-row>
 
-    <v-row no-gutters class="mt-2">
-      <v-data-table
-        v-model="loadedData"
-        :items="loadedData"
-        class="import-list"
-        :items-per-page="-1"
-        fixed-header
-        hide-default-footer
-        disable-pagination
-        :headers="tableHeaders"
-      >
-        <template v-slot:item.name="{ item }">
-          <div class="d-flex align-center">
-            <div class="image-wrapper" :style="{ 'background-color': item.color }">
-              <img :src="ICON_MAP[item.icon].workingFilePath" contain width="16px" height="16px" style="filter: invert(1)" />
-            </div>
-            <span class="waypoint-name pl-2"> {{ item.name }}</span>
-          </div>
-        </template>
-        <template v-slot:header.select>
-          <div class="d-flex align-center"> <v-checkbox v-model="allChecked" hide-details dense @change="flipAllChecked" /> </div>
-        </template>
-        <template v-slot:item.select="{ item }">
-          <div class="d-flex justify-center flex-grow-0">
-            <v-checkbox v-model="checkedWaypoints" class="pa-0 ma-0" hide-details dense multiple :value="item.id" />
-          </div>
-        </template>
-        <template v-slot:item.position="{ item }">
-          <div class="d-flex" style="font-size: 10px">
-            {{ `[${item.position.x}, ${item.position.y}, ${item.position.z}]` }}
-          </div>
-        </template>
-        <template v-slot:no-data>
-          <div class="d-flex flex-column">
-            <div class="pt-2">Load a JSON file.</div>
-            <div class="pt-2 pb-4">If you have already loaded one, the JSON file may be bad.</div>
-          </div>
-        </template>
-      </v-data-table>
+    <v-row v-else-if="loadedData && !needsMigration" no-gutters class="mt-2">
+      <div class="import-info">JSON Import Version: {{ loadedData.version }}</div>
     </v-row>
 
-    <v-row no-gutters class="align-center mt-1 pr-3">
+    <v-row v-else no-gutters class="mt-2"> Select and load a JSON file above to see information about it. </v-row>
+
+    <v-row v-if="loadedData && needsMigration" no-gutters class="align-center mt-2">
+      <v-btn dense class="action-button" small outlined @click="onMigrate">Migrate Data</v-btn>
+    </v-row>
+
+    <v-row v-else-if="loadedData && !needsMigration" no-gutters class="align-center mt-2">
       <v-tooltip left>
         <template v-slot:activator="{ on }">
           <div class="mode-wrapper d-flex flex-grow-0 px-2 mr-1 align-center" v-on="on">
@@ -110,66 +86,32 @@ export default {
     const showImportWidget = inject('showImportWidget');
 
     const uploadedFile = ref(null);
-    const loadedData = ref([]);
-    const checkedWaypoints = ref([]);
-    const allChecked = ref(true);
+    const loadedData = ref(null);
     const mode = ref('skip');
 
     const { readFromJSON } = useStorage(isElectron);
     const { scaleDownCoordinate } = useCoordinates();
     const { mergePoints } = useMap(masterMapData);
 
-    const tableHeaders = [
-      {
-        text: 'Select',
-        align: 'start',
-        sortable: false,
-        value: 'select',
-      },
-      {
-        text: 'Name',
-        align: 'start',
-        sortable: true,
-        value: 'name',
-      },
-      {
-        text: 'Coordinate',
-        align: 'start',
-        sortable: false,
-        value: 'position',
-      },
-      {
-        text: 'Group',
-        align: 'start',
-        sortable: true,
-        value: 'group',
-      },
-    ];
+    const needsMigration = ref(false);
 
     return {
       isElectron,
       showImportWidget,
       uploadedFile,
       loadedData,
-      checkedWaypoints,
-      allChecked,
       mode,
       readFromJSON,
-      tableHeaders,
       ICON_MAP,
       scaleDownCoordinate,
       mergePoints,
+      needsMigration,
     };
   },
 
   computed: {
-    importInfoText() {
-      if (this.loadedData) {
-        let numGroups = this.loadedData.map((item) => item.group).filter((value, index, self) => self.indexOf(value) === index).length;
-        return `From File: ${this.loadedData.length} Waypoints | ${numGroups} Groups`;
-      } else {
-        return 'Load a file to see information.';
-      }
+    currentAppVersion() {
+      return process.env.VUE_APP_VERSION;
     },
   },
 
@@ -180,17 +122,15 @@ export default {
 
     async onLoadData() {
       let storageData = await this.readFromJSON(null, this.uploadedFile.path, this.uploadedFile);
-      if (storageData.version !== '2.3.0') {
-        this.$toasted.global.alertError({
-          message: 'That JSON file is from an outdated version',
-          description: 'Please use a JSON file that has been updated to the current version of Atlas.',
-        });
-      } else {
-        this.loadedData = storageData.points;
-        this.checkedWaypoints = this.loadedData.map((obj) => {
-          return obj.id;
+      this.needsMigration = storageData.version !== process.env.VUE_APP_VERSION;
+      if (this.needsMigration) {
+        this.$toasted.global.alertWarning({
+          message: 'That JSON file is from an outdated Atlas version',
+          description: 'You will need to migrate your old data to the new version in order to import.',
         });
       }
+      console.log(storageData);
+      this.loadedData = storageData;
     },
 
     async onImport() {
@@ -218,6 +158,10 @@ export default {
       });
     },
 
+    async onMigrate() {
+      console.log('trying to migrate data');
+    },
+
     flipAllChecked() {
       if (this.allChecked) {
         this.checkedWaypoints = this.loadedData.map((obj) => {
@@ -238,17 +182,50 @@ export default {
 
 .import-widget {
   z-index: 10;
-  background: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+  background: transparent !important;
   width: 400px;
   position: fixed;
   top: 0;
   right: -400px;
   transition: right 0.1s ease;
-  border-bottom-left-radius: 16px;
   max-height: 635px;
+  overflow: visible;
 
   &.open {
     right: 0px;
+  }
+
+  &:before {
+    content: '';
+    z-index: -1;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    background-color: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+    clip-path: polygon(0px 0px, 100% 0px, 100% 100%, 15px 100%, 0px calc(100% - 15px));
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    margin-top: 5px;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-color: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+    clip-path: polygon(
+      0px 0px,
+      0px calc(100% - 15px + 2px),
+      14px 100%,
+      100% 100%,
+      100% calc(100% - 2px),
+      15px calc(100% - 2px),
+      2px calc(100% - 14px),
+      2px 0px
+    );
   }
 }
 
@@ -306,8 +283,19 @@ export default {
 }
 
 .import-info {
-  color: black;
   font-size: 14px;
+  color: black;
+
+  .field-title {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .needs-migration {
+    color: red;
+    font-weight: 800;
+    font-size: 14px;
+  }
 }
 
 .import-list::v-deep {
