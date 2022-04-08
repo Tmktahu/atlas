@@ -161,10 +161,16 @@ export default {
 
     typeText() {
       if (this.currentObject?.data) {
-        let scaledUpData = this.scaleUpCoordinate(this.currentObject.data);
-        return `${this.currentObject.data.type.replace(/_/g, ' ').toUpperCase()} [${scaledUpData.position.x}, ${scaledUpData.position.y}, ${
-          scaledUpData.position.z
-        }]`;
+        if (this.currentObject.data.type === 'planet' || this.currentObject.data.type === 'moon') {
+          return `${this.currentObject.data.type.replace(/_/g, ' ').toUpperCase()} [${this.currentObject.data.position.x}, ${
+            this.currentObject.data.position.y
+          }, ${this.currentObject.data.position.z}]`;
+        } else {
+          let scaledUpData = this.scaleUpCoordinate(this.currentObject.data);
+          return `${this.currentObject.data.type.replace(/_/g, ' ').toUpperCase()} [${scaledUpData.position.x}, ${scaledUpData.position.y}, ${
+            scaledUpData.position.z
+          }]`;
+        }
       } else {
         return 'Unkown';
       }
