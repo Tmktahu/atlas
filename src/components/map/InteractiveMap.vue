@@ -376,6 +376,7 @@ export default {
   position: absolute;
   display: none;
   pointer-events: none;
+  color: white;
 
   .name {
     font-size: 16px;

@@ -78,6 +78,7 @@ export default {
     const showWaypointCRUDWidget = ref(false);
     const showSaveWidget = ref(false);
     const showImportWidget = ref(false);
+    const showImportSelectionWidget = ref(false);
     const showInfoWidget = ref(false);
     const showVectorWidget = ref(false);
     const showVectorCRUDWidget = ref(false);
@@ -205,6 +206,7 @@ export default {
     provide('showWaypointCRUDWidget', showWaypointCRUDWidget);
     provide('showSaveWidget', showSaveWidget);
     provide('showImportWidget', showImportWidget);
+    provide('showImportSelectionWidget', showImportSelectionWidget);
     provide('showInfoWidget', showInfoWidget);
     provide('showVectorWidget', showVectorWidget);
     provide('showVectorCRUDWidget', showVectorCRUDWidget);

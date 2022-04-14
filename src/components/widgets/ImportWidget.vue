@@ -25,7 +25,7 @@
     <v-row v-if="loadedData && needsMigration" no-gutters class="d-flex flex-column mt-2">
       <div class="import-info">
         <span class="field-title">JSON Import Version: </span>
-        <span class="needs-migration">!! {{ loadedData.version }} !!</span>
+        <span class="needs-migration">!! {{ loadedData.version || '1.0.0' }} !!</span>
       </div>
       <div class="import-info">
         <span class="field-title">Current Atlas Version: {{ currentAppVersion }}</span>
@@ -33,8 +33,32 @@
       <div class="import-info"> The data in this JSON file is from an outdated version of Atlas. You must migrate it before you import. </div>
     </v-row>
 
-    <v-row v-else-if="loadedData && !needsMigration" no-gutters class="mt-2">
-      <div class="import-info">JSON Import Version: {{ loadedData.version }}</div>
+    <v-row v-else-if="loadedData && !needsMigration" no-gutters class="import-info mt-2 d-flex flex-column">
+      <div class="field-title mb-2">JSON Import Version: {{ loadedData.version }}</div>
+
+      <div class="d-flex import-info-wrapper pa-2">
+        <div class="d-flex flex-column flex-grow-0">
+          <div class="area-title mb-2">Points</div>
+          <v-btn :disabled="numPoints === 0" dense class="action-button" small outlined @click="onSelectPoints">Select Points to Import</v-btn>
+          <v-btn :disabled="numPoints === 0" dense class="action-button mt-2" small outlined @click="onResetPointSelection">Reset Selected Points</v-btn>
+        </div>
+        <div class="ml-3 pl-3" style="border-left: 1px solid black">
+          <div>{{ numPoints }} Points in Total</div>
+          <div>{{ numUserPoints }} User-Made Points</div>
+          <div>{{ pointSelection.length }} Points Selected for Import</div>
+        </div>
+      </div>
+
+      <div class="d-flex import-info-wrapper pa-2 mt-2">
+        <div class="d-flex flex-column flex-grow-0">
+          <div class="area-title mb-2">Vectors</div>
+          <v-btn :disabled="numVectors === 0" dense class="action-button" small outlined @click="onSelectVectors">Select Vectors to Import</v-btn>
+          <v-btn :disabled="numVectors === 0" dense class="action-button mt-2" small outlined @click="onResetVectorSelection">Reset Selected Vectors</v-btn>
+        </div>
+        <div class="ml-3 pl-3" style="border-left: 1px solid black">
+          <div>{{ numVectors }} Vectors in Total</div>
+        </div>
+      </div>
     </v-row>
 
     <v-row v-else no-gutters class="mt-2"> Select and load a JSON file above to see information about it. </v-row>
@@ -62,6 +86,7 @@
       <v-spacer />
       <v-btn dense class="action-button" small outlined @click="onImport">Import</v-btn>
     </v-row>
+    <ImportSelectionWidget ref="importSelectionWidget" @save="onSelectionSave" />
     <ConfirmationDialog ref="confirmationDialog" />
   </div>
 </template>
@@ -75,10 +100,11 @@ import { useCoordinates } from '@/models/useCoordinates';
 
 import { ICON_MAP } from '@/models/useIcons.js';
 import ConfirmationDialog from '@/components/dialogs/ConfirmationDialog.vue';
+import ImportSelectionWidget from './ImportSelectionWidget.vue';
 
 export default {
   name: 'ImportWidget',
-  components: { ConfirmationDialog },
+  components: { ConfirmationDialog, ImportSelectionWidget },
 
   setup() {
     const isElectron = inject('isElectron');
@@ -89,11 +115,13 @@ export default {
     const loadedData = ref(null);
     const mode = ref('skip');
 
-    const { readFromJSON } = useStorage(isElectron);
-    const { scaleDownCoordinate } = useCoordinates();
+    const { readFromJSON, saveToJSON, migrateData, dataStoragePath } = useStorage(isElectron);
+    const { scaleDownCoordinate, getInitialPoints } = useCoordinates();
     const { mergePoints } = useMap(masterMapData);
 
     const needsMigration = ref(false);
+
+    const pointSelection = ref([]);
 
     return {
       isElectron,
@@ -101,17 +129,41 @@ export default {
       uploadedFile,
       loadedData,
       mode,
+      dataStoragePath,
       readFromJSON,
+      saveToJSON,
       ICON_MAP,
       scaleDownCoordinate,
+      getInitialPoints,
       mergePoints,
       needsMigration,
+      migrateData,
+      pointSelection,
     };
   },
 
   computed: {
     currentAppVersion() {
       return process.env.VUE_APP_VERSION;
+    },
+
+    numPoints() {
+      return this.loadedData?.points?.length;
+    },
+
+    numUserPoints() {
+      let initialPoints = this.getInitialPoints();
+      let userPoints = this.loadedData.points.filter((importedPoint) => {
+        let matchingPoint = initialPoints.filter((defaultPoint) => {
+          return importedPoint.name === defaultPoint.name;
+        });
+        return matchingPoint.length === 0;
+      });
+      return userPoints.length;
+    },
+
+    numVectors() {
+      return this.loadedData?.vectors?.length;
     },
   },
 
@@ -129,8 +181,11 @@ export default {
           description: 'You will need to migrate your old data to the new version in order to import.',
         });
       }
-      console.log(storageData);
       this.loadedData = storageData;
+
+      this.pointSelection = this.loadedData?.points?.map((point) => {
+        return point.id;
+      });
     },
 
     async onImport() {
@@ -159,7 +214,71 @@ export default {
     },
 
     async onMigrate() {
-      console.log('trying to migrate data');
+      let newData = this.migrateData(this.loadedData);
+      this.loadedData = newData;
+      this.needsMigration = this.loadedData.version !== process.env.VUE_APP_VERSION;
+
+      this.pointSelection = this.loadedData?.points?.map((point) => {
+        return point.id;
+      });
+
+      this.$toasted.global.alertInfo({
+        message: 'Data Migration Successful',
+        description: 'The imported JSON data was migrated successfully.<br />If you want to save a local JSON copy, click the button in this popup.',
+        timeout: null,
+        actionText: 'Save Migrated Data',
+        action: () => {
+          this.downloadData(newData);
+        },
+      });
+    },
+
+    async downloadData(data) {
+      if (this.isElectron) {
+        let filePath = this.dataStoragePath.replace('atlas_data.json', `atlas_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`);
+        const errors = await this.saveToJSON(data, this.filePath);
+        if (errors) {
+          console.error('File Save Error: ', errors);
+          this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });
+        } else {
+          this.$toasted.global.alertInfo({ message: `Data saved to ${filePath}` });
+        }
+      } else {
+        let stringifiedData = JSON.stringify(data, null, 2);
+
+        let elem = document.createElement('a');
+        let file = new Blob([stringifiedData], { type: 'text/plain' });
+        elem.href = URL.createObjectURL(file);
+        let today = new Date();
+        elem.download = `atlas_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`;
+        elem.click();
+      }
+    },
+
+    onSelectPoints() {
+      this.$refs.importSelectionWidget.open(this.loadedData.points, 'points', this.pointSelection);
+    },
+
+    onResetPointSelection() {
+      this.pointSelection = this.loadedData.points.map((point) => {
+        return point.id;
+      });
+    },
+
+    onSelectVectors() {
+      console.log('we want to display point selection widget');
+    },
+
+    onResetVectorSelection() {
+      console.log('we want to reset selected points');
+    },
+
+    onSelectionSave(data) {
+      if (data.mode === 'points') {
+        this.pointSelection = data.selection;
+        console.log('got point selection back', this.pointSelection);
+      } else if (data.mode === 'vectors') {
+      }
     },
 
     flipAllChecked() {
@@ -282,12 +401,22 @@ export default {
   }
 }
 
+.import-info-wrapper {
+  border: 1px solid black;
+  border-radius: 8px;
+}
+
 .import-info {
   font-size: 14px;
   color: black;
 
   .field-title {
     font-size: 14px;
+    font-weight: 700;
+  }
+
+  .area-title {
+    font-size: 16px;
     font-weight: 700;
   }
 

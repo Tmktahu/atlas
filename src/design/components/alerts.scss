@@ -48,15 +48,37 @@
     color: black !important;
   }
 
-  a {
-    margin-left: auto !important;
-  }
-
   a .mdi-close {
     justify-self: end;
     padding-left: 11px !important;
     margin-left: auto !important;
     font-size: 24px !important;
+  }
+}
+
+.alert-action {
+  position: relative;
+  padding-right: 11px !important;
+  margin: auto 0 auto 16px !important;
+  font-family: $default-font-family !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  text-transform: none !important;
+  text-decoration: none !important;
+  color: black !important;
+  border: 2px solid black;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  &::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    content: "";
   }
 }
 

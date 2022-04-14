@@ -230,16 +230,36 @@ export function useStorage(isElectron) {
     return false;
   };
 
-  const updateDataStructure = (oldData, isElectron) => {
+  // This function specifically handles migrating old data strucutres to the current version
+  const migrateData = (oldData) => {
+    let newData = null;
+
+    // =========== Handling V1 ===============
     if (Array.isArray(oldData) && oldData.length > 0) {
       // we have a coordinate array, which is from v1 of the data structure
-
-      let newData = {
+      newData = {
         version: process.env.VUE_APP_VERSION,
         points: oldData,
         vectors: [],
       };
+    }
 
+    // =========== Handling Version Number Updates ===============
+    if (Array.isArray(oldData.points) && Array.isArray(oldData.vectors)) {
+      newData = {
+        version: process.env.VUE_APP_VERSION,
+        points: oldData.points,
+        vectors: oldData.vectors,
+      };
+    }
+
+    return newData;
+  };
+
+  const updateDataStructure = (oldData, isElectron) => {
+    let newData = migrateData(oldData);
+
+    if (newData) {
       if (isElectron) {
         saveToJSON(newData, dataStoragePath.value);
       } else {
@@ -324,6 +344,7 @@ export function useStorage(isElectron) {
     readFromLocalStorage,
     saveToLocalStorage,
     updateDataStructure,
+    migrateData,
     assembleStorageData,
     scaleDownStorageData,
   };

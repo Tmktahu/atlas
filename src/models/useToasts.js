@@ -8,6 +8,21 @@ export const useToasts = () => {
     singleton: true,
   };
 
+  const setupCustomAction = (payload) => {
+    let customAction = {
+      text: payload.actionText,
+      class: 'alert-action',
+      onClick: (event, toastObject) => {
+        if (payload.action) {
+          payload.action();
+        }
+        toastObject.goAway(0);
+      },
+    };
+
+    return customAction;
+  };
+
   // Alert Definitions
 
   Vue.toasted.register(
@@ -16,13 +31,19 @@ export const useToasts = () => {
       defaultAlertConfig.icon = 'mdi-information';
       defaultAlertConfig.className = `alert alert-info ${payload.description ? 'with-description' : null}`;
 
-      if (payload.timeout) {
+      if (payload.timeout !== undefined) {
         defaultAlertConfig.duration = payload.timeout;
       } else {
         defaultAlertConfig.duration = 5000;
       }
 
+      let customAction = null;
+      if (payload.actionText && payload.action) {
+        customAction = setupCustomAction(payload);
+      }
+
       defaultAlertConfig.action = [
+        customAction,
         {
           icon: 'mdi-close',
           onClick: (event, toastObject) => {
