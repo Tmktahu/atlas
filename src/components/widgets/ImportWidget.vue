@@ -2,7 +2,7 @@
 <template>
   <div class="import-widget pa-3" :class="{ open: showImportWidget, 'with-drag-bar': isElectron }">
     <v-row no-gutters>
-      <div class="page-title">Import Waypoints</div>
+      <div class="page-title">Import Data</div>
       <v-spacer />
       <v-btn icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
     </v-row>
@@ -42,10 +42,44 @@
           <v-btn :disabled="numPoints === 0" dense class="action-button" small outlined @click="onSelectPoints">Select Points to Import</v-btn>
           <v-btn :disabled="numPoints === 0" dense class="action-button mt-2" small outlined @click="onResetPointSelection">Reset Selected Points</v-btn>
         </div>
-        <div class="ml-3 pl-3" style="border-left: 1px solid black">
-          <div>{{ numPoints }} Points in Total</div>
-          <div>{{ numUserPoints }} User-Made Points</div>
-          <div>{{ pointSelection.length }} Points Selected for Import</div>
+        <div class="d-flex flex-column flex-grow-1 ml-3 pl-3" style="border-left: 1px solid black">
+          <div class="d-flex">
+            <div>{{ numPoints }} Points in Total</div>
+            <v-spacer />
+
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-icon size="16" v-on="on">mdi-help-circle</v-icon>
+              </template>
+              <div> Total number of points in the JSON data. </div>
+            </v-tooltip>
+          </div>
+          <div class="d-flex">
+            <div>{{ numUserPoints }} User-Made Points</div>
+            <v-spacer />
+
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-icon size="16" v-on="on">mdi-help-circle</v-icon>
+              </template>
+              <div> Number of points that seem to be user-created.<br />Based on point name. </div>
+            </v-tooltip>
+          </div>
+
+          <v-spacer />
+          <v-divider color="black" class="my-1" />
+
+          <div class="d-flex">
+            <div>{{ pointSelection.length }} Points Selected</div>
+            <v-spacer />
+
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-icon size="16" v-on="on">mdi-help-circle</v-icon>
+              </template>
+              <div> Number of points currently selected for import. </div>
+            </v-tooltip>
+          </div>
         </div>
       </div>
 
@@ -55,8 +89,33 @@
           <v-btn :disabled="numVectors === 0" dense class="action-button" small outlined @click="onSelectVectors">Select Vectors to Import</v-btn>
           <v-btn :disabled="numVectors === 0" dense class="action-button mt-2" small outlined @click="onResetVectorSelection">Reset Selected Vectors</v-btn>
         </div>
-        <div class="ml-3 pl-3" style="border-left: 1px solid black">
-          <div>{{ numVectors }} Vectors in Total</div>
+        <div class="d-flex flex-column flex-grow-1 ml-3 pl-3" style="border-left: 1px solid black">
+          <div class="d-flex">
+            <div>{{ numVectors }} Vectors in Total</div>
+            <v-spacer />
+
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-icon size="16" v-on="on">mdi-help-circle</v-icon>
+              </template>
+              <div> Total number of vectors in the JSON data. </div>
+            </v-tooltip>
+          </div>
+
+          <v-spacer />
+          <v-divider color="black" class="my-1" />
+
+          <div class="d-flex">
+            <div>{{ vectorSelection.length }} Vectors Selected</div>
+            <v-spacer />
+
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-icon size="16" v-on="on">mdi-help-circle</v-icon>
+              </template>
+              <div> Number of vectors currently selected for import. </div>
+            </v-tooltip>
+          </div>
         </div>
       </div>
     </v-row>
@@ -122,6 +181,7 @@ export default {
     const needsMigration = ref(false);
 
     const pointSelection = ref([]);
+    const vectorSelection = ref([]);
 
     return {
       isElectron,
@@ -139,6 +199,7 @@ export default {
       needsMigration,
       migrateData,
       pointSelection,
+      vectorSelection,
     };
   },
 
@@ -186,6 +247,10 @@ export default {
       this.pointSelection = this.loadedData?.points?.map((point) => {
         return point.id;
       });
+
+      this.vectorSelection = this.loadedData?.vectors?.map((vector) => {
+        return vector.id;
+      });
     },
 
     async onImport() {
@@ -220,6 +285,10 @@ export default {
 
       this.pointSelection = this.loadedData?.points?.map((point) => {
         return point.id;
+      });
+
+      this.vectorSelection = this.loadedData?.vectors?.map((vector) => {
+        return vector.id;
       });
 
       this.$toasted.global.alertInfo({
@@ -266,11 +335,13 @@ export default {
     },
 
     onSelectVectors() {
-      console.log('we want to display point selection widget');
+      this.$refs.importSelectionWidget.open(this.loadedData.vectors, 'vectors', this.vectorSelection);
     },
 
     onResetVectorSelection() {
-      console.log('we want to reset selected points');
+      this.vectorSelection = this.loadedData?.vectors?.map((vector) => {
+        return vector.id;
+      });
     },
 
     onSelectionSave(data) {
@@ -278,6 +349,8 @@ export default {
         this.pointSelection = data.selection;
         console.log('got point selection back', this.pointSelection);
       } else if (data.mode === 'vectors') {
+        this.vectorSelection = data.selection;
+        console.log('got vectopr selection back', this.vectorSelection);
       }
     },
 
@@ -376,6 +449,10 @@ export default {
   align-items: center;
   font-size: 12px;
 
+  &.v-btn {
+    background-color: color.change($primary-blue, $lightness: 60%, $saturation: 60%) !important;
+  }
+
   .v-file-input__text {
     color: black !important;
     line-height: 16px;
@@ -388,6 +465,7 @@ export default {
 
   fieldset {
     border-color: rgba(0, 0, 0, 0.87);
+    background-color: color.change($primary-blue, $lightness: 60%, $saturation: 60%) !important;
   }
 
   .v-text-field__slot {
