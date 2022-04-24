@@ -1,10 +1,10 @@
 <!-- eslint-disable vue/valid-v-slot */ -->
 <template>
-  <div class="import-widget py-3 pl-3" :class="{ open: showImportWidget, 'with-drag-bar': isElectron }">
+  <div class="import-widget pa-3" :class="{ open: showImportWidget, 'with-drag-bar': isElectron }">
     <v-row no-gutters>
-      <div class="page-title">Import Waypoints</div>
+      <div class="page-title">Import Data</div>
       <v-spacer />
-      <v-btn text @click="close"><v-icon>mdi-close</v-icon></v-btn>
+      <v-btn icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
     </v-row>
 
     <v-row no-gutters class="align-center mt-1">
@@ -22,52 +22,117 @@
       <v-btn dense class="action-button" small outlined @click="onLoadData">Load Data</v-btn>
     </v-row>
 
-    <v-row no-gutters class="mt-1">
-      <div class="import-info">{{ importInfoText }}</div>
+    <v-row v-if="loadedData && needsMigration" no-gutters class="d-flex flex-column mt-2">
+      <div class="import-info">
+        <span class="field-title">JSON Import Version: </span>
+        <span class="needs-migration">!! {{ loadedData.version || '1.0.0' }} !!</span>
+      </div>
+      <div class="import-info">
+        <span class="field-title">Current Atlas Version: {{ currentAppVersion }}</span>
+      </div>
+      <div class="import-info"> The data in this JSON file is from an outdated version of Atlas. You must migrate it before you import. </div>
     </v-row>
 
-    <v-row no-gutters class="mt-2">
-      <v-data-table
-        v-model="loadedData"
-        :items="loadedData"
-        class="import-list"
-        :items-per-page="-1"
-        fixed-header
-        hide-default-footer
-        disable-pagination
-        :headers="tableHeaders"
-      >
-        <template v-slot:item.name="{ item }">
-          <div class="d-flex align-center">
-            <div class="image-wrapper" :style="{ 'background-color': item.color }">
-              <img :src="ICON_MAP[item.icon].workingFilePath" contain width="16px" height="16px" style="filter: invert(1)" />
-            </div>
-            <span class="waypoint-name pl-2"> {{ item.name }}</span>
+    <v-row v-else-if="loadedData && !needsMigration" no-gutters class="import-info mt-2 d-flex flex-column">
+      <div class="field-title mb-2">JSON Import Version: {{ loadedData.version }}</div>
+
+      <div class="d-flex import-info-wrapper pa-2">
+        <div class="d-flex flex-column flex-grow-0">
+          <div class="area-title"> Points </div>
+          <div v-if="conflicts.pointConflicts && conflicts.pointConflicts.length" class="conflicts-tag mb-2">
+            {{ conflicts.pointConflicts.length }} Selection Conflicts
           </div>
-        </template>
-        <template v-slot:header.select>
-          <div class="d-flex align-center"> <v-checkbox v-model="allChecked" hide-details dense @change="flipAllChecked" /> </div>
-        </template>
-        <template v-slot:item.select="{ item }">
-          <div class="d-flex justify-center flex-grow-0">
-            <v-checkbox v-model="checkedWaypoints" class="pa-0 ma-0" hide-details dense multiple :value="item.id" />
+          <v-btn :disabled="numPoints === 0" dense class="action-button" small outlined @click="onSelectPoints">Select Points to Import</v-btn>
+          <v-btn :disabled="numPoints === 0" dense class="action-button mt-2" small outlined @click="onResetPointSelection">Reset Selected Points</v-btn>
+        </div>
+        <div class="d-flex flex-column flex-grow-1 ml-3 pl-3" style="border-left: 1px solid black">
+          <div class="d-flex">
+            <div>{{ numPoints }} Points in Total</div>
+            <v-spacer />
+
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-icon size="16" v-on="on">mdi-help-circle</v-icon>
+              </template>
+              <div> Total number of points in the JSON data. </div>
+            </v-tooltip>
           </div>
-        </template>
-        <template v-slot:item.position="{ item }">
-          <div class="d-flex" style="font-size: 10px">
-            {{ `[${item.position.x}, ${item.position.y}, ${item.position.z}]` }}
+          <div class="d-flex">
+            <div>{{ numUserPoints }} User-Made Points</div>
+            <v-spacer />
+
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-icon size="16" v-on="on">mdi-help-circle</v-icon>
+              </template>
+              <div> Number of points that seem to be user-created.<br />Based on point name. </div>
+            </v-tooltip>
           </div>
-        </template>
-        <template v-slot:no-data>
-          <div class="d-flex flex-column">
-            <div class="pt-2">Load a JSON file.</div>
-            <div class="pt-2 pb-4">If you have already loaded one, the JSON file may be bad.</div>
+
+          <v-spacer />
+          <v-divider color="black" class="my-1" />
+
+          <div class="d-flex">
+            <div>{{ pointSelection.length }} Points Selected</div>
+            <v-spacer />
+
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-icon size="16" v-on="on">mdi-help-circle</v-icon>
+              </template>
+              <div> Number of points currently selected for import. </div>
+            </v-tooltip>
           </div>
-        </template>
-      </v-data-table>
+        </div>
+      </div>
+
+      <div class="d-flex import-info-wrapper pa-2 mt-2">
+        <div class="d-flex flex-column flex-grow-0">
+          <div class="area-title"> Vectors </div>
+          <div v-if="conflicts.vectorConflicts && conflicts.vectorConflicts.length" class="conflicts-tag mb-2">
+            {{ conflicts.vectorConflicts.length }} Selection Conflicts
+          </div>
+          <v-btn :disabled="numVectors === 0" dense class="action-button" small outlined @click="onSelectVectors">Select Vectors to Import</v-btn>
+          <v-btn :disabled="numVectors === 0" dense class="action-button mt-2" small outlined @click="onResetVectorSelection">Reset Selected Vectors</v-btn>
+        </div>
+        <div class="d-flex flex-column flex-grow-1 ml-3 pl-3" style="border-left: 1px solid black">
+          <div class="d-flex">
+            <div>{{ numVectors }} Vectors in Total</div>
+            <v-spacer />
+
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-icon size="16" v-on="on">mdi-help-circle</v-icon>
+              </template>
+              <div> Total number of vectors in the JSON data. </div>
+            </v-tooltip>
+          </div>
+
+          <v-spacer />
+          <v-divider color="black" class="my-1" />
+
+          <div class="d-flex">
+            <div>{{ vectorSelection.length }} Vectors Selected</div>
+            <v-spacer />
+
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-icon size="16" v-on="on">mdi-help-circle</v-icon>
+              </template>
+              <div> Number of vectors currently selected for import. </div>
+            </v-tooltip>
+          </div>
+        </div>
+      </div>
     </v-row>
 
-    <v-row no-gutters class="align-center mt-1 pr-3">
+    <v-row v-else no-gutters class="mt-2"> Select and load a JSON file above to see information about it. </v-row>
+
+    <v-row v-if="loadedData && needsMigration" no-gutters class="align-center mt-2">
+      <v-btn dense class="action-button" small outlined @click="onMigrate">Migrate Data</v-btn>
+    </v-row>
+
+    <v-row v-else-if="loadedData && !needsMigration" no-gutters class="align-center mt-2">
       <v-tooltip left>
         <template v-slot:activator="{ on }">
           <div class="mode-wrapper d-flex flex-grow-0 px-2 mr-1 align-center" v-on="on">
@@ -77,21 +142,28 @@
           </div>
         </template>
         <div>
-          <div>This switch controls how conflicts are handled during merges.<br />Conflicts are identified by waypoint ID.</div>
+          <div>This switch controls how conflicts are handled during merges.<br />Conflicts are identified by internal waypoint UUID.</div>
           <div><strong>Skip</strong> : This option skips conflicts, keeping the originals.</div>
           <div><strong>Replace</strong> : This option replaces conflicts with the new waypoints.</div>
         </div>
       </v-tooltip>
 
       <v-spacer />
-      <v-btn dense class="action-button" small outlined @click="onImport">Import</v-btn>
+      <v-btn :disabled="pointSelection.length === 0 && vectorSelection.length === 0" dense class="action-button" small outlined @click="onImport">Import</v-btn>
     </v-row>
+    <ImportSelectionWidget
+      ref="importSelectionWidget"
+      :conflicts="conflicts"
+      :loaded-data="loadedData"
+      :point-selection.sync="pointSelection"
+      :vector-selection.sync="vectorSelection"
+    />
     <ConfirmationDialog ref="confirmationDialog" />
   </div>
 </template>
 
 <script>
-import { ref, inject } from '@vue/composition-api';
+import { ref, inject, watch } from '@vue/composition-api';
 
 import { useStorage } from '@/models/useStorage.js';
 import { useMap } from '@/models/useMap.js';
@@ -99,10 +171,11 @@ import { useCoordinates } from '@/models/useCoordinates';
 
 import { ICON_MAP } from '@/models/useIcons.js';
 import ConfirmationDialog from '@/components/dialogs/ConfirmationDialog.vue';
+import ImportSelectionWidget from './ImportSelectionWidget.vue';
 
 export default {
   name: 'ImportWidget',
-  components: { ConfirmationDialog },
+  components: { ConfirmationDialog, ImportSelectionWidget },
 
   setup() {
     const isElectron = inject('isElectron');
@@ -110,87 +183,86 @@ export default {
     const showImportWidget = inject('showImportWidget');
 
     const uploadedFile = ref(null);
-    const loadedData = ref([]);
-    const checkedWaypoints = ref([]);
-    const allChecked = ref(true);
+    const loadedData = ref(null);
     const mode = ref('skip');
 
-    const { readFromJSON } = useStorage(isElectron);
-    const { scaleDownCoordinate } = useCoordinates();
-    const { mergePoints } = useMap(masterMapData);
+    const { readFromJSON, saveToJSON, migrateData, dataStoragePath } = useStorage(isElectron);
+    const { scaleDownCoordinate, getInitialPoints } = useCoordinates();
+    const { findConflicts, mergePoints } = useMap(masterMapData);
 
-    const tableHeaders = [
-      {
-        text: 'Select',
-        align: 'start',
-        sortable: false,
-        value: 'select',
-      },
-      {
-        text: 'Name',
-        align: 'start',
-        sortable: true,
-        value: 'name',
-      },
-      {
-        text: 'Coordinate',
-        align: 'start',
-        sortable: false,
-        value: 'position',
-      },
-      {
-        text: 'Group',
-        align: 'start',
-        sortable: true,
-        value: 'group',
-      },
-    ];
+    const needsMigration = ref(false);
+
+    const pointSelection = ref([]);
+    const vectorSelection = ref([]);
+
+    const conflicts = ref({});
+
+    watch([pointSelection, vectorSelection], () => {
+      conflicts.value = findConflicts({ pointIds: pointSelection.value, vectorIds: vectorSelection.value });
+    });
 
     return {
       isElectron,
       showImportWidget,
       uploadedFile,
       loadedData,
-      checkedWaypoints,
-      allChecked,
       mode,
+      dataStoragePath,
       readFromJSON,
-      tableHeaders,
+      saveToJSON,
       ICON_MAP,
       scaleDownCoordinate,
+      getInitialPoints,
       mergePoints,
+      needsMigration,
+      migrateData,
+      pointSelection,
+      vectorSelection,
+      conflicts,
     };
   },
 
   computed: {
-    importInfoText() {
-      if (this.loadedData) {
-        let numGroups = this.loadedData.map((item) => item.group).filter((value, index, self) => self.indexOf(value) === index).length;
-        return `From File: ${this.loadedData.length} Waypoints | ${numGroups} Groups`;
-      } else {
-        return 'Load a file to see information.';
-      }
+    currentAppVersion() {
+      return process.env.VUE_APP_VERSION;
+    },
+
+    numPoints() {
+      return this.loadedData?.points?.length;
+    },
+
+    numUserPoints() {
+      let initialPoints = this.getInitialPoints();
+      let userPoints = this.loadedData.points.filter((importedPoint) => {
+        let matchingPoint = initialPoints.filter((defaultPoint) => {
+          return importedPoint.name === defaultPoint.name;
+        });
+        return matchingPoint.length === 0;
+      });
+      return userPoints.length;
+    },
+
+    numVectors() {
+      return this.loadedData?.vectors?.length;
     },
   },
 
   methods: {
     close() {
       this.showImportWidget = false;
+      this.$refs.importSelectionWidget.close();
     },
 
     async onLoadData() {
       let storageData = await this.readFromJSON(null, this.uploadedFile.path, this.uploadedFile);
-      if (storageData.version !== '2.3.0') {
-        this.$toasted.global.alertError({
-          message: 'That JSON file is from an outdated version',
-          description: 'Please use a JSON file that has been updated to the current version of Atlas.',
-        });
-      } else {
-        this.loadedData = storageData.points;
-        this.checkedWaypoints = this.loadedData.map((obj) => {
-          return obj.id;
+      this.needsMigration = storageData.version !== process.env.VUE_APP_VERSION;
+      if (this.needsMigration) {
+        this.$toasted.global.alertWarning({
+          message: 'That JSON file is from an outdated Atlas version',
+          description: 'You will need to migrate your old data to the new version in order to import.',
         });
       }
+      this.loadedData = storageData;
     },
 
     async onImport() {
@@ -203,18 +275,96 @@ export default {
         yesText: 'Yes',
         noText: 'No',
         onYes: () => {
-          let selectedPoints = this.loadedData.filter((obj) => {
-            return this.checkedWaypoints.includes(obj.id);
+          let selectedPoints = this.loadedData.points.filter((obj) => {
+            return this.pointSelection.includes(obj.id);
           });
 
+          let selectedVectors = this.loadedData.vectors.filter((obj) => {
+            return this.vectorSelection.includes(obj.id);
+          });
+
+          // we are importing from JSON, so we want to scale things down for the BE
           let scaledDownPoints = selectedPoints.map((obj) => {
             return this.scaleDownCoordinate(obj);
           });
 
-          this.mergePoints(scaledDownPoints, this.mode === 'replace');
+          let scaledDownVectors = selectedVectors.map((obj) => {
+            return this.scaleDownCoordinate(obj);
+          });
+
+          let mapData = {
+            points: scaledDownPoints,
+            vectors: scaledDownVectors,
+          };
+
+          this.mergePoints(mapData, this.mode === 'replace', this.conflicts);
           this.close();
           this.$refs.confirmationDialog.close();
         },
+      });
+    },
+
+    async onMigrate() {
+      let newData = this.migrateData(this.loadedData);
+      this.loadedData = newData;
+      this.needsMigration = this.loadedData.version !== process.env.VUE_APP_VERSION;
+
+      this.pointSelection = this.loadedData?.points?.map((point) => {
+        return point.id;
+      });
+
+      this.vectorSelection = this.loadedData?.vectors?.map((vector) => {
+        return vector.id;
+      });
+
+      this.$toasted.global.alertInfo({
+        message: 'Data Migration Successful',
+        description: 'The imported JSON data was migrated successfully.<br />If you want to save a local JSON copy, click the button in this popup.',
+        timeout: null,
+        actionText: 'Save Migrated Data',
+        action: () => {
+          this.downloadData(newData);
+        },
+      });
+    },
+
+    async downloadData(data) {
+      if (this.isElectron) {
+        let filePath = this.dataStoragePath.replace('atlas_data.json', `atlas_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`);
+        const errors = await this.saveToJSON(data, this.filePath);
+        if (errors) {
+          console.error('File Save Error: ', errors);
+          this.$toasted.global.alertError({ message: 'Error saving JSON file', description: errors });
+        } else {
+          this.$toasted.global.alertInfo({ message: `Data saved to ${filePath}` });
+        }
+      } else {
+        let stringifiedData = JSON.stringify(data, null, 2);
+
+        let elem = document.createElement('a');
+        let file = new Blob([stringifiedData], { type: 'text/plain' });
+        elem.href = URL.createObjectURL(file);
+        let today = new Date();
+        elem.download = `atlas_data_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}.json`;
+        elem.click();
+      }
+    },
+
+    onSelectPoints() {
+      this.$refs.importSelectionWidget.open('points');
+    },
+
+    onResetPointSelection() {
+      this.pointSelection = [];
+    },
+
+    onSelectVectors() {
+      this.$refs.importSelectionWidget.open('vectors');
+    },
+
+    onResetVectorSelection() {
+      this.vectorSelection = this.loadedData?.vectors?.map((vector) => {
+        return vector.id;
       });
     },
 
@@ -238,17 +388,50 @@ export default {
 
 .import-widget {
   z-index: 10;
-  background: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+  background: transparent !important;
   width: 400px;
   position: fixed;
   top: 0;
   right: -400px;
   transition: right 0.1s ease;
-  border-bottom-left-radius: 16px;
   max-height: 635px;
+  overflow: visible;
 
   &.open {
     right: 0px;
+  }
+
+  &:before {
+    content: '';
+    z-index: -1;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    background-color: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+    clip-path: polygon(0px 0px, 100% 0px, 100% 100%, 15px 100%, 0px calc(100% - 15px));
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    margin-top: 5px;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-color: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
+    clip-path: polygon(
+      0px 0px,
+      0px calc(100% - 15px + 2px),
+      14px 100%,
+      100% 100%,
+      100% calc(100% - 2px),
+      15px calc(100% - 2px),
+      2px calc(100% - 14px),
+      2px 0px
+    );
   }
 }
 
@@ -280,6 +463,10 @@ export default {
   align-items: center;
   font-size: 12px;
 
+  &.v-btn {
+    background-color: color.change($primary-blue, $lightness: 60%, $saturation: 60%) !important;
+  }
+
   .v-file-input__text {
     color: black !important;
     line-height: 16px;
@@ -292,6 +479,7 @@ export default {
 
   fieldset {
     border-color: rgba(0, 0, 0, 0.87);
+    background-color: color.change($primary-blue, $lightness: 60%, $saturation: 60%) !important;
   }
 
   .v-text-field__slot {
@@ -305,9 +493,40 @@ export default {
   }
 }
 
+.import-info-wrapper {
+  border: 1px solid black;
+  border-radius: 8px;
+}
+
 .import-info {
-  color: black;
   font-size: 14px;
+  color: black;
+
+  .field-title {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .area-title {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .conflicts-tag {
+    width: fit-content;
+    padding: 2px 6px 0px 6px;
+    background: rgba($color: red, $alpha: 0.6);
+    border-radius: 8px;
+    font-size: 12px;
+    color: black;
+    font-weight: 800;
+  }
+
+  .needs-migration {
+    color: red;
+    font-weight: 800;
+    font-size: 14px;
+  }
 }
 
 .import-list::v-deep {

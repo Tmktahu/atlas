@@ -78,6 +78,7 @@ export default {
     const showWaypointCRUDWidget = ref(false);
     const showSaveWidget = ref(false);
     const showImportWidget = ref(false);
+    const showImportSelectionWidget = ref(false);
     const showInfoWidget = ref(false);
     const showVectorWidget = ref(false);
     const showVectorCRUDWidget = ref(false);
@@ -179,11 +180,16 @@ export default {
         let points = toRefs(masterMapData).points;
         let vectors = toRefs(masterMapData).vectors;
 
+        let initialSave = true;
         let saveDebounce = debounce(() => {
           if (!isElectron) {
             saveToLocalStorage(masterMapData);
           }
-          needsToSave.value = true;
+
+          if (!initialSave) {
+            needsToSave.value = true;
+          }
+          initialSave = false;
         }, 500);
 
         watch(points, saveDebounce);
@@ -205,6 +211,7 @@ export default {
     provide('showWaypointCRUDWidget', showWaypointCRUDWidget);
     provide('showSaveWidget', showSaveWidget);
     provide('showImportWidget', showImportWidget);
+    provide('showImportSelectionWidget', showImportSelectionWidget);
     provide('showInfoWidget', showInfoWidget);
     provide('showVectorWidget', showVectorWidget);
     provide('showVectorCRUDWidget', showVectorCRUDWidget);
@@ -228,7 +235,7 @@ html {
 }
 
 #app {
-  color: white;
+  color: black;
   background: #333;
 }
 

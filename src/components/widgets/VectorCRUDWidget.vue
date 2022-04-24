@@ -56,7 +56,7 @@
           hide-details
           dense
           :error="$v.formInfo.startPoint.x.$invalid && $v.formInfo.startPoint.x.$dirty"
-          @input="onInput($v.formInfo.start.x)"
+          @input="onInput($v.formInfo.startPoint.x)"
         />
         <v-text-field
           v-model="formInfo.startPoint.y"
@@ -484,9 +484,9 @@ export default {
 
     onInput(validationObject) {
       validationObject.$touch();
-      let hasStartPoint = this.formInfo.startPoint.x !== null && this.formInfo.startPoint.y !== null && this.formInfo.startPoint.z !== null;
-      let hasDirection = this.formInfo.direction.x !== null && this.formInfo.direction.y !== null && this.formInfo.direction.z !== null;
-      let hasEndPoint = this.formInfo.endPoint.x !== null && this.formInfo.endPoint.y !== null && this.formInfo.endPoint.z !== null;
+      let hasStartPoint = this.formInfo.startPoint?.x !== null && this.formInfo.startPoint?.y !== null && this.formInfo.startPoint?.z !== null;
+      let hasDirection = this.formInfo.direction?.x !== null && this.formInfo.direction?.y !== null && this.formInfo.direction?.z !== null;
+      let hasEndPoint = this.formInfo.endPoint?.x !== null && this.formInfo.endPoint?.y !== null && this.formInfo.endPoint?.z !== null;
       let hasLength = this.formInfo.length !== null;
 
       if (this.mode === 'odl') {

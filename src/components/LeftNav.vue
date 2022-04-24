@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
   <v-navigation-drawer v-model="leftNav" expand-on-hover permanent class="left-nav" @transitionend="onTransitionEnd">
     <v-layout column fill-height>
@@ -25,13 +26,19 @@
           <span class="left-nav-label pl-5">Vectors</span>
         </v-list-item>
 
-        <v-list-item link :class="{ selected: showSaveWidget }" @click="onSave">
-          <div class="left-nav-icon">
-            <v-icon>mdi-content-save-outline</v-icon>
-            <v-icon v-if="needsToSave" class="notification-icon">mdi-circle</v-icon>
-          </div>
-          <span class="left-nav-label pl-5">{{ isElectron ? 'Save Data' : 'Download Data' }}</span>
-        </v-list-item>
+        <v-tooltip :disabled="!needsToSave" right content-class="left-nav-tooltip">
+          <template v-slot:activator="{ on }">
+            <v-list-item link :class="{ selected: showSaveWidget }" @click="onSave" v-on="on">
+              <div class="left-nav-icon">
+                <v-icon>mdi-content-save-outline</v-icon>
+                <v-icon v-if="needsToSave" class="notification-icon">mdi-circle</v-icon>
+              </div>
+              <span class="left-nav-label pl-5">{{ isElectron ? 'Save Data' : 'Download Data' }}</span>
+            </v-list-item>
+          </template>
+          <!-- eslint-disable-next-line prettier/prettier -->
+          <div class="d-flex flex-column" v-html="saveText" />
+        </v-tooltip>
 
         <v-list-item link :class="{ selected: showImportWidget }" @click="onImportWaypoints">
           <div class="left-nav-icon">
@@ -80,7 +87,7 @@
           <span class="left-nav-label pl-5">Github</span>
         </v-list-item>
 
-        <v-tooltip right absolute content-class="about-tooltip">
+        <v-tooltip right absolute content-class="left-nav-tooltip about">
           <template v-slot:activator="{ on }">
             <v-list-item style="margin-top: auto; margin-bottom: 0; cursor: pointer" v-on="on">
               <div class="left-nav-icon">
@@ -155,6 +162,14 @@ export default {
         `;
       }
     },
+
+    saveText() {
+      if (this.isElectron) {
+        return 'Map data has changed.<br />You may want to save.';
+      } else {
+        return 'Your data has been saved to localstorage.<br />But you may want to save a copy anyway.';
+      }
+    },
   },
 
   methods: {
@@ -175,12 +190,13 @@ export default {
         this.needsToSave = false;
         this.showSaveWidget = !this.showSaveWidget;
       } else {
+        // The data we pull from masterMapData is scaled down. So we need to scale it up.
         let points = this.masterMapData.points.map((point) => {
-          return point.data;
+          return this.scaleUpCoordinate(point.data);
         });
 
         let vectors = this.masterMapData.vectors.map((vector) => {
-          return vector.data;
+          return this.scaleUpCoordinate(vector.data);
         });
 
         let data = {
@@ -242,14 +258,17 @@ export default {
 
 @import '@/design/variables/_colors';
 
-.about-tooltip {
-  top: unset !important;
-  bottom: 12px;
+.left-nav-tooltip {
   left: 212px !important;
   background-color: color.change($primary-blue, $lightness: 80%) !important;
 
   div {
     color: black;
+  }
+
+  &.about {
+    top: unset !important;
+    bottom: 12px;
   }
 }
 </style>
