@@ -2,6 +2,7 @@
 <template>
   <v-navigation-drawer v-model="leftNav" expand-on-hover permanent class="left-nav" @transitionend="onTransitionEnd">
     <v-layout column fill-height>
+      <div class="testing" />
       <v-list class="pa-0" style="height: 100%">
         <v-list-item class="pa-0 flex-grow-0">
           <div class="left-nav-logo pa-2">
@@ -99,6 +100,8 @@
           <div class="d-flex flex-column" v-html="aboutText" />
         </v-tooltip>
       </v-list>
+
+      <ControlsWidget ref="controlsWidget" />
     </v-layout>
   </v-navigation-drawer>
 </template>
@@ -107,8 +110,12 @@
 import { ref, watch, inject, toRefs } from '@vue/composition-api';
 import { useCoordinates } from '@/models/useCoordinates.js';
 
+import ControlsWidget from '@/components/widgets/ControlsWidget.vue';
+
 export default {
   name: 'LeftNav',
+
+  components: { ControlsWidget },
 
   setup() {
     const isElectron = inject('isElectron');
@@ -376,5 +383,11 @@ export default {
   font-weight: 800;
   letter-spacing: 0.03em;
   white-space: nowrap;
+}
+
+.testing {
+  width: 20px;
+  height: 20px;
+  background: green;
 }
 </style>

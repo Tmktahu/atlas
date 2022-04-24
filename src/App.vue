@@ -8,7 +8,6 @@
     <InfoWidget ref="infoWidget" />
     <VectorManagementWidget ref="vectorManagementWidget" />
     <OldDataDialog ref="oldDataDialog" />
-    <ControlsWidget ref="controlsWidget" />
     <v-main>
       <div v-if="isElectron" class="draggable-area-bar" />
       <router-view />
@@ -34,7 +33,6 @@ import ImportWidget from '@/components/widgets/ImportWidget.vue';
 import InfoWidget from '@/components/widgets/InfoWidget.vue';
 import VectorManagementWidget from '@/components/widgets/VectorManagementWidget.vue';
 import OldDataDialog from '@/components/dialogs/OldDataDialog.vue';
-import ControlsWidget from '@/components/widgets/ControlsWidget.vue';
 
 export default {
   metaInfo: {
@@ -53,7 +51,6 @@ export default {
     InfoWidget,
     VectorManagementWidget,
     OldDataDialog,
-    ControlsWidget,
   },
 
   setup(_, context) {
