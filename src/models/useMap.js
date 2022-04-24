@@ -756,36 +756,42 @@ export function useMap() {
     masterMapData.points.splice(index, 1);
   };
 
-  const mergePoints = async (incomingPointData, shouldReplace = false) => {
-    let existingIDs = masterMapData.points.map((obj) => {
-      return obj.id;
-    });
-    let conflictingPoints = [];
+  const mergePoints = async (incomingMapData, shouldReplace = false, conflicts) => {
+    for (const index in incomingMapData.points) {
+      let pointData = incomingMapData.points[index];
 
-    for (const index in incomingPointData) {
-      let pointData = incomingPointData[index];
-
-      if (existingIDs.includes(pointData.id)) {
+      if (conflicts.pointConflicts.includes(pointData.id)) {
         if (shouldReplace) {
           deletePoint(pointData);
           await createNewPoint(pointData);
-        } else {
-          conflictingPoints.push(pointData);
         }
       } else {
         await createNewPoint(pointData);
       }
     }
 
-    if (conflictingPoints.length > 0) {
-      let names = conflictingPoints.map((obj) => {
-        return obj.name;
-      });
+    for (const index in incomingMapData.vectors) {
+      let vectorData = incomingMapData.vectors[index];
 
-      if (shouldReplace) {
-        Vue.toasted.global.alertError({ message: `${conflictingPoints.length} Points were replaced due to duplicate IDs` });
+      if (conflicts.vectorConflicts.includes(vectorData.id)) {
+        if (shouldReplace) {
+          deleteVector(vectorData);
+          await createNewVector(vectorData);
+        }
       } else {
-        Vue.toasted.global.alertError({ message: `${conflictingPoints.length} Points were skipped due to duplicate IDs`, description: names.join(', ') });
+        await createNewVector(pointData);
+      }
+    }
+
+    if (conflicts?.pointConflicts?.length > 0 || conflicts?.vectorConflicts?.length > 0) {
+      if (shouldReplace) {
+        Vue.toasted.global.alertWarning({
+          message: `${conflicts?.pointConflicts?.length || 0} Points and ${conflicts?.vectorConflicts?.length || 0} Vectors were replaced due to duplicate IDs`,
+        });
+      } else {
+        Vue.toasted.global.alertWarning({
+          message: `${conflicts?.pointConflicts?.length || 0} Points and ${conflicts?.vectorConflicts?.length || 0} Vectors were skipped due to duplicate IDs`,
+        });
       }
     }
   };
@@ -809,6 +815,40 @@ export function useMap() {
     return data;
   };
 
+  const findConflicts = (incomingData) => {
+    let existingPointIDs = masterMapData.points.map((obj) => {
+      return obj.id;
+    });
+
+    let existingVectorIDs = masterMapData.vectors.map((obj) => {
+      return obj.id;
+    });
+
+    let pointConflicts = [];
+    let vectorConflicts = [];
+
+    for (const index in incomingData.pointIds) {
+      let pointId = incomingData.pointIds[index];
+
+      if (existingPointIDs.includes(pointId)) {
+        pointConflicts.push(pointId);
+      }
+    }
+
+    for (const index in incomingData.vectorIds) {
+      let vectorId = incomingData.vectorIds[index];
+
+      if (existingVectorIDs.includes(vectorId)) {
+        vectorConflicts.push(vectorId);
+      }
+    }
+
+    return {
+      pointConflicts,
+      vectorConflicts,
+    };
+  };
+
   return {
     initMasterMapData,
     init,
@@ -830,5 +870,6 @@ export function useMap() {
     deleteVector,
     saveVector,
     showHideVector,
+    findConflicts,
   };
 }

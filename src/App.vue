@@ -180,11 +180,16 @@ export default {
         let points = toRefs(masterMapData).points;
         let vectors = toRefs(masterMapData).vectors;
 
+        let initialSave = true;
         let saveDebounce = debounce(() => {
           if (!isElectron) {
             saveToLocalStorage(masterMapData);
           }
-          needsToSave.value = true;
+
+          if (!initialSave) {
+            needsToSave.value = true;
+          }
+          initialSave = false;
         }, 500);
 
         watch(points, saveDebounce);

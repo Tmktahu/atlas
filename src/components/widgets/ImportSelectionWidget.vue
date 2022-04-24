@@ -4,18 +4,63 @@
     <v-row no-gutters>
       <div class="widget-title">{{ widgetTitle }}</div>
       <v-spacer />
-      <v-btn dense class="action-button" small outlined @click="onSaveSelection">Save Selection ({{ treeSelection.length }})</v-btn>
+      <v-btn icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
     </v-row>
-    <v-row style="height: 200px">
-      <v-treeview v-model="treeSelection" selected-color="black" class="selection-list pb-3" dense selectable :items="treeData">
+
+    <v-row v-if="mode === 'points' && conflicts.pointConflicts && conflicts.pointConflicts.length > 0" no-gutters class="conflicts-tag mb-2">
+      {{ conflicts.pointConflicts.length }} Point Conflicts
+    </v-row>
+
+    <v-row v-if="mode === 'vectors' && conflicts.vectorConflicts && conflicts.vectorConflicts.length > 0" no-gutters class="conflicts-tag mb-2">
+      {{ conflicts.vectorConflicts.length }} Vector Conflicts
+    </v-row>
+
+    <v-row no-gutters style="height: 200px">
+      <v-treeview
+        v-if="mode === 'points'"
+        v-model="pointTreeSelection"
+        selected-color="black"
+        class="selection-list pb-3"
+        dense
+        selectable
+        :items="pointTreeData"
+        @input="onPointInput"
+      >
         <template v-slot:label="{ item, leaf }">
-          <div v-if="leaf" class="d-flex flex-column">
+          <div v-if="mode === 'points' && leaf" class="d-flex flex-column" :class="{ conflict: hasConflict(item) }">
+            <div class="conflict-line" />
             <span>
               {{ item.name }} <small>(Type "{{ item.type }}")</small>
             </span>
             <small>[{{ item.position.x }}, {{ item.position.y }}, {{ item.position.z }}]</small>
           </div>
-          <div v-else> "{{ item.name }}" Group </div>
+          <div v-else-if="mode === 'points'"> "{{ item.name }}" Group </div>
+          <div v-else-if="mode === 'vectors' && leaf" class="d-flex flex-column" :class="{ conflict: hasConflict(item) }">
+            <div class="conflict-line" />
+            <span>
+              {{ item.name }}
+            </span>
+          </div>
+        </template>
+      </v-treeview>
+
+      <v-treeview
+        v-else-if="mode === 'vectors'"
+        v-model="vectorTreeSelection"
+        selected-color="black"
+        class="selection-list pb-3"
+        dense
+        selectable
+        :items="vectorTreeData"
+        @input="onVectorInput"
+      >
+        <template v-slot:label="{ item }">
+          <div class="d-flex flex-column" :class="{ conflict: hasConflict(item) }">
+            <div class="conflict-line vectors" />
+            <span>
+              {{ item.name }}
+            </span>
+          </div>
         </template>
       </v-treeview>
     </v-row>
@@ -31,7 +76,26 @@ import { ICON_MAP } from '@/models/useIcons.js';
 export default {
   name: 'ImportSelectionWidget',
 
-  setup() {
+  props: {
+    loadedData: {
+      type: Object,
+      default: () => {},
+    },
+    pointSelection: {
+      type: Array,
+      default: () => [],
+    },
+    vectorSelection: {
+      type: Array,
+      default: () => [],
+    },
+    conflicts: {
+      type: Object,
+      default: () => {},
+    },
+  },
+
+  setup(props) {
     const isElectron = inject('isElectron');
     const showImportSelectionWidget = inject('showImportSelectionWidget');
 
@@ -39,14 +103,52 @@ export default {
 
     const { scaleDownCoordinate } = useCoordinates();
 
-    const treeData = ref([]);
-    const treeSelection = ref([]);
+    const pointTreeSelection = ref([]);
+    const vectorTreeSelection = ref([]);
+
+    const pointTreeData = ref([]);
+    const vectorTreeData = ref([]);
+
+    watch(props, () => {
+      setTreeData();
+    });
+
+    watch(mode, () => {
+      setTreeData();
+    });
+
+    const setTreeData = () => {
+      if (props.loadedData && mode.value === 'points') {
+        let groupObjects = {};
+        for (let index in props.loadedData.points) {
+          let point = props.loadedData.points[index];
+          if (groupObjects[point.group] === undefined) {
+            groupObjects[point.group] = [];
+          }
+          groupObjects[point.group].push(point);
+        }
+
+        pointTreeData.value = [];
+        for (let group in groupObjects) {
+          pointTreeData.value.push({
+            id: group,
+            name: group,
+            children: groupObjects[group],
+          });
+        }
+      } else if (props.loadedData && mode.value === 'vectors') {
+        vectorTreeData.value = [];
+        vectorTreeData.value = props.loadedData.vectors;
+      }
+    };
 
     return {
       isElectron,
       showImportSelectionWidget,
-      treeData,
-      treeSelection,
+      pointTreeSelection,
+      vectorTreeSelection,
+      pointTreeData,
+      vectorTreeData,
       mode,
       ICON_MAP,
       scaleDownCoordinate,
@@ -66,38 +168,29 @@ export default {
   },
 
   methods: {
-    open(inData, mode, currentSelection) {
-      this.data = inData;
+    open(mode) {
       this.mode = mode;
-
-      if (this.mode === 'points') {
-        let groupObjects = {};
-        for (let index in this.data) {
-          let point = this.data[index];
-          if (groupObjects[point.group] === undefined) {
-            groupObjects[point.group] = [];
-          }
-          groupObjects[point.group].push(point);
-        }
-
-        this.treeData = [];
-        for (let group in groupObjects) {
-          this.treeData.push({
-            id: group,
-            name: group,
-            children: groupObjects[group],
-          });
-        }
-      } else if (this.mode === 'vectors') {
-      }
-
-      this.treeSelection = currentSelection;
       this.showImportSelectionWidget = true;
     },
 
-    onSaveSelection() {
+    close() {
       this.showImportSelectionWidget = false;
-      this.$emit('save', { mode: this.mode, selection: this.treeSelection });
+    },
+
+    hasConflict(item) {
+      if (this.mode === 'points') {
+        return this.conflicts?.pointConflicts?.includes(item.id);
+      } else if (this.mode === 'vectors') {
+        return this.conflicts?.vectorConflicts?.includes(item.id);
+      }
+    },
+
+    onPointInput() {
+      this.$emit('update:pointSelection', this.pointTreeSelection);
+    },
+
+    onVectorInput() {
+      this.$emit('update:vectorSelection', this.vectorTreeSelection);
     },
   },
 };
@@ -113,7 +206,6 @@ export default {
   background: transparent !important;
   width: 350px;
   position: fixed;
-  top: 400px;
   right: -400px;
   transition: right 0.1s ease;
 
@@ -216,5 +308,43 @@ export default {
   .v-treeview-node__level {
     width: 18px !important;
   }
+
+  .v-treeview-node__label {
+    overflow: visible;
+  }
+
+  .conflict-line {
+    background: red;
+    height: 5px;
+    width: 35px;
+    left: -70px;
+    position: absolute;
+    display: none;
+    top: 19px;
+    border-radius: 4px;
+
+    &.vectors {
+      top: 9px;
+    }
+  }
+
+  .conflict {
+    color: red;
+    position: relative;
+
+    .conflict-line {
+      display: block;
+    }
+  }
+}
+
+.conflicts-tag {
+  width: fit-content;
+  padding: 2px 6px 0px 6px;
+  background: rgba($color: red, $alpha: 0.6);
+  border-radius: 8px;
+  font-size: 12px;
+  color: black;
+  font-weight: 800;
 }
 </style>

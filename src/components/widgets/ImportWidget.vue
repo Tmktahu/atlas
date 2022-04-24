@@ -38,7 +38,10 @@
 
       <div class="d-flex import-info-wrapper pa-2">
         <div class="d-flex flex-column flex-grow-0">
-          <div class="area-title mb-2">Points</div>
+          <div class="area-title"> Points </div>
+          <div v-if="conflicts.pointConflicts && conflicts.pointConflicts.length" class="conflicts-tag mb-2">
+            {{ conflicts.pointConflicts.length }} Selection Conflicts
+          </div>
           <v-btn :disabled="numPoints === 0" dense class="action-button" small outlined @click="onSelectPoints">Select Points to Import</v-btn>
           <v-btn :disabled="numPoints === 0" dense class="action-button mt-2" small outlined @click="onResetPointSelection">Reset Selected Points</v-btn>
         </div>
@@ -85,7 +88,10 @@
 
       <div class="d-flex import-info-wrapper pa-2 mt-2">
         <div class="d-flex flex-column flex-grow-0">
-          <div class="area-title mb-2">Vectors</div>
+          <div class="area-title"> Vectors </div>
+          <div v-if="conflicts.vectorConflicts && conflicts.vectorConflicts.length" class="conflicts-tag mb-2">
+            {{ conflicts.vectorConflicts.length }} Selection Conflicts
+          </div>
           <v-btn :disabled="numVectors === 0" dense class="action-button" small outlined @click="onSelectVectors">Select Vectors to Import</v-btn>
           <v-btn :disabled="numVectors === 0" dense class="action-button mt-2" small outlined @click="onResetVectorSelection">Reset Selected Vectors</v-btn>
         </div>
@@ -136,22 +142,28 @@
           </div>
         </template>
         <div>
-          <div>This switch controls how conflicts are handled during merges.<br />Conflicts are identified by waypoint ID.</div>
+          <div>This switch controls how conflicts are handled during merges.<br />Conflicts are identified by internal waypoint UUID.</div>
           <div><strong>Skip</strong> : This option skips conflicts, keeping the originals.</div>
           <div><strong>Replace</strong> : This option replaces conflicts with the new waypoints.</div>
         </div>
       </v-tooltip>
 
       <v-spacer />
-      <v-btn dense class="action-button" small outlined @click="onImport">Import</v-btn>
+      <v-btn :disabled="pointSelection.length === 0 && vectorSelection.length === 0" dense class="action-button" small outlined @click="onImport">Import</v-btn>
     </v-row>
-    <ImportSelectionWidget ref="importSelectionWidget" @save="onSelectionSave" />
+    <ImportSelectionWidget
+      ref="importSelectionWidget"
+      :conflicts="conflicts"
+      :loaded-data="loadedData"
+      :point-selection.sync="pointSelection"
+      :vector-selection.sync="vectorSelection"
+    />
     <ConfirmationDialog ref="confirmationDialog" />
   </div>
 </template>
 
 <script>
-import { ref, inject } from '@vue/composition-api';
+import { ref, inject, watch } from '@vue/composition-api';
 
 import { useStorage } from '@/models/useStorage.js';
 import { useMap } from '@/models/useMap.js';
@@ -176,12 +188,18 @@ export default {
 
     const { readFromJSON, saveToJSON, migrateData, dataStoragePath } = useStorage(isElectron);
     const { scaleDownCoordinate, getInitialPoints } = useCoordinates();
-    const { mergePoints } = useMap(masterMapData);
+    const { findConflicts, mergePoints } = useMap(masterMapData);
 
     const needsMigration = ref(false);
 
     const pointSelection = ref([]);
     const vectorSelection = ref([]);
+
+    const conflicts = ref({});
+
+    watch([pointSelection, vectorSelection], () => {
+      conflicts.value = findConflicts({ pointIds: pointSelection.value, vectorIds: vectorSelection.value });
+    });
 
     return {
       isElectron,
@@ -200,6 +218,7 @@ export default {
       migrateData,
       pointSelection,
       vectorSelection,
+      conflicts,
     };
   },
 
@@ -231,6 +250,7 @@ export default {
   methods: {
     close() {
       this.showImportWidget = false;
+      this.$refs.importSelectionWidget.close();
     },
 
     async onLoadData() {
@@ -243,14 +263,6 @@ export default {
         });
       }
       this.loadedData = storageData;
-
-      this.pointSelection = this.loadedData?.points?.map((point) => {
-        return point.id;
-      });
-
-      this.vectorSelection = this.loadedData?.vectors?.map((vector) => {
-        return vector.id;
-      });
     },
 
     async onImport() {
@@ -263,15 +275,29 @@ export default {
         yesText: 'Yes',
         noText: 'No',
         onYes: () => {
-          let selectedPoints = this.loadedData.filter((obj) => {
-            return this.checkedWaypoints.includes(obj.id);
+          let selectedPoints = this.loadedData.points.filter((obj) => {
+            return this.pointSelection.includes(obj.id);
           });
 
+          let selectedVectors = this.loadedData.vectors.filter((obj) => {
+            return this.vectorSelection.includes(obj.id);
+          });
+
+          // we are importing from JSON, so we want to scale things down for the BE
           let scaledDownPoints = selectedPoints.map((obj) => {
             return this.scaleDownCoordinate(obj);
           });
 
-          this.mergePoints(scaledDownPoints, this.mode === 'replace');
+          let scaledDownVectors = selectedVectors.map((obj) => {
+            return this.scaleDownCoordinate(obj);
+          });
+
+          let mapData = {
+            points: scaledDownPoints,
+            vectors: scaledDownVectors,
+          };
+
+          this.mergePoints(mapData, this.mode === 'replace', this.conflicts);
           this.close();
           this.$refs.confirmationDialog.close();
         },
@@ -325,33 +351,21 @@ export default {
     },
 
     onSelectPoints() {
-      this.$refs.importSelectionWidget.open(this.loadedData.points, 'points', this.pointSelection);
+      this.$refs.importSelectionWidget.open('points');
     },
 
     onResetPointSelection() {
-      this.pointSelection = this.loadedData.points.map((point) => {
-        return point.id;
-      });
+      this.pointSelection = [];
     },
 
     onSelectVectors() {
-      this.$refs.importSelectionWidget.open(this.loadedData.vectors, 'vectors', this.vectorSelection);
+      this.$refs.importSelectionWidget.open('vectors');
     },
 
     onResetVectorSelection() {
       this.vectorSelection = this.loadedData?.vectors?.map((vector) => {
         return vector.id;
       });
-    },
-
-    onSelectionSave(data) {
-      if (data.mode === 'points') {
-        this.pointSelection = data.selection;
-        console.log('got point selection back', this.pointSelection);
-      } else if (data.mode === 'vectors') {
-        this.vectorSelection = data.selection;
-        console.log('got vectopr selection back', this.vectorSelection);
-      }
     },
 
     flipAllChecked() {
@@ -496,6 +510,16 @@ export default {
   .area-title {
     font-size: 16px;
     font-weight: 700;
+  }
+
+  .conflicts-tag {
+    width: fit-content;
+    padding: 2px 6px 0px 6px;
+    background: rgba($color: red, $alpha: 0.6);
+    border-radius: 8px;
+    font-size: 12px;
+    color: black;
+    font-weight: 800;
   }
 
   .needs-migration {
