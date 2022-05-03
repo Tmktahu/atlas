@@ -59,10 +59,9 @@ export default {
 .controls-widget {
   pointer-events: none !important;
   background: transparent;
-  pointer-events: none;
   width: 70vw;
   position: absolute;
-  top: 50vh;
+  top: 55vh;
   left: -400px;
   transition: left 0.1s ease;
   padding-left: 70px !important;

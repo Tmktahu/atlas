@@ -54,6 +54,12 @@
           </div>
           <span class="left-nav-label pl-5">Coord Conversion</span>
         </v-list-item>
+        <v-list-item link :class="{ selected: showCelestialsWidget }" @click="onCelestials">
+          <div class="left-nav-icon">
+            <v-icon>mdi-earth</v-icon>
+          </div>
+          <span class="left-nav-label pl-5">Celestial List</span>
+        </v-list-item>
 
         <v-list-item link :class="{ selected: showControlsWidget }" @click="onControls">
           <div class="left-nav-icon">
@@ -131,6 +137,7 @@ export default {
     const showImportWidget = inject('showImportWidget');
     const showSaveWidget = inject('showSaveWidget');
     const showVectorWidget = inject('showVectorWidget');
+    const showCelestialsWidget = inject('showCelestialsWidget');
 
     const needsToSave = inject('needsToSave');
 
@@ -148,6 +155,7 @@ export default {
       showSaveWidget,
       showImportWidget,
       showVectorWidget,
+      showCelestialsWidget,
       needsToSave,
     };
   },
@@ -229,6 +237,10 @@ export default {
       this.showImportWidget = !this.showImportWidget;
     },
 
+    onCelestials() {
+      this.showCelestialsWidget = !this.showCelestialsWidget;
+    },
+
     onCoordinateConversion() {
       this.showConversionWidget = !this.showConversionWidget;
     },
@@ -301,8 +313,8 @@ export default {
     clip-path: polygon(
       0px 0px,
       100% 0px,
-      100% calc(390px),
-      calc(100% - 13px) calc(410px),
+      100% calc(460px),
+      calc(100% - 13px) calc(480px),
       calc(100% - 13px) calc(100% - 164px),
       100% calc(100% - 144px),
       100% 100%,
@@ -320,16 +332,16 @@ export default {
     clip-path: polygon(
       0px 0px,
       100% 0px,
-      100% calc(390px + 1px),
-      calc(100% - 13px) calc(410px + 1px),
+      100% calc(460px + 1px),
+      calc(100% - 13px) calc(480px + 1px),
       calc(100% - 13px) calc(100% - 164px - 1px),
       100% calc(100% - 144px - 1px),
       100% 100%,
       calc(100% - 2px) 100%,
       calc(100% - 2px) calc(100% - 144px - 1px),
       calc(100% - 13px - 2px) calc(100% - 164px - 1px),
-      calc(100% - 13px - 2px) calc(410px + 1px),
-      calc(100% - 2px) calc(390px + 1px),
+      calc(100% - 13px - 2px) calc(480px + 1px),
+      calc(100% - 2px) calc(460px + 1px),
       calc(100% - 2px) 0px
     );
   }

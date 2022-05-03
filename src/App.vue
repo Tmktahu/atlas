@@ -8,6 +8,7 @@
     <InfoWidget ref="infoWidget" />
     <VectorManagementWidget ref="vectorManagementWidget" />
     <OldDataDialog ref="oldDataDialog" />
+    <CelestialsWidget ref="celestialsWidget" />
     <v-main>
       <div v-if="isElectron" class="draggable-area-bar" />
       <router-view />
@@ -33,6 +34,7 @@ import ImportWidget from '@/components/widgets/ImportWidget.vue';
 import InfoWidget from '@/components/widgets/InfoWidget.vue';
 import VectorManagementWidget from '@/components/widgets/VectorManagementWidget.vue';
 import OldDataDialog from '@/components/dialogs/OldDataDialog.vue';
+import CelestialsWidget from '@/components/widgets/CelestialsWidget.vue';
 
 export default {
   metaInfo: {
@@ -51,6 +53,7 @@ export default {
     InfoWidget,
     VectorManagementWidget,
     OldDataDialog,
+    CelestialsWidget,
   },
 
   setup(_, context) {
@@ -80,6 +83,19 @@ export default {
     const showVectorWidget = ref(false);
     const showVectorCRUDWidget = ref(false);
     const showControlsWidget = ref(false);
+    const showCelestialsWidget = ref(false);
+
+    watch(showConversionWidget, () => {
+      if (showConversionWidget.value) {
+        showCelestialsWidget.value = false;
+      }
+    });
+
+    watch(showCelestialsWidget, () => {
+      if (showCelestialsWidget.value) {
+        showConversionWidget.value = false;
+      }
+    });
 
     watch(showWaypointWidget, () => {
       if (showWaypointWidget.value) {
@@ -212,6 +228,7 @@ export default {
     provide('showInfoWidget', showInfoWidget);
     provide('showVectorWidget', showVectorWidget);
     provide('showVectorCRUDWidget', showVectorCRUDWidget);
+    provide('showCelestialsWidget', showCelestialsWidget);
 
     provide('showOldDataDialog', showOldDataDialog);
 
