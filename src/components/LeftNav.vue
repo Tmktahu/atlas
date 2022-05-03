@@ -2,6 +2,7 @@
 <template>
   <v-navigation-drawer v-model="leftNav" expand-on-hover permanent class="left-nav" @transitionend="onTransitionEnd">
     <v-layout column fill-height>
+      <div class="testing" />
       <v-list class="pa-0" style="height: 100%">
         <v-list-item class="pa-0 flex-grow-0">
           <div class="left-nav-logo pa-2">
@@ -53,6 +54,12 @@
           </div>
           <span class="left-nav-label pl-5">Coord Conversion</span>
         </v-list-item>
+        <v-list-item link :class="{ selected: showCelestialsWidget }" @click="onCelestials">
+          <div class="left-nav-icon">
+            <v-icon>mdi-earth</v-icon>
+          </div>
+          <span class="left-nav-label pl-5">Celestial List</span>
+        </v-list-item>
 
         <v-list-item link :class="{ selected: showControlsWidget }" @click="onControls">
           <div class="left-nav-icon">
@@ -99,6 +106,8 @@
           <div class="d-flex flex-column" v-html="aboutText" />
         </v-tooltip>
       </v-list>
+
+      <ControlsWidget ref="controlsWidget" />
     </v-layout>
   </v-navigation-drawer>
 </template>
@@ -107,8 +116,12 @@
 import { ref, watch, inject, toRefs } from '@vue/composition-api';
 import { useCoordinates } from '@/models/useCoordinates.js';
 
+import ControlsWidget from '@/components/widgets/ControlsWidget.vue';
+
 export default {
   name: 'LeftNav',
+
+  components: { ControlsWidget },
 
   setup() {
     const isElectron = inject('isElectron');
@@ -124,6 +137,7 @@ export default {
     const showImportWidget = inject('showImportWidget');
     const showSaveWidget = inject('showSaveWidget');
     const showVectorWidget = inject('showVectorWidget');
+    const showCelestialsWidget = inject('showCelestialsWidget');
 
     const needsToSave = inject('needsToSave');
 
@@ -141,6 +155,7 @@ export default {
       showSaveWidget,
       showImportWidget,
       showVectorWidget,
+      showCelestialsWidget,
       needsToSave,
     };
   },
@@ -222,6 +237,10 @@ export default {
       this.showImportWidget = !this.showImportWidget;
     },
 
+    onCelestials() {
+      this.showCelestialsWidget = !this.showCelestialsWidget;
+    },
+
     onCoordinateConversion() {
       this.showConversionWidget = !this.showConversionWidget;
     },
@@ -294,8 +313,8 @@ export default {
     clip-path: polygon(
       0px 0px,
       100% 0px,
-      100% calc(390px),
-      calc(100% - 13px) calc(410px),
+      100% calc(460px),
+      calc(100% - 13px) calc(480px),
       calc(100% - 13px) calc(100% - 164px),
       100% calc(100% - 144px),
       100% 100%,
@@ -313,16 +332,16 @@ export default {
     clip-path: polygon(
       0px 0px,
       100% 0px,
-      100% calc(390px + 1px),
-      calc(100% - 13px) calc(410px + 1px),
+      100% calc(460px + 1px),
+      calc(100% - 13px) calc(480px + 1px),
       calc(100% - 13px) calc(100% - 164px - 1px),
       100% calc(100% - 144px - 1px),
       100% 100%,
       calc(100% - 2px) 100%,
       calc(100% - 2px) calc(100% - 144px - 1px),
       calc(100% - 13px - 2px) calc(100% - 164px - 1px),
-      calc(100% - 13px - 2px) calc(410px + 1px),
-      calc(100% - 2px) calc(390px + 1px),
+      calc(100% - 13px - 2px) calc(480px + 1px),
+      calc(100% - 2px) calc(460px + 1px),
       calc(100% - 2px) 0px
     );
   }
@@ -376,5 +395,11 @@ export default {
   font-weight: 800;
   letter-spacing: 0.03em;
   white-space: nowrap;
+}
+
+.testing {
+  width: 20px;
+  height: 20px;
+  background: green;
 }
 </style>

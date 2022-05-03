@@ -57,18 +57,22 @@ export default {
 @import '@/design/variables/_colors';
 
 .controls-widget {
-  z-index: 1;
+  pointer-events: none !important;
   background: transparent;
-  pointer-events: none;
   width: 70vw;
   position: absolute;
-  top: 410px;
-  left: -1000px;
+  top: 55vh;
+  left: -400px;
   transition: left 0.1s ease;
   padding-left: 70px !important;
+  z-index: -1;
+
+  div {
+    pointer-events: none !important;
+  }
 
   &.open {
-    left: 0px;
+    left: 100%;
   }
 
   div {
@@ -87,8 +91,10 @@ export default {
     position: absolute;
     top: 0;
     left: 0;
+    margin-left: -60px;
     width: 100%;
     height: 100%;
+    z-index: -1;
     background-color: color.change($primary-blue, $lightness: 60%, $saturation: 50%) !important;
     clip-path: polygon(
       0px 0px,
