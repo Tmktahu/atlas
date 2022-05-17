@@ -24,6 +24,24 @@ export const MOONS = [
   { name: 'Ciel', id: 'm17', type: 'moon', color: '#704A57', position: { x: 134839528.1, y: 25265809.85, z: 0 }, radius: 245000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: '[EPIC Corp] Subaru', namedAt: '8/27/2021' },
 ];
 
+export const SUB_MOONS = [
+  { name: 'Sugon', devName: '', id: 'm1-0', parentId: 'm1', type: 'sub_moon', color: '#8F8D78', positionOffset: {x: 1000000, y: 500000, z: 1000000}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: 'Lanata', namedAt: null },
+  { name: 'Xevaos', devName: '', id: 'm2-0', parentId: 'm2', type: 'sub_moon', color: '#5A4A3D', positionOffset: {x: -1000000, y: 1000000, z: 100000}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: 'supahffej', namedAt: null },
+  { name: 'AnaMllaan', devName: '', id: 'm2-1', parentId: 'm2', type: 'sub_moon', color: '#6C6549', positionOffset: {x: 1000000, y: -1500000, z: 500000}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: 'supahffej', namedAt: null },
+  { name: 'Suti', devName: '', id: 'm3-0', parentId: 'm3', type: 'sub_moon', color: '#6C6A5D', positionOffset: {x: 1000000, y: 0, z: 0}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: '[EPIC Corp] Rabir', namedAt: '8/18/2021' },
+  { name: 'Aura', devName: '', id: 'm5-0', parentId: 'm5', type: 'sub_moon', color: '#C6CEA9', positionOffset: {x: 1000000, y: 0, z: 0}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: '[EPIC Corp] Subaru', namedAt: '8/13/2021' },
+  { name: 'Spud', devName: '', id: 'm6-0', parentId: 'm6', type: 'sub_moon', color: '#8F8D78', positionOffset: {x: 1000000, y: 0, z: 0}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: 'Zz', namedAt: '9/13/2021' },
+  { name: 'Secunda', devName: '', id: 'm7-0', parentId: 'm7', type: 'sub_moon', color: '#AA757B', positionOffset: {x: 1000000, y: 0, z: 0}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: '[EPIC Corp] Nihil', namedAt: '10/9/2021' },
+  { name: 'Mures', devName: '', id: 'm8-0', parentId: 'm8', type: 'sub_moon', color: '#8F8D78', positionOffset: {x: 1000000, y: 0, z: 0}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: '[EPIC Corp] Senkii', namedAt: '8/21/2021' },
+  { name: 'Ione', devName: '', id: 'm9-0', parentId: 'm9', type: 'sub_moon', color: '#9BAC4C', positionOffset: {x: 1000000, y: 0, z: 0}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: '[EPIC Corp] Senkii', namedAt: '8/23/2021' },
+  { name: 'Ferrum', devName: '', id: 'm11-0', parentId: 'm11', type: 'sub_moon', color: '#BE6E7B', positionOffset: {x: 1000000, y: 0, z: 0}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: '[EPIC Corp] Alegost', namedAt: '9/21/2021' },
+  { name: 'Tephra', devName: '', id: 'm12-0', parentId: 'm12', type: 'sub_moon', color: '#7D7455', positionOffset: {x: 1000000, y: 0, z: 0}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: '[EPIC Corp] Subaru', namedAt: '8/20/2021' },
+  { name: 'Mel', devName: '', id: 'm13-0', parentId: 'm13', type: 'sub_moon', color: '#7D2674', positionOffset: {x: 1000000, y: 0, z: 0}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: '[B.E.E.S.] MrMunchkin21', namedAt: '9/18/2021' },
+  { name: 'Borealis', devName: '', id: 'm15-0', parentId: 'm15', type: 'sub_moon', color: '#6F6B62', positionOffset: {x: 1000000, y: 0, z: 0}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: '[EPIC Corp] Alegost', namedAt: '9/1/2021' },
+  { name: 'Vilous', devName: '', id: 'm17-0', parentId: 'm17', type: 'sub_moon', color: '#7198A9', positionOffset: {x: 1000000, y: 0, z: 0}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: '[EPIC Corp] Subaru', namedAt: '8/27/2021' },
+  { name: 'Cassini', devName: '', id: 'm17-1', parentId: 'm17', type: 'sub_moon', color: '#8F8763', positionOffset: {x: 0, y: 1000000, z: 0}, radius: 100000, widthSegments: 50, heightSegments: 50, opacity: 0.9, description: '', namedBy: '[EPIC Corp] Subaru', namedAt: '8/27/2021' },
+]
+
 export const ORBIT_RINGS = [
   { name: 'Elysium Orbit', radius: 22000000, color: '#FFFFFF'},
   { name: 'Chemosh Orbit', radius: 20000000, color: '#FFFFFF'},

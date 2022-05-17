@@ -23,9 +23,10 @@ import {
   createSafeZoneMeshRing,
   createHoverLine,
   createHoverCircle,
+  createOrbitRing,
 } from '@/models/useMapObjects.js';
 
-import { ASTROID_BELTS, MOONS, ORBIT_RINGS, EOS_BELT_ZONES } from './presetMapData/celestialBodies';
+import { ASTROID_BELTS, MOONS, ORBIT_RINGS, EOS_BELT_ZONES, SUB_MOONS } from './presetMapData/celestialBodies';
 import { ELYSIUM_WARP_GATE } from './presetMapData/elysium';
 
 export const EOS_OFFSET = {
@@ -108,6 +109,7 @@ export const masterMapData = reactive({
   otherBelts: [],
 
   moons: [],
+  subMoons: [],
 
   lookAtVector: new THREE.Vector3(),
 
@@ -441,6 +443,34 @@ export function useMap() {
       masterMapData.scene.add(moon.intersectionRing);
     }
 
+    for (let index in SUB_MOONS) {
+      let options = SUB_MOONS[index];
+      let parentMoon = MOONS.find((moon) => moon.id === options.parentId);
+      options.position = {
+        x: parentMoon.position.x + options.positionOffset.x,
+        y: parentMoon.position.y + options.positionOffset.y,
+        z: parentMoon.position.z + options.positionOffset.z,
+      };
+
+      options.centerPoint = parentMoon.position;
+      options.targetPoint = options.position;
+
+      let moonMesh = await createSphereMesh(options);
+      let orbitRing = await createOrbitRing(options);
+
+      let subMoon = {
+        id: SUB_MOONS[index].id,
+        parentId: SUB_MOONS[index].parentId,
+        data: SUB_MOONS[index],
+        mesh: moonMesh,
+        orbitRing: orbitRing,
+      };
+
+      masterMapData.subMoons.push(subMoon);
+      masterMapData.scene.add(subMoon.mesh);
+      masterMapData.scene.add(subMoon.orbitRing);
+    }
+
     // TODO move this definition into some other file and import it
     // probably will do this when I go to add more safezones around other stations?
 
@@ -692,7 +722,7 @@ export function useMap() {
 
       masterMapData.controls.update();
     } else if (object.type === 'Mesh') {
-      let dist = object.geometry.boundingSphere.radius * 1.5;
+      let dist = object.geometry.boundingSphere.radius * 6;
       masterMapData.camera.position.set(object.position.x + dist + 0.1, object.position.y + dist + 0.1, object.position.z + dist + 0.1);
       masterMapData.controls.target.set(object.position.x + dist, object.position.y + dist, object.position.z + dist);
 
