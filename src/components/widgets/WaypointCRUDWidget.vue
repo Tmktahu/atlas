@@ -373,8 +373,9 @@ export default {
     async onPaste() {
       try {
         let content = await navigator.clipboard.readText();
-        if (content) {
-          let coord = content.split(',');
+        let sanitizedContent = content.replace(/[\[\]\(\)\{\}\ ]/gi, '');
+        if (sanitizedContent) {
+          let coord = sanitizedContent.split(',');
 
           if (coord.length !== 3) {
             this.$toasted.global.alertError({ message: 'Paste Format Invalid', description: 'Please use the format x,y,z' });
