@@ -50,6 +50,7 @@ export function useStorage(isElectron) {
           useCoordinates.ISAN_ORIGIN_POINT,
           ...eosData.ORIGIN_STATIONS,
           ...eosData.TRANSMITTER_STATIONS,
+          ...eosData.EOS_STATIONS,
         ];
 
         const { result, errors } = await saveToJSON(defaultData, dataStoragePath.value);

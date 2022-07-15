@@ -499,8 +499,9 @@ export default {
     async onPaste(side) {
       try {
         let content = await navigator.clipboard.readText();
-        if (content) {
-          let coord = content.split(',');
+        let sanitizedContent = content.replace(/[\[\]\(\)\{\}\ ]/gi, '');
+        if (sanitizedContent) {
+          let coord = sanitizedContent.split(',');
           if (coord.length !== 3) {
             return;
           }

@@ -1,7 +1,7 @@
 /* eslint-disable id-length */
 import { v4 as uuidv4 } from 'uuid';
 
-import { ORIGIN_STATIONS, TRANSMITTER_STATIONS } from './presetMapData/eos';
+import { ORIGIN_STATIONS, TRANSMITTER_STATIONS, EOS_STATIONS } from './presetMapData/eos';
 import { ELYSIUM_WARP_GATE } from './presetMapData/elysium';
 
 export const GRID_SCALAR = 10000;
@@ -54,6 +54,10 @@ export function useCoordinates() {
 
     for (let index in TRANSMITTER_STATIONS) {
       initialPoints.push(TRANSMITTER_STATIONS[index]);
+    }
+
+    for (let index in EOS_STATIONS) {
+      initialPoints.push(EOS_STATIONS[index]);
     }
 
     return initialPoints;
