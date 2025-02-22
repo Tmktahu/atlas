@@ -1,5 +1,5 @@
 /* eslint-disable id-length */
-import safezoneTexture from '@/assets/textures/safezone.png';
+import safezoneTexture from '@/atlas/assets/textures/safezone.png';
 
 import Vue from 'vue';
 import * as THREE from 'three';
