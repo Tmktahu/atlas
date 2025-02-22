@@ -1,29 +1,29 @@
-import diamond1 from '@/assets/map_icons/diamond1.png';
-import diamond2 from '@/assets/map_icons/diamond2.png';
-import dot from '@/assets/map_icons/dot.png';
-import pin1 from '@/assets/map_icons/pin1.png';
-import pin2 from '@/assets/map_icons/pin2.png';
-import pin3 from '@/assets/map_icons/pin3.png';
-import satellite from '@/assets/map_icons/satellite.png';
-import shield from '@/assets/map_icons/shield.png';
-import ship1 from '@/assets/map_icons/ship1.png';
-import ship2 from '@/assets/map_icons/ship2.png';
-import ship3 from '@/assets/map_icons/ship3.png';
-import ship4 from '@/assets/map_icons/ship4.png';
-import stargate from '@/assets/map_icons/stargate.png';
-import station1 from '@/assets/map_icons/station1.png';
-import station2 from '@/assets/map_icons/station2.png';
-import station3 from '@/assets/map_icons/station3.png';
-import target from '@/assets/map_icons/target.png';
-import collective from '@/assets/map_icons/collective.png';
-import nomads from '@/assets/map_icons/nomads.png';
-import tactical from '@/assets/map_icons/tactical.png';
-import isan from '@/assets/map_icons/isan.png';
-import federation from '@/assets/map_icons/federation.png';
-import united_sentinel_corporation from '@/assets/map_icons/united_sentinel_corporation.png';
-import utopian_pursuit from '@/assets/map_icons/utopian_pursuit.png';
+import diamond1 from '@/atlas/assets/map_icons/diamond1.png';
+import diamond2 from '@/atlas/assets/map_icons/diamond2.png';
+import dot from '@/atlas/assets/map_icons/dot.png';
+import pin1 from '@/atlas/assets/map_icons/pin1.png';
+import pin2 from '@/atlas/assets/map_icons/pin2.png';
+import pin3 from '@/atlas/assets/map_icons/pin3.png';
+import satellite from '@/atlas/assets/map_icons/satellite.png';
+import shield from '@/atlas/assets/map_icons/shield.png';
+import ship1 from '@/atlas/assets/map_icons/ship1.png';
+import ship2 from '@/atlas/assets/map_icons/ship2.png';
+import ship3 from '@/atlas/assets/map_icons/ship3.png';
+import ship4 from '@/atlas/assets/map_icons/ship4.png';
+import stargate from '@/atlas/assets/map_icons/stargate.png';
+import station1 from '@/atlas/assets/map_icons/station1.png';
+import station2 from '@/atlas/assets/map_icons/station2.png';
+import station3 from '@/atlas/assets/map_icons/station3.png';
+import target from '@/atlas/assets/map_icons/target.png';
+import collective from '@/atlas/assets/map_icons/collective.png';
+import nomads from '@/atlas/assets/map_icons/nomads.png';
+import tactical from '@/atlas/assets/map_icons/tactical.png';
+import isan from '@/atlas/assets/map_icons/isan.png';
+import federation from '@/atlas/assets/map_icons/federation.png';
+import united_sentinel_corporation from '@/atlas/assets/map_icons/united_sentinel_corporation.png';
+import utopian_pursuit from '@/atlas/assets/map_icons/utopian_pursuit.png';
 
-export const ICON_FOLDER_PATH = '@/assets/map_icons/';
+export const ICON_FOLDER_PATH = '@/atlas/assets/map_icons/';
 
 export const ICON_MAP = {
   diamond1: { name: 'diamond1', fileName: 'diamond1.png', baseFilePath: `${ICON_FOLDER_PATH}diamond1.png`, workingFilePath: diamond1 },
