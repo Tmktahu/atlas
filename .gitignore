@@ -1,0 +1,4 @@
+/node_modules
+/dist_electron
+/.vscode
+atlas.code-workspace
