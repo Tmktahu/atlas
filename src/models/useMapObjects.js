@@ -228,6 +228,49 @@ export async function createSafeZoneMeshRing(options) {
 
 // ============= Plane Intersection Objects =============
 
+export function createOrbitRing(options) {
+  // the idea behind an orbit ring is you have a center point and then a point on the ring that should determine the ring's orrientation
+  const { scaleDownCoordinate } = useCoordinates();
+
+  // target point = object coordinate
+  // center point = provided (either origin or a parent object coordinate)
+  let centerPoint = scaleDownCoordinate({ position: options.centerPoint });
+  let targetPoint = scaleDownCoordinate({ position: options.targetPoint });
+
+  let radius = Math.sqrt(
+    Math.pow(centerPoint.position.x - targetPoint.position.x, 2) +
+      Math.pow(centerPoint.position.y - targetPoint.position.y, 2) +
+      Math.pow(centerPoint.position.z - targetPoint.position.z, 2)
+  );
+
+  const geometry = new THREE.RingGeometry(radius, radius + radius / 100, options.widthSegments); //, 1, 0, 3.5); // debug for ring rotation
+  const material = new THREE.MeshBasicMaterial({ color: options.color, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+  const ring = new THREE.Mesh(geometry, material);
+
+  // we initially rotate the ring so it lays flat on the horizontal plane
+  ring.rotateX(Math.PI / 2);
+
+  // this rotate pulls the starting point of the ring onto the same vertical plane as the target point
+  let angle1 = Math.atan((targetPoint.position.y - centerPoint.position.y) / (centerPoint.position.x - targetPoint.position.x));
+  if (Math.sign(centerPoint.position.x - targetPoint.position.x) === 1) {
+    ring.rotateZ(Math.PI + angle1);
+  } else {
+    ring.rotateZ(angle1);
+  }
+
+  // now we rotate the ring to intersect with the target point
+  let angle2 = Math.atan(
+    Math.abs(centerPoint.position.z - targetPoint.position.z) /
+      Math.sqrt(Math.pow(targetPoint.position.y - centerPoint.position.y, 2) + Math.pow(centerPoint.position.x - targetPoint.position.x, 2))
+  );
+
+  ring.rotateY(angle2);
+
+  ring.position.set(centerPoint.position.x, centerPoint.position.z, -centerPoint.position.y);
+  //ring.scale.set(options.scaleX, options.scaleZ, options.scaleY);
+  return ring;
+}
+
 export function createSphereIntersectionRing(options) {
   const { scaleDownCoordinate } = useCoordinates();
   let scaledDownMeasurements = scaleDownCoordinate(options);

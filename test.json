@@ -9,7 +9,7 @@
     },
     "id": "0",
     "hide": false,
-    "icon": "/assets/img/stargate.e602d949.png"
+    "icon": "/atlas/assets/img/stargate.e602d949.png"
   },
   {
     "name": "Origin Station 1",
@@ -21,7 +21,7 @@
     },
     "id": "1",
     "hide": false,
-    "icon": "/assets/img/station1.8c54b451.png"
+    "icon": "/atlas/assets/img/station1.8c54b451.png"
   },
   {
     "name": "East",
@@ -33,7 +33,7 @@
     },
     "id": "33",
     "hide": false,
-    "icon": "/assets/img/satellite.742cc23b.png"
+    "icon": "/atlas/assets/img/satellite.742cc23b.png"
   },
   {
     "name": "West",
@@ -45,7 +45,7 @@
     },
     "id": "34",
     "hide": false,
-    "icon": "/assets/img/satellite.742cc23b.png"
+    "icon": "/atlas/assets/img/satellite.742cc23b.png"
   },
   {
     "id": "57497b3a-de97-4e73-bfa3-1b10393cb0bf",
@@ -57,6 +57,6 @@
     },
     "color": "#00FF13",
     "hide": false,
-    "icon": "/assets/img/pin1.d8d2e45f.png"
+    "icon": "/atlas/assets/img/pin1.d8d2e45f.png"
   }
 ]
