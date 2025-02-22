@@ -6,7 +6,7 @@
       <v-list class="pa-0" style="height: 100%">
         <v-list-item class="pa-0 flex-grow-0">
           <div class="left-nav-logo pa-2">
-            <v-img :src="require('@/assets/Atlas-Logo-Transparent.png')" contain />
+            <v-img :src="require('@/atlas/assets/Atlas-Logo-Transparent.png')" contain />
           </div>
           <span class="left-nav-logo-label pl-3">Atlas Map</span>
         </v-list-item>
